@@ -4,6 +4,7 @@ $top_phone = Database::setting('phone','(021) 1234567');
 $top_email = Database::setting('email','info@sekolah.sch.id');
 $school = Database::setting('school_name','SMK Nusantara');
 $tagline = Database::setting('tagline','Unggul, Berkarakter');
+$logo = Database::setting('logo','');
 try {
 $db = Database::conn();
 $mm = $db->query("SELECT * FROM menus WHERE location='primary' LIMIT 1")->fetch();
@@ -23,7 +24,7 @@ function menuLink($u,$forceTarget=null){ [$href,$t]=Helper::menuUrl($u); $t=$for
 </div></div>
 <header id="mainNav" class="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b transition">
 <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-<a href="<?= Helper::url() ?>" class="flex items-center gap-2"><span class="w-10 h-10 rounded-xl bg-emerald-600 text-white grid place-items-center font-bold">S</span><span><span class="block font-800 font-bold leading-tight"><?= Helper::e($school) ?></span><span class="block text-xs text-slate-500"><?= Helper::e($tagline) ?></span></span></a>
+<a href="<?= Helper::url() ?>" class="flex items-center gap-2.5"><span class="w-11 h-11 rounded-xl bg-emerald-600 text-white grid place-items-center font-bold overflow-hidden shadow-sm"><?php if($logo): ?><img src="<?= Helper::upload($logo) ?>" alt="Logo <?= Helper::e($school) ?>" class="w-full h-full object-contain bg-white p-1"><?php else: ?><?= Helper::e(mb_substr($school,0,1)) ?><?php endif; ?></span><span><span class="block font-extrabold leading-tight"><?= Helper::e($school) ?></span><span class="block text-xs text-slate-500"><?= Helper::e($tagline) ?></span></span></a>
 <nav class="hidden lg:flex items-center gap-1 text-sm font-medium" id="deskMenu">
 <?php foreach(menuTree($items) as $m): $ch=menuTree($items,$m['id']); $hasMega=false;
 if(($m['kind']??'link')==='mega'&&!empty($m['mega_id'])){ foreach($mega as $g){ if((int)$g['id']===(int)$m['mega_id']) $hasMega=$g; } }

@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 $title='Kategori'; $q=trim($_GET['q']??''); $edit=null;
+try{$db->exec("ALTER TABLE categories ADD COLUMN grid_style VARCHAR(30) NOT NULL DEFAULT 'cards-3' AFTER description");}catch(Throwable){}
 if(isset($_GET['edit'])){ $s=$db->prepare("SELECT * FROM categories WHERE id=?"); $s->execute([(int)$_GET['edit']]); $edit=$s->fetch(); }
 if($_SERVER['REQUEST_METHOD']==='POST'){
   if(!Security::verifyCsrf($_POST['csrf']??null)){ Session::flash('err','CSRF tidak valid.'); header('Location: '.Helper::url('admin/categories')); exit; }
@@ -11,8 +12,9 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     $name=trim($_POST['name']??''); $slug=Security::slug($_POST['slug']??$name);
     if($name===''){ Session::flash('err','Nama wajib diisi.'); }
     else{
-      if(!empty($_POST['id'])){ $db->prepare("UPDATE categories SET name=?,slug=?,description=? WHERE id=?")->execute([$name,$slug,$_POST['description']??'',(int)$_POST['id']]); Auth::log($db,'update','categories',"Ubah kategori $name"); }
-      else{ $db->prepare("INSERT INTO categories(name,slug,description) VALUES(?,?,?)")->execute([$name,$slug,$_POST['description']??'']); Auth::log($db,'create','categories',"Tambah kategori $name"); }
+      $grid=in_array($_POST['grid_style']??'', ['cards-2','cards-3','cards-4','magazine','masonry','horizontal','timeline','overlay','minimal'],true)?$_POST['grid_style']:'cards-3';
+      if(!empty($_POST['id'])){ $db->prepare("UPDATE categories SET name=?,slug=?,description=?,grid_style=? WHERE id=?")->execute([$name,$slug,$_POST['description']??'',$grid,(int)$_POST['id']]); Auth::log($db,'update','categories',"Ubah kategori $name"); }
+      else{ $db->prepare("INSERT INTO categories(name,slug,description,grid_style) VALUES(?,?,?,?)")->execute([$name,$slug,$_POST['description']??'',$grid]); Auth::log($db,'create','categories',"Tambah kategori $name"); }
       Session::flash('ok','Kategori disimpan.');
     }
   }
@@ -38,7 +40,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <td class="p-3"><input type="checkbox" form="bulkForm" name="ids[]" value="<?= $r['id'] ?>" class="rowcheck"></td><td class="p-3 text-slate-500"><?= $no++ ?></td><td class="p-3 font-semibold"><?= Helper::e($r['name']) ?><?php if(!empty($r['description'])): ?><span class="block text-[11px] font-normal text-slate-400"><?= Helper::e(Helper::excerpt($r['description']??'',80)) ?></span><?php endif; ?></td>
 <td class="p-3 text-xs text-slate-500 font-mono">/<?= Helper::e($r['slug']) ?></td>
 <td class="p-3"><span class="flex gap-1 justify-end">
-<button class="btn-edit w-8 h-8 border rounded-lg grid place-items-center bg-white hover:text-emerald-600" title="Edit" data-row='<?= htmlspecialchars(json_encode(['id'=>$r['id'],'name'=>$r['name'],'slug'=>$r['slug'],'description'=>$r['description']??'']),ENT_QUOTES) ?>'><i class="fa fa-pen text-xs"></i></button>
+<button class="btn-edit w-8 h-8 border rounded-lg grid place-items-center bg-white hover:text-emerald-600" title="Edit" data-row='<?= htmlspecialchars(json_encode(['id'=>$r['id'],'name'=>$r['name'],'slug'=>$r['slug'],'description'=>$r['description']??'','grid_style'=>$r['grid_style']??'cards-3']),ENT_QUOTES) ?>'><i class="fa fa-pen text-xs"></i></button>
 <form method="post" data-confirm><?= Security::csrfField() ?><input type="hidden" name="act" value="delete"><input type="hidden" name="id" value="<?= $r['id'] ?>"><button class="w-8 h-8 border rounded-lg grid place-items-center bg-white text-red-600" title="Hapus"><i class="fa fa-trash text-xs"></i></button></form>
 </span></td></tr><?php endforeach; ?></table></div></div>
 
@@ -52,6 +54,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <label class="grid gap-1 font-semibold">Nama<input name="name" id="f_name" required placeholder="Berita" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Slug <span class="font-normal text-slate-400 text-xs">otomatis dari nama</span><input name="slug" id="f_slug" placeholder="berita" class="border rounded-lg p-2 font-normal font-mono text-xs"></label>
 <label class="grid gap-1 font-semibold">Deskripsi<textarea name="description" id="f_desc" rows="3" placeholder="Keterangan kategori..." class="border rounded-lg p-2 font-normal"></textarea></label>
+<label class="grid gap-1 font-semibold">Gaya grid berita<select name="grid_style" id="f_grid" class="border rounded-lg p-2 font-normal"><?php foreach(['cards-2'=>'Kartu 2 Kolom','cards-3'=>'Kartu 3 Kolom','cards-4'=>'Kartu 4 Kolom','magazine'=>'Magazine','masonry'=>'Masonry','horizontal'=>'Horizontal','timeline'=>'Timeline','overlay'=>'Overlay','minimal'=>'Minimal'] as $k=>$v): ?><option value="<?= $k ?>"><?= $v ?></option><?php endforeach; ?></select></label>
 <div class="flex gap-2 bg-white pt-2 pb-1"><button class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl p-2.5 font-bold"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 
@@ -67,6 +70,7 @@ function openModal(d){
   document.getElementById('f_name').value=d?.name||'';
   const s=document.getElementById('f_slug');s.value=d?.slug||'';delete s.dataset.touched;
   document.getElementById('f_desc').value=d?.description||'';
+  document.getElementById('f_grid').value=d?.grid_style||'cards-3';
   modal.classList.remove('hidden');document.body.style.overflow='hidden';
 }
 function closeModal(){modal.classList.add('hidden');document.body.style.overflow=''}
@@ -76,6 +80,6 @@ modal.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',clo
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 document.getElementById('f_name').addEventListener('input',e=>{const s=document.getElementById('f_slug');if(!s.dataset.touched)s.value=slugify(e.target.value)});
 document.getElementById('f_slug').addEventListener('input',e=>e.target.dataset.touched='1');
-<?php if($edit): ?>openModal(<?= json_encode(['id'=>$edit['id'],'name'=>$edit['name'],'slug'=>$edit['slug'],'description'=>$edit['description']??'']) ?>);<?php endif; ?>
+<?php if($edit): ?>openModal(<?= json_encode(['id'=>$edit['id'],'name'=>$edit['name'],'slug'=>$edit['slug'],'description'=>$edit['description']??'','grid_style'=>$edit['grid_style']??'cards-3']) ?>);<?php endif; ?>
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>

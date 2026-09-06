@@ -43,11 +43,12 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div class="bg-white rounded-2xl border overflow-hidden">
 <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 border-b text-sm"><span id="selCount" class="text-slate-500">0 dipilih</span><button type="button" id="btnBulk" class="ml-auto bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg"><i class="fa fa-trash mr-1"></i>Hapus Terpilih</button></div>
 <div class="overflow-x-auto"><table class="w-full text-sm min-w-[640px]">
-<tr class="text-left text-slate-500 text-xs uppercase bg-slate-50"><th class="p-3 w-8"><input type="checkbox" id="checkAllPosts"></th><th class="p-3 w-10">No</th><th class="p-3">Judul</th><th class="p-3">Status</th><th class="p-3">Tanggal</th><th class="p-3 text-right">Aksi</th></tr>
-<?php if(!$rows): ?><tr><td colspan="6" class="p-10 text-center text-slate-500"><i class="fa fa-newspaper text-3xl block mb-2"></i>Belum ada berita. Klik Tambah Berita.</td></tr><?php endif; ?>
+<tr class="text-left text-slate-500 text-xs uppercase bg-slate-50"><th class="p-3 w-8"><input type="checkbox" id="checkAllPosts"></th><th class="p-3 w-10">No</th><th class="p-3">Judul</th><th class="p-3">Kategori</th><th class="p-3">Status</th><th class="p-3">Tanggal</th><th class="p-3 text-right">Aksi</th></tr>
+<?php if(!$rows): ?><tr><td colspan="7" class="p-10 text-center text-slate-500"><i class="fa fa-newspaper text-3xl block mb-2"></i>Belum ada berita. Klik Tambah Berita.</td></tr><?php endif; ?>
 <?php $no=$off+1; foreach($rows as $r): ?>
 <tr class="border-t hover:bg-slate-50">
 <td class="p-3"><input type="checkbox" form="bulkForm" name="ids[]" value="<?= $r['id'] ?>" class="rowcheck"></td><td class="p-3 text-slate-500"><?= $no++ ?></td><td class="p-3 font-semibold"><?= Helper::e($r['title']) ?><span class="block text-[11px] font-normal text-slate-400"><?= Helper::e($r['cat']??'Tanpa kategori') ?> • /berita/<?= Helper::e($r['slug']) ?></span></td>
+<td class="p-3"><span class="text-xs font-semibold px-2 py-1 rounded-full bg-sky-50 text-sky-700"><?= Helper::e($r['cat']??'Tanpa kategori') ?></span></td>
 <td class="p-3"><span class="text-xs font-bold px-2 py-0.5 rounded-full <?= $r['status']==='published'?'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-700' ?>"><?= $r['status'] ?></span></td>
 <td class="p-3 text-xs text-slate-500"><?= Helper::e(Helper::tgl($r['published_at']??$r['created_at'])) ?></td>
 <td class="p-3"><span class="flex gap-1 justify-end">

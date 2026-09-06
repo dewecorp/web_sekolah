@@ -32,8 +32,8 @@ Auth::requireLogin();
 try { $db->exec("DELETE FROM activity_logs WHERE created_at < NOW() - INTERVAL 24 HOUR"); } catch (Throwable) {}
 $role = $_SESSION['user']['role'] ?? 'author';
 $roleMap = [
-  'administrator' => ['pages','posts','categories','media','gallery','announcements','agenda','teachers','extras','menus','megamenu','widgets','sections','settings','users','logs'],
-  'editor' => ['pages','posts','categories','media','gallery','announcements','agenda','teachers','extras','menus','megamenu','widgets','sections'],
+  'administrator' => ['pages','posts','categories','media','gallery','announcements','agenda','teachers','extras','menus','megamenu','widgets','sections','themes','appearance','settings','users','logs'],
+  'editor' => ['pages','posts','categories','media','gallery','announcements','agenda','teachers','extras','menus','megamenu','widgets','sections','themes','appearance'],
   'author' => ['posts','pages','media','gallery'],
 ];
 $allow = $roleMap[$role] ?? $roleMap['author'];

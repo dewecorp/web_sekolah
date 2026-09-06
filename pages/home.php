@@ -35,7 +35,7 @@ $btn = function($t,$u,$ghost=false,$target='_self') {
   $tgt=$target==='_blank'||$auto==='_blank'?' target="_blank" rel="noopener noreferrer"':'';
   return '<a href="'.Helper::e($href).'"'.$tgt.' class="'.($ghost?'border border-current px-5 py-2.5 rounded-xl hover:bg-white/10':'bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-emerald-500').' inline-block mt-2 mr-2">'.Helper::e($t).'</a>';
 };
-$head = fn($s) => (($s['title']??'')||($s['subtitle']??'')) ? '<div class="mb-6 '.$al($s['align']??'left').' max-w-2xl '.(($s['align']??'')==='center'?'mx-auto':'').'">'.($s['title']?'<h2 class="text-2xl md:text-3xl font-extrabold">'.Helper::e($s['title']).'</h2>':'').($s['subtitle']?'<p class="mt-2 opacity-80">'.Helper::e($s['subtitle']).'</p>':'').'</div>' : '';
+$head = fn($s) => (($s['title']??'')||($s['subtitle']??'')) ? '<div class="section-heading mb-6 '.$al($s['align']??'left').' max-w-2xl '.(($s['align']??'')==='center'?'mx-auto':'').'">'.($s['title']?'<h2 class="text-2xl md:text-3xl font-extrabold">'.Helper::e($s['title']).'</h2>':'').($s['subtitle']?'<p class="mt-2 opacity-80">'.Helper::e($s['subtitle']).'</p>':'').'</div>' : '';
 $secBtns = function($s) use ($btn) {
   $list = [];
   if (!empty($s['buttons_json'])) { $jb = json_decode($s['buttons_json'], true); if (is_array($jb)) foreach ($jb as $b) { if (!empty($b['text']) || !empty($b['url'])) $list[] = $b; } }
@@ -57,7 +57,7 @@ if ($type==='hero'):
   $t = $s['title'] ?: 'Selamat Datang'; $st = $s['subtitle'] ?? '';
   $heroImg = Helper::cover($s['image'] ?? '', 'hero-' . ($s['section_key'] ?? $t), 1600, 900);
 ?>
-<section class="relative overflow-hidden bg-slate-900 text-white <?= $fxCls ?> fx-hero min-h-[78vh] md:min-h-[92vh] flex items-center">
+<section class="mobile-center-section relative overflow-hidden bg-slate-900 text-white <?= $fxCls ?> fx-hero min-h-[78vh] md:min-h-[92vh] flex items-center">
 <img src="<?= Helper::e($heroImg) ?>" alt="<?= Helper::e($t) ?>" fetchpriority="high" class="fx-zoomimg absolute inset-0 w-full h-full object-cover" loading="eager">
 <div class="absolute inset-0 bg-slate-900/55"></div>
 <div class="absolute inset-0 bg-gradient-to-r from-emerald-950/90 via-emerald-900/50 to-slate-900/40"></div>
@@ -74,7 +74,7 @@ if ($type==='carousel'):
   if (!$myItems) $myItems = [['heading' => $s['title'] ?: 'Selamat Datang', 'subheading' => $s['subtitle'] ?? '', 'image' => $s['image'] ?? '', 'cta_text' => $s['btn_text'] ?? '', 'cta_url' => $s['btn_url'] ?? '']];
   $items = array_slice($myItems, 0, $lim);
 ?>
-<section class="relative overflow-hidden bg-slate-900 text-white <?= $fxCls ?> min-h-[78vh] md:min-h-[92vh] grid" data-carousel>
+<section class="mobile-center-section relative overflow-hidden bg-slate-900 text-white <?= $fxCls ?> min-h-[78vh] md:min-h-[92vh] grid" data-carousel>
 <?php foreach($items as $i=>$sl): $slImg=Helper::cover($sl['image']??'', 'slide-'.($sl['heading']??$i), 1600, 900); ?>
 <div data-slide class="col-start-1 row-start-1 grid items-center transition-opacity duration-700 ease-out <?= $i?'opacity-0 pointer-events-none':'opacity-100' ?>">
 <img src="<?= Helper::e($slImg) ?>" alt="<?= Helper::e($sl['heading']) ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
@@ -93,12 +93,12 @@ if ($type==='carousel'):
 $bg=$bgMap[$s['bg']??'white']??''; $box=$boxMap[$s['style']??'default']??'';
 $fx=$s['effect']??'fade-up'; $fxCls=$fx==='none'?'fx-none':'fx fx-'.$fx;
 ?>
-<section class="<?= $pad ?> <?= $bg ?>"><div class="max-w-7xl mx-auto px-4"><div class="<?= $box ?> <?= $fxCls ?>">
-<?= $head($s) ?>
+<section class="mobile-center-section <?= $pad ?> <?= $bg ?>"><div class="max-w-7xl mx-auto px-4"><div class="<?= $box ?> <?= $fxCls ?>">
+<?= $type==='cta' ? '' : $head($s) ?>
 <?php if($type==='sambutan'): ?>
-<div class="grid md:grid-cols-[300px_1fr] gap-5 md:gap-6 items-center">
-<div><?php $pp=!empty($profile['principal_photo'])?Helper::upload($profile['principal_photo']):Helper::dummy('kepala-sekolah',600,700); ?><img src="<?= Helper::e($pp) ?>" alt="Kepala Sekolah" class="rounded-2xl shadow w-full max-w-[300px] aspect-[4/5] object-cover" loading="lazy"></div>
-<div><p class="font-bold text-sm uppercase text-emerald-600">Sambutan</p><h3 class="text-2xl font-bold"><?= Helper::e($profile['principal_name']??'-') ?></h3><p class="text-sm opacity-70"><?= Helper::e($profile['principal_title']??'Kepala Sekolah') ?></p><p class="mt-2 opacity-90"><?= nl2br(Helper::e($profile['principal_greeting']??'Selamat datang.')) ?></p></div>
+<div class="welcome-content grid md:grid-cols-[300px_1fr] gap-5 md:gap-6 items-center">
+<div class="welcome-photo flex justify-center"><?php $pp=!empty($profile['principal_photo'])?Helper::upload($profile['principal_photo']):Helper::dummy('kepala-sekolah',600,700); ?><img src="<?= Helper::e($pp) ?>" alt="Kepala Sekolah" class="rounded-2xl shadow w-full max-w-[300px] aspect-[4/5] object-cover" loading="lazy"></div>
+<div class="welcome-copy"><p class="font-bold text-sm uppercase text-emerald-600">Sambutan</p><h3 class="text-2xl font-bold"><?= Helper::e($profile['principal_name']??'-') ?></h3><p class="text-sm opacity-70"><?= Helper::e($profile['principal_title']??'Kepala Sekolah') ?></p><p class="welcome-message mt-2 opacity-90 text-justify"><?= nl2br(Helper::e($profile['principal_greeting']??'Selamat datang.')) ?></p></div>
 </div>
 <?php elseif($type==='statistik'): $st=(int)($profile['total_students']??0); $gr=(int)($profile['total_teachers']??0); $ek=(int)($profile['total_extracurricular']??0); $th=(int)($profile['years_established']??0); ?>
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -125,6 +125,14 @@ $fx=$s['effect']??'fade-up'; $fxCls=$fx==='none'?'fx-none':'fx fx-'.$fx;
 <img src="<?= Helper::e($cv) ?>" alt="<?= Helper::e($p['title']) ?>" class="w-28 h-20 rounded-xl object-cover shrink-0" loading="lazy">
 <span class="min-w-0"><span class="block font-bold text-sm line-clamp-2"><?= Helper::e($p['title']) ?></span><span class="block text-[11px] opacity-60 mt-1"><?= Helper::e($f['cat']??$p['cat']??'Berita') ?> • <?= Helper::tgl($p['published_at']??$p['created_at']) ?></span></span></a>
 <?php endforeach; ?></div></div>
+<?php elseif($grid==='magazine'): $lead=array_shift($rows); $leadImg=Helper::cover($lead['featured_image']??'', 'berita-'.$lead['slug'], 1000, 700); ?>
+<div class="grid lg:grid-cols-5 gap-4"><a href="<?= Helper::url('berita/'.$lead['slug']) ?>" class="lg:col-span-3 lg:row-span-2 relative min-h-[360px] rounded-3xl overflow-hidden group card-hover"><img src="<?= Helper::e($leadImg) ?>" alt="<?= Helper::e($lead['title']) ?>" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-700"><span class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/25 to-transparent"></span><span class="absolute bottom-0 p-6 text-white"><span class="text-[10px] font-bold bg-emerald-600 px-2 py-1 rounded-full"><?= Helper::e($lead['cat']??'Berita') ?></span><strong class="block text-2xl md:text-3xl mt-3 leading-tight"><?= Helper::e($lead['title']) ?></strong><small class="block mt-2 text-slate-300"><?= Helper::tgl($lead['published_at']??$lead['created_at']) ?></small></span></a><div class="lg:col-span-2 grid gap-4"><?php foreach($rows as $p): $cv=Helper::cover($p['featured_image']??'', 'berita-'.$p['slug'],500,300); ?><a href="<?= Helper::url('berita/'.$p['slug']) ?>" class="flex gap-3 rounded-2xl border bg-white dark:bg-slate-800 p-2.5 card-hover"><img src="<?= Helper::e($cv) ?>" alt="<?= Helper::e($p['title']) ?>" class="w-28 h-24 rounded-xl object-cover"><span class="min-w-0"><small class="text-emerald-600 font-bold"><?= Helper::e($p['cat']??'Berita') ?></small><b class="block line-clamp-2 mt-1"><?= Helper::e($p['title']) ?></b><small class="text-slate-400"><?= Helper::tgl($p['published_at']??$p['created_at']) ?></small></span></a><?php endforeach; ?></div></div>
+<?php elseif($grid==='masonry'): ?>
+<div class="columns-1 sm:columns-2 lg:columns-3 gap-4"><?php foreach($rows as $i=>$p): $cv=Helper::cover($p['featured_image']??'', 'berita-'.$p['slug'],700,600); ?><article class="break-inside-avoid mb-4 rounded-2xl border overflow-hidden bg-white dark:bg-slate-800 card-hover"><img src="<?= Helper::e($cv) ?>" alt="<?= Helper::e($p['title']) ?>" class="w-full object-cover <?= $i%3===0?'h-64':($i%3===1?'h-44':'h-52') ?>"><div class="p-4"><small class="text-emerald-600 font-bold"><?= Helper::e($p['cat']??'Berita') ?></small><h3 class="font-bold mt-1"><?= Helper::e($p['title']) ?></h3><p class="text-xs text-slate-500 mt-2"><?= Helper::e(Helper::excerpt($p['excerpt']?:$p['content'],90)) ?></p></div></article><?php endforeach; ?></div>
+<?php elseif($grid==='horizontal'): ?>
+<div class="grid md:grid-cols-2 gap-4"><?php foreach($rows as $p): $cv=Helper::cover($p['featured_image']??'', 'berita-'.$p['slug'],500,400); ?><a href="<?= Helper::url('berita/'.$p['slug']) ?>" class="grid grid-cols-[120px_1fr] sm:grid-cols-[180px_1fr] rounded-2xl border overflow-hidden bg-white dark:bg-slate-800 card-hover"><img src="<?= Helper::e($cv) ?>" alt="<?= Helper::e($p['title']) ?>" class="w-full h-full min-h-36 object-cover"><span class="p-4"><small class="text-emerald-600 font-bold"><?= Helper::e($p['cat']??'Berita') ?></small><b class="block mt-1 line-clamp-2"><?= Helper::e($p['title']) ?></b><small class="block text-slate-400 mt-2"><?= Helper::tgl($p['published_at']??$p['created_at']) ?></small></span></a><?php endforeach; ?></div>
+<?php elseif($grid==='timeline'): ?>
+<div class="relative ml-3 md:ml-6 border-l-2 border-emerald-200 space-y-5"><?php foreach($rows as $p): ?><article class="relative pl-7"><span class="absolute -left-[9px] top-2 w-4 h-4 rounded-full bg-emerald-600 ring-4 ring-white dark:ring-slate-900"></span><div class="rounded-2xl border bg-white dark:bg-slate-800 p-4 card-hover"><small class="text-emerald-600 font-bold"><?= Helper::tgl($p['published_at']??$p['created_at']) ?> &bull; <?= Helper::e($p['cat']??'Berita') ?></small><h3 class="font-bold text-lg mt-1"><?= Helper::e($p['title']) ?></h3><p class="text-sm text-slate-500 mt-1"><?= Helper::e(Helper::excerpt($p['excerpt']?:$p['content'],120)) ?></p><a href="<?= Helper::url('berita/'.$p['slug']) ?>" class="inline-block text-emerald-600 text-sm font-bold mt-2">Baca selengkapnya &rarr;</a></div></article><?php endforeach; ?></div>
 <?php elseif($grid==='list'): ?>
 <div class="grid gap-2.5"><?php foreach($rows as $p): $cv=Helper::cover($p['featured_image']??'', 'berita-'.$p['slug'], 400, 260); ?>
 <a href="<?= Helper::url('berita/'.$p['slug']) ?>" class="flex gap-3.5 items-center rounded-2xl border bg-white dark:bg-slate-800 p-3 card-hover">
@@ -177,11 +185,11 @@ $fx=$s['effect']??'fade-up'; $fxCls=$fx==='none'?'fx-none':'fx fx-'.$fx;
 <?php elseif($type==='pengumuman'): $rows=array_slice($ann,0,$lim); ?>
 <div class="flex flex-wrap items-center gap-2 mb-3"><h3 class="font-extrabold text-lg"><i class="fa fa-bullhorn text-rose-500 mr-1.5"></i><?= Helper::e($s['title']??'Pengumuman Terbaru') ?></h3><span class="text-[11px] bg-rose-100 dark:bg-rose-900 text-rose-700 dark:text-rose-200 px-2 py-0.5 rounded-full font-bold"><?= count($rows) ?> info</span><a href="<?= Helper::url('pengumuman') ?>" class="ml-auto text-xs text-emerald-600 font-bold">Semua →</a></div>
 <?php if(!$rows): ?><p class="opacity-70 text-sm">Belum ada pengumuman</p><?php else: ?><div class="grid gap-2.5"><?php foreach($rows as $i=>$a): $hasFile=!empty($a['attachment']); ?>
-<div class="flex gap-2.5 items-start border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-2xl px-3.5 py-3 card-hover">
-<span class="w-10 h-10 rounded-xl grid place-items-center shrink-0 text-white <?= $i===0?'bg-gradient-to-b from-amber-400 to-orange-500':'bg-gradient-to-b from-rose-500 to-pink-600' ?>"><i class="fa <?= $i===0?'fa-star':'fa-bullhorn' ?> text-sm"></i></span>
-<span class="min-w-0 flex-1"><span class="flex flex-wrap items-center gap-1.5"><b class="text-sm"><?= Helper::e($a['title']) ?></b><?php if($i===0): ?><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">TERBARU</span><?php endif; ?><?php if($hasFile): ?><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-700"><i class="fa fa-paperclip mr-0.5"></i>Lampiran</span><?php endif; ?></span>
+<div class="announcement-card flex min-w-0 overflow-hidden gap-2 sm:gap-2.5 items-start border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-2xl px-3 sm:px-3.5 py-3 card-hover">
+<span class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl grid place-items-center shrink-0 text-white <?= $i===0?'bg-gradient-to-b from-amber-400 to-orange-500':'bg-gradient-to-b from-rose-500 to-pink-600' ?>"><i class="fa <?= $i===0?'fa-star':'fa-bullhorn' ?> text-sm"></i></span>
+<span class="min-w-0 max-w-full flex-1 overflow-hidden"><span class="flex min-w-0 flex-wrap items-center gap-1.5"><b class="min-w-0 max-w-full text-sm break-words [overflow-wrap:anywhere]"><?= Helper::e($a['title']) ?></b><?php if($i===0): ?><span class="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">TERBARU</span><?php endif; ?><?php if($hasFile): ?><span class="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-700"><i class="fa fa-paperclip mr-0.5"></i>Lampiran</span><?php endif; ?></span>
 <span class="text-[11px] text-slate-400 block mt-0.5"><i class="fa fa-clock mr-1"></i><?= Helper::e(Helper::ago($a['published_at']??$a['created_at'])) ?> • <?= Helper::e(Helper::tgl($a['published_at']??$a['created_at'])) ?></span>
-<span class="text-xs text-slate-500 block truncate mt-0.5"><?= Helper::e(Helper::excerpt($a['content']??'',110)) ?></span></span></div>
+<span class="text-xs text-slate-500 block mt-1 line-clamp-2 break-words [overflow-wrap:anywhere]"><?= Helper::e(Helper::excerpt($a['content']??'',110)) ?></span></span></div>
 <?php endforeach; ?></div><?php endif; ?>
 <?php elseif($type==='galeri'): $rows=array_slice($galImgs,0,max(4,$lim)); ?>
 <?php if(!$rows): ?><div class="grid grid-cols-2 md:grid-cols-4 gap-3"><?php for($gi=0;$gi<4;$gi++): ?><img src="<?= Helper::e(Helper::dummy('galeri-'.$gi.'-'.($s['section_key']??''),600,450)) ?>" alt="Galeri sekolah" loading="lazy" class="h-40 w-full object-cover rounded-xl border card-hover"><?php endfor; ?></div><?php else: ?><div class="grid grid-cols-2 md:grid-cols-4 gap-3"><?php foreach($rows as $g): ?><img src="<?= Helper::url($g['filepath']) ?>" alt="<?= Helper::e($g['caption']??$g['gtitle']) ?>" data-lightbox loading="lazy" class="h-40 w-full object-cover rounded-xl border cursor-zoom-in card-hover"><?php endforeach; ?></div><?php endif; ?>
@@ -215,7 +223,7 @@ $fx=$s['effect']??'fade-up'; $fxCls=$fx==='none'?'fx-none':'fx fx-'.$fx;
 </div></article>
 <?php endforeach; ?></div><?php endif; ?>
 <?php elseif($type==='cta'): ?>
-<div class="<?= $al($s['align']??'center') ?>"><div class="mt-2"><?= $secBtns($s) ?: $btn('Hubungi Kami',Helper::url('kontak')) ?></div></div>
+<div class="cta-panel relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-500 text-white p-7 md:p-12 shadow-xl"><span class="absolute -right-16 -top-20 w-64 h-64 rounded-full border-[28px] border-white/10"></span><span class="absolute -left-20 -bottom-24 w-72 h-72 rounded-full border-[36px] border-white/10"></span><div class="relative max-w-3xl mx-auto text-center"><span class="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-[.16em]"><i class="fa fa-sparkles text-amber-300"></i><?= Helper::e($s['subtitle']??'Bersama membangun masa depan') ?></span><h3 class="text-3xl md:text-5xl font-extrabold leading-tight mt-4"><?= Helper::e($s['title']??'Mari Bergabung Bersama Kami') ?></h3><p class="text-white/80 text-sm md:text-base max-w-2xl mx-auto mt-4 leading-relaxed"><?= Helper::e($s['content']??'Temukan lingkungan belajar yang aman, inspiratif, dan berorientasi pada masa depan.') ?></p><div class="mt-7 flex flex-wrap justify-center gap-3"><?= $secBtns($s) ?: $btn('Hubungi Kami',Helper::url('kontak')) ?></div><div class="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-white/70"><span><i class="fa fa-circle-check text-amber-300 mr-1"></i>Pembelajaran berkarakter</span><span><i class="fa fa-circle-check text-amber-300 mr-1"></i>Guru profesional</span><span><i class="fa fa-circle-check text-amber-300 mr-1"></i>Siap menghadapi masa depan</span></div></div></div>
 <?php else: ?>
 <?php if(!empty($s['image'])): ?><img src="<?= Helper::upload($s['image']) ?>" alt="<?= Helper::e($s['title']??'') ?>" class="rounded-2xl mb-4 w-full max-h-96 object-cover" loading="lazy"><?php endif; ?>
 <?php if(!empty($s['content'])): ?><div class="prose max-w-none"><?= $s['content'] ?></div><?php endif; ?>

@@ -44,6 +44,7 @@ document.getElementById('loader')?.remove();
 })();
 const mb=document.getElementById('mobBtn'),mm=document.getElementById('mobMenu');
 mb?.addEventListener('click',()=>mm.classList.toggle('hidden'));
+(function(){const d=document.querySelector('[data-clock-date]'),t=document.querySelector('[data-clock-time]');if(!d&&!t)return;const days=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];const months={Jan:'Jan',Feb:'Feb',Mar:'Mar',Apr:'Apr',May:'Mei',Jun:'Jun',Jul:'Jul',Aug:'Agu',Sep:'Sep',Oct:'Okt',Nov:'Nov',Dec:'Des'};const pad=n=>String(n).padStart(2,'0');function tick(){const n=new Date();if(t)t.textContent=pad(n.getHours())+':'+pad(n.getMinutes())+':'+pad(n.getSeconds());if(d){const parts=n.toDateString().split(' ');d.textContent=days[n.getDay()]+', '+parts[2]+' '+(months[parts[1]]||parts[1])+' '+parts[3]}}tick();setInterval(tick,1000)})();
 const dbtn=document.getElementById('darkBtn');
 function paint(){if(dbtn)dbtn.textContent=document.documentElement.classList.contains('dark')?'☀':'🌙'}
 dbtn?.addEventListener('click',()=>{document.documentElement.classList.toggle('dark');localStorage.theme=document.documentElement.classList.contains('dark')?'dark':'light';paint()});paint();

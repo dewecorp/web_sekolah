@@ -17,6 +17,7 @@ $heroDesc=$active?(!empty($active['description'])?nl2br(Helper::e($active['descr
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Berita'.($active?' / '.Helper::e($active['name']):'');
 $heroTheme='sky';
 $heroStats=[['icon'=>'fa-newspaper','label'=>count($featured).' sorotan','solid'=>true],['icon'=>'fa-tags','label'=>count($cats).' kategori','solid'=>false]];
+$heroActions='<a href="'.Helper::url('indeks-berita').'" class="inline-flex items-center gap-2 bg-white text-slate-900 px-4 py-2 rounded-xl font-bold"><i class="fa fa-layer-group text-sky-600"></i>Indeks Berita</a>';
 require ROOT.'/templates/frontend/page-hero.php'; ?>
 <div class="mt-4">
 <?php if($active): ?>

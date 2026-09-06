@@ -7,6 +7,7 @@ if ($uri === '/' ) { require ROOT.'/pages/home.php'; exit; }
 if ($uri === '/profil' || $uri === '/sejarah') { $_GET['slug']=$uri; require ROOT.'/pages/profile.php'; exit; }
 if ($uri === '/visi-misi') { require ROOT.'/pages/vision.php'; exit; }
 if ($uri === '/berita') { require ROOT.'/pages/news.php'; exit; }
+if ($uri === '/indeks-berita' || $uri === '/berita/indeks') { require ROOT.'/pages/news-index.php'; exit; }
 if (str_starts_with($uri, '/berita/')) { $slug = basename($uri); require ROOT.'/pages/news-detail.php'; exit; }
 if ($uri === '/galeri') { require ROOT.'/pages/gallery.php'; exit; }
 if ($uri === '/guru') { require ROOT.'/pages/teachers.php'; exit; }

@@ -1,0 +1,11 @@
+RewriteEngine On
+RewriteRule ^admin(/.*)?$ index.php [QSA,L]
+RewriteRule ^install(/.*)?$ index.php [QSA,L]
+RewriteRule ^api(/.*)?$ index.php [QSA,L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+<FilesMatch "\.(env|sql|log)$">
+  Require all denied
+</FilesMatch>

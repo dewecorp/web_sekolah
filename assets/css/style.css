@@ -1,0 +1,15 @@
+:root{--font-body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+html,body,input,select,textarea,button{font-family:var(--font-body)!important}
+h1,h2,h3,h4{font-family:var(--font-body)!important;letter-spacing:-.02em;font-weight:800}
+.font-display{font-family:var(--font-body)!important}
+.reveal{opacity:1}
+.reveal.show{opacity:1!important;transform:none!important}
+/* FX: konten SELALU terlihat (default). JS sembunyikan inline sesaat lalu
+   reveal via transisi inline. Tanpa JS = tampil statis. Tak bisa hilang. */
+.fx{opacity:1;transform:none}
+.fx-none{opacity:1!important;transform:none!important}
+@media (prefers-reduced-motion:reduce){.fx{animation:none!important;opacity:1!important;transform:none!important}}
+.card-hover{transition:transform .3s ease,box-shadow .3s ease}
+.card-hover:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.12)}
+#mainNav.scrolled{box-shadow:0 4px 20px rgba(0,0,0,.08)}
+img{max-width:100%}

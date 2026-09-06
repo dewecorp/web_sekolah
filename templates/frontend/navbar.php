@@ -22,7 +22,7 @@ function menuLink($u,$forceTarget=null){ [$href,$t]=Helper::menuUrl($u); $t=$for
 <div class="flex gap-4"><span><i class="fa fa-location-dot mr-1"></i><?= Helper::e($top_addr) ?></span><span><i class="fa fa-phone mr-1"></i><?= Helper::e($top_phone) ?></span><span><i class="fa fa-envelope mr-1"></i><?= Helper::e($top_email) ?></span></div>
 <div class="flex gap-3"><a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a><a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a><a href="#" aria-label="Youtube"><i class="fab fa-youtube"></i></a></div>
 </div></div>
-<header id="mainNav" class="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b transition">
+<header id="mainNav" class="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b-0 transition">
 <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
 <a href="<?= Helper::url() ?>" class="flex items-center gap-2.5"><span class="w-11 h-11 rounded-xl bg-emerald-600 text-white grid place-items-center font-bold overflow-hidden shadow-sm"><?php if($logo): ?><img src="<?= Helper::upload($logo) ?>" alt="Logo <?= Helper::e($school) ?>" class="w-full h-full object-contain bg-white p-1"><?php else: ?><?= Helper::e(mb_substr($school,0,1)) ?><?php endif; ?></span><span><span class="block font-extrabold leading-tight"><?= Helper::e($school) ?></span><span class="block text-xs text-slate-500"><?= Helper::e($tagline) ?></span></span></a>
 <nav class="hidden lg:flex items-center gap-1 text-sm font-medium" id="deskMenu">
@@ -31,7 +31,7 @@ if(($m['kind']??'link')==='mega'&&!empty($m['mega_id'])){ foreach($mega as $g){ 
 if(!$hasMega){ foreach($mega as $g){ if(($g['label']??'')===$m['label']) $hasMega=$g; } } ?>
 <?php if($hasMega): $cols=json_decode($hasMega['columns_json']??'[]',true)?:[]; ?>
 <div class="relative group"><button class="px-3 py-2 rounded-lg hover:bg-emerald-50"><?= Helper::e($m['label']) ?> <i class="fa fa-chevron-down text-[10px]"></i></button>
-<div class="absolute left-1/2 -translate-x-1/2 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition"><div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border p-6 grid grid-cols-3 gap-6 w-[640px]">
+<div class="absolute left-1/2 -translate-x-1/2 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition"><div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border p-6 grid grid-cols-3 gap-6 w-[640px] max-w-[90vw]">
 <?php foreach($cols as $c): ?><div><p class="font-bold text-xs uppercase text-emerald-700 mb-2"><?= Helper::e($c['title']??'') ?></p><?php foreach($c['links']??[] as $l): ?><a href="<?= Helper::e($l['url']??'#') ?>" class="block py-1 text-slate-600 dark:text-slate-300 hover:text-emerald-600"><?= Helper::e($l['label']??'') ?></a><?php endforeach; ?></div><?php endforeach; ?>
 </div></div></div>
 <?php elseif($ch): ?><div class="relative group"><a <?= menuLink($m['url'],$m['target']??null) ?> class="px-3 py-2 rounded-lg hover:bg-emerald-50 inline-block"><?= Helper::e($m['label']) ?> <i class="fa fa-chevron-down text-[10px]"></i></a>

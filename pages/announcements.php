@@ -34,7 +34,7 @@ require ROOT . '/templates/frontend/header.php'; ?>
 </div></div></div></div></div>
 <?php endif; ?>
 </div>
-<div class="max-w-5xl mx-auto px-4 py-8">
+<div class="max-w-7xl mx-auto px-4 py-8">
 <div class="relative mb-5 reveal"><i class="fa fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i><input id="q" placeholder="Cari pengumuman..." class="w-full border dark:border-slate-700 rounded-2xl pl-10 pr-3 py-2.5 text-sm bg-white dark:bg-slate-800 shadow-sm focus:ring-2 focus:ring-sky-500 focus:outline-none"></div>
 <?php if (!$all): ?>
 <div class="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-3xl p-14 text-center reveal"><span class="w-16 h-16 rounded-3xl bg-sky-100 dark:bg-sky-900 grid place-items-center mx-auto text-3xl">📢</span><p class="font-extrabold text-lg mt-4">Belum ada pengumuman</p><p class="text-sm text-slate-500">Pengumuman baru tampil di sini setelah admin publish.</p></div>
@@ -51,7 +51,7 @@ require ROOT . '/templates/frontend/header.php'; ?>
 <?php if ($hasFile): ?><span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-900 text-sky-700 dark:text-sky-200"><i class="fa fa-paperclip mr-0.5"></i>Lampiran</span><?php endif; ?>
 </div>
 <p class="text-[11px] text-slate-400 mt-1.5 flex flex-wrap gap-x-3"><span><i class="fa fa-clock mr-1"></i><?= Helper::e(Helper::ago($dt)) ?></span><span><i class="fa fa-calendar-day mr-1"></i><?= Helper::e(Helper::tgl($dt)) ?></span></p>
-<p class="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed"><?= nl2br(Helper::e($x['content'])) ?></p>
+<p class="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed text-justify"><?= nl2br(Helper::e($x['content'])) ?></p>
 <?php if ($hasFile): $href = str_starts_with($x['attachment'], 'http') ? $x['attachment'] : Helper::url(ltrim($x['attachment'], '/')); ?>
 <a href="<?= Helper::e($href) ?>" target="_blank" rel="noopener noreferrer" class="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-white bg-sky-600 hover:bg-sky-500 px-3.5 py-2 rounded-xl shadow"><i class="fa fa-download"></i>Unduh Lampiran</a>
 <?php endif; ?>

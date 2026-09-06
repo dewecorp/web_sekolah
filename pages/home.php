@@ -74,13 +74,13 @@ if ($type==='carousel'):
   if (!$myItems) $myItems = [['heading' => $s['title'] ?: 'Selamat Datang', 'subheading' => $s['subtitle'] ?? '', 'image' => $s['image'] ?? '', 'cta_text' => $s['btn_text'] ?? '', 'cta_url' => $s['btn_url'] ?? '']];
   $items = array_slice($myItems, 0, $lim);
 ?>
-<section class="mobile-center-section relative overflow-hidden bg-slate-900 text-white <?= $fxCls ?> min-h-[78vh] md:min-h-[92vh] grid" data-carousel>
+<section class="relative overflow-hidden bg-slate-900 text-white <?= $fxCls ?> min-h-[78vh] md:min-h-[92vh] grid -mt-px" data-carousel>
 <?php foreach($items as $i=>$sl): $slImg=Helper::cover($sl['image']??'', 'slide-'.($sl['heading']??$i), 1600, 900); ?>
-<div data-slide class="col-start-1 row-start-1 grid items-center transition-opacity duration-700 ease-out <?= $i?'opacity-0 pointer-events-none':'opacity-100' ?>">
+<div data-slide class="col-start-1 row-start-1 flex items-center transition-opacity duration-700 ease-out <?= $i?'opacity-0 pointer-events-none':'opacity-100' ?>">
 <img src="<?= Helper::e($slImg) ?>" alt="<?= Helper::e($sl['heading']) ?>" class="absolute inset-0 w-full h-full object-cover" loading="lazy">
 <div class="absolute inset-0 bg-slate-900/55"></div>
 <div class="absolute inset-0 bg-gradient-to-r from-emerald-900/90 via-emerald-900/40 to-slate-900/30"></div>
-<div class="relative max-w-7xl mx-auto px-4 py-24 md:py-32 w-full"><h2 class="text-4xl md:text-6xl font-extrabold max-w-3xl leading-tight"><?= Helper::e($sl['heading']) ?></h2><p class="mt-4 text-lg text-slate-200 max-w-2xl"><?= Helper::e($sl['subheading']??'') ?></p>
+<div class="relative max-w-7xl mx-auto px-4 py-24 md:py-32 w-full text-left flex flex-col justify-center items-start"><h2 class="text-4xl md:text-6xl font-extrabold max-w-3xl leading-tight text-left ml-0 mr-auto"><?= Helper::e($sl['heading']) ?></h2><p class="mt-4 text-lg text-slate-200 max-w-2xl text-left ml-0 mr-auto"><?= Helper::e($sl['subheading']??'') ?></p>
 <div class="mt-6"><?php if(!empty($sl['cta_text'])): ?><a href="<?= Helper::e($sl['cta_url']??'#') ?>" class="bg-emerald-600 px-5 py-2.5 rounded-xl font-semibold"><?= Helper::e($sl['cta_text']) ?></a><?php endif; ?></div></div>
 </div>
 <?php endforeach; ?>

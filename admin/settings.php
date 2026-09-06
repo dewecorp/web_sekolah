@@ -26,6 +26,10 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div class="bg-white rounded-2xl border p-4 grid gap-2"><h2 class="font-bold">Identitas Sekolah</h2>
 <?php foreach(['school_name'=>'Nama Sekolah','tagline'=>'Tagline','address'=>'Alamat','phone'=>'Telepon','email'=>'Email','footer_text'=>'Footer Text','powered_by'=>'Powered By','homepage_title'=>'Homepage Title','facebook'=>'Facebook','instagram'=>'Instagram','youtube'=>'YouTube','tiktok'=>'TikTok'] as $k=>$l): ?>
 <label class="grid gap-1"><?= $l ?><input name="s[<?= $k ?>]" value="<?= Helper::e($sets[$k]??'') ?>" class="border rounded-lg p-2"></label><?php endforeach; ?>
+<label class="grid gap-1">Jam Layanan - Hari<input name="s[service_days]" value="<?= Helper::e($sets['service_days']??'Senin - Jumat') ?>" placeholder="Senin - Jumat" class="border rounded-lg p-2"></label>
+<div class="grid grid-cols-2 gap-2">
+<label class="grid gap-1">Jam Buka<input type="time" name="s[service_open]" value="<?= Helper::e($sets['service_open']??'07:00') ?>" class="border rounded-lg p-2"></label>
+<label class="grid gap-1">Jam Tutup<input type="time" name="s[service_close]" value="<?= Helper::e($sets['service_close']??'15:30') ?>" class="border rounded-lg p-2"></label></div>
 <label class="grid gap-1">Logo<input type="file" name="logo" accept="image/*" class="border rounded-lg p-2"></label></div>
 <div class="grid gap-3">
 <div class="bg-white rounded-2xl border p-4 grid gap-2"><h2 class="font-bold">Profil & Statistik</h2>

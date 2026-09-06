@@ -15,7 +15,7 @@
 <span class="flex gap-1.5 flex-wrap"><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/25 text-white"><?= Helper::e($r['level']??'Sekolah') ?></span><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-900/30 text-white"><?= Helper::e($r['year']??date('Y')) ?></span></span>
 </div>
 <div class="p-4"><h2 class="font-extrabold leading-snug"><?= Helper::e($r['title']) ?></h2>
-<?php if(!empty($r['description'])): ?><p class="text-sm text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed"><?= nl2br(Helper::e($r['description'])) ?></p><?php endif; ?></div>
+<?php if(!empty($r['description'])): ?><p class="text-sm text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed text-justify"><?= nl2br(Helper::e($r['description'])) ?></p><?php endif; ?></div>
 </article>
 <?php endforeach; ?></div><?php endif; ?></div>
 <?php require ROOT.'/templates/frontend/footer.php'; ?>

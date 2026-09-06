@@ -16,7 +16,7 @@
 <div class="min-w-0"><h2 class="font-extrabold leading-snug"><?= Helper::e($r['name']) ?></h2>
 <?php if(!empty($r['coach'])): ?><p class="text-[11px] text-slate-500"><i class="fa fa-user-tie mr-1 text-emerald-500"></i><?= Helper::e($r['coach']) ?></p><?php endif; ?></div>
 </div>
-<?php if(!empty($r['description'])): ?><p class="text-sm text-slate-600 dark:text-slate-300 mt-3 leading-relaxed"><?= nl2br(Helper::e($r['description'])) ?></p><?php endif; ?>
+<?php if(!empty($r['description'])): ?><p class="text-sm text-slate-600 dark:text-slate-300 mt-3 leading-relaxed text-justify"><?= nl2br(Helper::e($r['description'])) ?></p><?php endif; ?>
 <div class="flex flex-wrap gap-1.5 mt-3">
 <?php if(!empty($r['coach'])): ?><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700"><i class="fa fa-user mr-0.5"></i><?= Helper::e($r['coach']) ?></span><?php endif; ?>
 <?php if(!empty($r['schedule'])): ?><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-200"><i class="fa fa-clock mr-0.5"></i><?= Helper::e($r['schedule']) ?></span><?php endif; ?>

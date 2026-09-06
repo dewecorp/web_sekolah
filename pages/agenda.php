@@ -45,7 +45,7 @@ require ROOT . '/templates/frontend/header.php'; ?>
 <?php endif; ?>
 </div>
 <div class="max-w-7xl mx-auto px-4 py-8">
-<div class="sticky top-[68px] z-30 -mx-4 px-4 py-3 bg-slate-50/85 dark:bg-slate-950/85 backdrop-blur-lg">
+<div class="sticky top-[68px] z-30 px-1 py-3 bg-slate-50/85 dark:bg-slate-950/85 backdrop-blur-lg rounded-2xl">
 <div class="flex flex-col md:flex-row gap-2">
 <div class="relative flex-1"><i class="fa fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i><input id="q" placeholder="Cari agenda, lokasi..." class="w-full border dark:border-slate-700 rounded-2xl pl-10 pr-3 py-2.5 text-sm bg-white dark:bg-slate-800 shadow-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"></div>
 <div class="flex gap-1.5 text-sm font-bold">
@@ -65,7 +65,7 @@ require ROOT . '/templates/frontend/header.php'; ?>
 <div class="min-w-0 flex-1">
 <div class="flex flex-wrap items-center gap-2"><h2 class="font-extrabold text-[15px] group-hover:text-emerald-600 transition-colors"><?= Helper::e($x['title']) ?></h2><span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full <?= !$isUp ? 'bg-slate-200 dark:bg-slate-700 text-slate-500' : ($dd === 0 ? 'bg-red-500 text-white animate-pulse' : 'bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-200') ?>"><?= $when ?></span></div>
 <p class="text-xs text-slate-500 mt-1.5 flex flex-wrap gap-x-4 gap-y-1"><span><i class="fa fa-calendar-day mr-1.5 text-emerald-500"></i><?= Helper::tgl($ed) ?></span><?php if (!empty($x['start_time'])): ?><span><i class="fa fa-clock mr-1.5 text-emerald-500"></i><?= Helper::e($x['start_time']) ?><?php if (!empty($x['end_time'])): ?>–<?= Helper::e($x['end_time']) ?><?php endif; ?></span><?php endif; ?><?php if (!empty($x['location'])): ?><span><i class="fa fa-location-dot mr-1.5 text-emerald-500"></i><?= Helper::e($x['location']) ?></span><?php endif; ?></p>
-<?php if (!empty($x['description'])): ?><p class="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed"><?= nl2br(Helper::e($x['description'])) ?></p><?php endif; ?>
+<?php if (!empty($x['description'])): ?><p class="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed text-justify"><?= nl2br(Helper::e($x['description'])) ?></p><?php endif; ?>
 </div></article>
 <?php endforeach; ?>
 </div></div>

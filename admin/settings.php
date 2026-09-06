@@ -26,6 +26,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div class="bg-white rounded-2xl border p-4 grid gap-2"><h2 class="font-bold"><i class="fa fa-school text-emerald-600 mr-1"></i>Identitas Sekolah</h2>
 <?php foreach(['school_name'=>'Nama Sekolah','tagline'=>'Tagline','address'=>'Alamat','phone'=>'Telepon','email'=>'Email','footer_text'=>'Footer Text','homepage_title'=>'Homepage Title'] as $k=>$l): ?>
 <label class="grid gap-1"><?= $l ?><input name="s[<?= $k ?>]" value="<?= Helper::e($sets[$k]??'') ?>" class="border rounded-lg p-2"></label><?php endforeach; ?>
+<label class="grid gap-1">Hero Alignment<select name="s[hero_align]" class="border rounded-lg p-2"><option value="left" <?= ($sets['hero_align']??'center')==='left'?'selected':'' ?>>Kiri</option><option value="center" <?= ($sets['hero_align']??'center')==='center'?'selected':'' ?>>Tengah</option><option value="right" <?= ($sets['hero_align']??'center')==='right'?'selected':'' ?>>Kanan</option></select><span class="text-xs font-normal text-slate-400">Rata kiri/tengah/kanan hero & semua elemen</span></label>
 <label class="grid gap-1">Logo<input type="file" name="logo" accept="image/*" class="border rounded-lg p-2"></label></div>
 <div class="bg-white rounded-2xl border p-4 grid gap-2"><h2 class="font-bold"><i class="fa fa-share-nodes text-emerald-600 mr-1"></i>Media Sosial</h2>
 <?php foreach(['facebook'=>'Facebook','instagram'=>'Instagram','youtube'=>'YouTube','tiktok'=>'TikTok'] as $k=>$l): ?>

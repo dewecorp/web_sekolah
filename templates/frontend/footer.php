@@ -3,7 +3,7 @@
 try { $fm = Database::conn()->query("SELECT * FROM menus WHERE location='footer' LIMIT 1")->fetch(); $fitems = [];
 if ($fm) { $fs = Database::conn()->prepare("SELECT * FROM menu_items WHERE menu_id=? AND is_active=1 ORDER BY sort_order"); $fs->execute([$fm['id']]); $fitems = $fs->fetchAll(); } } catch (Throwable) { $fitems = []; }
 if (!$fitems) $fitems = [['label'=>'Profil','url'=>'/profil'],['label'=>'Berita','url'=>'/berita'],['label'=>'Galeri','url'=>'/galeri'],['label'=>'Kontak','url'=>'/kontak']]; ?>
-<footer class="relative overflow-hidden bg-slate-950 text-slate-300 mt-16">
+<footer class="relative overflow-hidden bg-slate-950 text-slate-300 mt-auto w-full">
 <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-600 via-amber-500 to-emerald-600"></div>
 <div class="absolute -top-32 -right-24 w-80 h-80 rounded-full bg-emerald-600/10 blur-3xl pointer-events-none"></div>
 <div class="max-w-7xl mx-auto px-4 py-12 grid md:grid-cols-4 gap-8 text-sm">

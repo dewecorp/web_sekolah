@@ -54,7 +54,7 @@ if (!in_array($themeRadius,['soft','square','round'],true)) $themeRadius='soft';
 <script>if(localStorage.theme==='dark')document.documentElement.classList.add('dark')</script>
 <noscript><style>#loader{display:none!important}</style></noscript>
 </head>
-<body class="site-shell theme-<?= Helper::e($siteTheme) ?> radius-<?= Helper::e($themeRadius) ?> font-sans antialiased bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 tracking-tight">
+<body class="site-shell theme-<?= Helper::e($siteTheme) ?> radius-<?= Helper::e($themeRadius) ?> font-sans antialiased bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 tracking-tight flex flex-col min-h-screen">
 <div id="loader" class="fixed inset-0 z-[99] bg-white dark:bg-slate-950 grid place-items-center"><div class="w-10 h-10 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div></div>
 <?php require ROOT.'/templates/frontend/navbar.php'; ?>
-<main class="min-h-[60vh]">
+<main class="min-h-[60vh] flex-1 w-full flex flex-col">

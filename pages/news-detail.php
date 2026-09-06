@@ -6,14 +6,21 @@ $db->prepare("UPDATE posts SET views=views+1 WHERE id=?")->execute([$p['id']]);
 $metaTitle=$p['title']; $metaDesc=Helper::excerpt($p['excerpt']?:$p['content']);
 require ROOT.'/templates/frontend/header.php'; ?>
 <?php $shareUrl=Helper::url('berita/'.$p['slug']);$shareText=$p['title'].' - '.Database::setting('school_name','Sekolah');$shareHeading=Database::setting('share_heading','Bagikan berita ini');$shareDescription=Database::setting('share_description','Sebarkan informasi kepada keluarga dan teman.'); ?>
-<div class="max-w-7xl mx-auto px-4 py-10">
-<nav class="text-xs text-slate-500 mb-3"><a href="<?= Helper::url() ?>">Beranda</a> / <a href="<?= Helper::url('berita') ?>">Berita</a> / <?= Helper::e($p['title']) ?></nav>
-<span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded"><?= Helper::e($p['cat']??'Berita') ?></span>
-<h1 class="text-3xl font-extrabold mt-2"><?= Helper::e($p['title']) ?></h1>
-<p class="text-xs text-slate-500 mt-1"><?= Helper::e($p['author']??'') ?> • <?= Helper::tgl($p['published_at']??$p['created_at']) ?> • <?= (int)$p['views'] ?> dibaca</p>
-<img src="<?= Helper::e(Helper::cover($p['featured_image']??'', 'berita-'.$p['slug'], 1200, 630)) ?>" alt="<?= Helper::e($p['title']) ?>" class="rounded-2xl mt-4 w-full aspect-[16/9] object-cover" loading="lazy">
-<article class="prose max-w-none mt-4 text-slate-700 dark:text-slate-200 text-justify leading-relaxed"><?= $p['content'] ?></article>
-<aside class="mt-10 border-t pt-6"><div class="rounded-2xl border bg-white dark:bg-slate-800 p-5 flex flex-col md:flex-row md:items-center gap-4"><div class="md:mr-auto"><h2 class="font-extrabold text-lg"><?=Helper::e($shareHeading)?></h2><p class="text-sm text-slate-500"><?=Helper::e($shareDescription)?></p></div><div class="flex flex-wrap gap-2">
+<div class="w-full px-4 md:px-8 py-10">
+<?php
+$heroBadge='<i class="fa fa-newspaper text-amber-300"></i>'.Helper::e($p['cat']??'Berita');
+$heroTitle=$p['title'];
+$heroDesc=!empty($p['excerpt'])?nl2br(Helper::e($p['excerpt'])):'';
+$heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / <a href="'.Helper::url('berita').'" class="hover:text-white">Berita</a> / '.Helper::e($p['cat']??'Berita');
+$heroTheme='sky';
+$heroStats=[['icon'=>'fa-user','label'=>$p['author']??'Redaksi','solid'=>true],['icon'=>'fa-calendar-day','label'=>Helper::tgl($p['published_at']??$p['created_at']),'solid'=>false],['icon'=>'fa-eye','label'=>(int)$p['views'].' dibaca','solid'=>false]];
+require ROOT.'/templates/frontend/page-hero.php'; ?>
+<div class="mt-4 grid lg:grid-cols-3 gap-4 items-start">
+<article class="lg:col-span-2 bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-2xl p-6 md:p-8 reveal">
+<img src="<?= Helper::e(Helper::cover($p['featured_image']??'', 'berita-'.$p['slug'], 1200, 630)) ?>" alt="<?= Helper::e($p['title']) ?>" class="rounded-2xl w-full aspect-[16/9] object-cover" loading="lazy">
+<div class="prose max-w-none mt-4 text-slate-700 dark:text-slate-200 text-justify leading-relaxed"><?= $p['content'] ?></div>
+</article>
+<aside class="grid gap-4"><div class="rounded-2xl border bg-white dark:bg-slate-800 p-5 reveal"><div><h2 class="font-extrabold text-lg"><?=Helper::e($shareHeading)?></h2><p class="text-sm text-slate-500"><?=Helper::e($shareDescription)?></p></div><div class="flex flex-wrap gap-2 mt-3">
 <a href="https://wa.me/?text=<?= rawurlencode($shareText.' '.$shareUrl) ?>" target="_blank" rel="noopener" class="share-btn bg-green-500" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
 <a href="https://www.facebook.com/sharer/sharer.php?u=<?= rawurlencode($shareUrl) ?>" target="_blank" rel="noopener" class="share-btn bg-blue-600" title="Facebook"><i class="fab fa-facebook-f"></i></a>
 <a href="https://twitter.com/intent/tweet?text=<?= rawurlencode($shareText) ?>&url=<?= rawurlencode($shareUrl) ?>" target="_blank" rel="noopener" class="share-btn bg-slate-900" title="X / Twitter"><i class="fab fa-x-twitter"></i></a>

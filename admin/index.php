@@ -32,8 +32,8 @@ Auth::requireLogin();
 try { $db->exec("DELETE FROM activity_logs WHERE created_at < NOW() - INTERVAL 24 HOUR"); } catch (Throwable) {}
 $role = $_SESSION['user']['role'] ?? 'author';
 $roleMap = [
-  'administrator' => ['pages','posts','categories','media','gallery','announcements','agenda','teachers','extras','menus','megamenu','widgets','sections','themes','appearance','settings','users','logs'],
-  'editor' => ['pages','posts','categories','media','gallery','announcements','agenda','teachers','extras','menus','megamenu','widgets','sections','themes','appearance'],
+  'administrator' => ['pages','posts','categories','media','gallery','announcements','agenda','teachers','extras','structure','curriculum','vision','statistics','menus','megamenu','widgets','sections','themes','appearance','settings','seo','users','logs'],
+  'editor' => ['pages','posts','categories','media','gallery','announcements','agenda','teachers','extras','structure','curriculum','vision','statistics','menus','megamenu','widgets','sections','themes','appearance'],
   'author' => ['posts','pages','media','gallery'],
 ];
 $allow = $roleMap[$role] ?? $roleMap['author'];
@@ -41,5 +41,6 @@ $path = trim(substr($uri, 6), '/'); // hapus /admin
 if ($path === '') { require ROOT.'/admin/dashboard.php'; exit; }
 $seg = explode('/', $path)[0];
 if ($seg === 'sliders') { header('Location: ' . Helper::url('admin/sections')); exit; }
+if ($seg === 'academic') { header('Location: ' . Helper::url('admin/structure')); exit; }
 if (!in_array($seg, $allow, true)) { http_response_code(403); require ROOT.'/templates/error/403.php'; exit; }
 require ROOT.'/admin/'.$seg.'.php';

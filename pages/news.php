@@ -9,7 +9,16 @@ $fetch=function(string $where,array $args=[],int $limit=6)use($db,$baseWhere){$s
 $carouselLimit=max(1,min(10,(int)Database::setting('news_carousel_limit','5')));$carouselSpeed=max(1000,min(20000,(int)Database::setting('news_carousel_speed','5000')));$carouselMobile=max(150,min(420,(int)Database::setting('news_carousel_mobile_height','200')));$carouselDesktop=max(180,min(520,(int)Database::setting('news_carousel_desktop_height','270')));$featured=$fetch('',[],$carouselLimit);
 if($active){$posts=$fetch('p.category_id=?',[$active['id']],12);$grid=$active['grid_style']??'cards-3';}
 ?>
-<div class="max-w-7xl mx-auto px-4 pt-2 pb-6 md:pt-3 md:pb-10">
+<div class="w-full px-4 md:px-8 py-10">
+<?php
+$heroBadge='<i class="fa fa-newspaper text-amber-300"></i>Berita Sekolah';
+$heroTitle=$active?$active['name']:'Berita';
+$heroDesc=$active?(!empty($active['description'])?nl2br(Helper::e($active['description'])):''):'';
+$heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Berita'.($active?' / '.Helper::e($active['name']):'');
+$heroTheme='sky';
+$heroStats=[['icon'=>'fa-newspaper','label'=>count($featured).' sorotan','solid'=>true],['icon'=>'fa-tags','label'=>count($cats).' kategori','solid'=>false]];
+require ROOT.'/templates/frontend/page-hero.php'; ?>
+<div class="mt-4">
 <?php if($active): ?>
 <?php if(!$posts):?><div class="rounded-3xl border bg-white p-14 text-center text-slate-500"><?=Helper::e($newsEmpty)?></div><?php else:echo newsGrid($posts,$grid);endif;?>
 <?php else: ?>

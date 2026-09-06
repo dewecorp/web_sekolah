@@ -98,18 +98,19 @@ $fx=$s['effect']??'fade-up'; $fxCls=$fx==='none'?'fx-none':'fx fx-'.$fx;
 <?php if($type==='sambutan'): ?>
 <div class="welcome-content grid md:grid-cols-[300px_1fr] gap-5 md:gap-6 items-center">
 <div class="welcome-photo flex justify-center"><?php $pp=!empty($profile['principal_photo'])?Helper::upload($profile['principal_photo']):Helper::dummy('kepala-sekolah',600,700); ?><img src="<?= Helper::e($pp) ?>" alt="Kepala Sekolah" class="rounded-2xl shadow w-full max-w-[300px] aspect-[4/5] object-cover" loading="lazy"></div>
-<div class="welcome-copy"><p class="font-bold text-sm uppercase text-emerald-600">Sambutan</p><h3 class="text-2xl font-bold"><?= Helper::e($profile['principal_name']??'-') ?></h3><p class="text-sm opacity-70"><?= Helper::e($profile['principal_title']??'Kepala Sekolah') ?></p><p class="welcome-message mt-2 opacity-90 text-justify"><?= nl2br(Helper::e($profile['principal_greeting']??'Selamat datang.')) ?></p></div>
+<div class="welcome-copy"><p class="font-bold text-sm uppercase text-emerald-600">Sambutan</p><h3 class="text-2xl font-bold"><?= Helper::e($profile['principal_name']??'-') ?></h3><p class="text-sm opacity-70"><?= Helper::e($profile['principal_title']??'Kepala Sekolah') ?></p><div class="welcome-message mt-2 opacity-90 text-justify text-sm leading-relaxed"><?= $profile['principal_greeting']??'Selamat datang.' ?></div></div>
 </div>
-<?php elseif($type==='statistik'): $st=(int)($profile['total_students']??0); $gr=(int)($profile['total_teachers']??0); $ek=(int)($profile['total_extracurricular']??0); $th=(int)($profile['years_established']??0); ?>
+<?php elseif($type==='statistik'): try{ $stats=$db->query("SELECT * FROM statistics WHERE is_active=1 ORDER BY sort_order,id")->fetchAll(); }catch(Throwable){ $stats=[]; } ?>
+<?php if(!$stats): ?><p class="opacity-70 text-sm">Belum ada statistik. Tambah via Sekolah &gt; Statistik.</p><?php else: ?>
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-<?php foreach([['Siswa Aktif',$st,'+','fa-users','from-emerald-500 to-teal-600','Peserta didik tahun ini'],['Guru & Tendik',$gr,'','fa-chalkboard-user','from-sky-500 to-indigo-600','Pendidik profesional'],['Ekstrakurikuler',$ek,'','fa-futbol','from-amber-500 to-orange-600','Minat & bakat'],['Tahun Berdiri',$th,'','fa-building-columns','from-violet-500 to-fuchsia-600','Pengalaman mendidik']] as $stt): ?>
-<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br <?= $stt[4] ?> text-white p-5 card-hover">
+<?php foreach($stats as $stt): ?>
+<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br <?= Helper::e($stt['gradient']??'from-emerald-500 to-teal-600') ?> text-white p-5 card-hover">
 <span class="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-white/15"></span><span class="absolute right-6 top-8 w-8 h-8 rounded-full bg-white/10"></span>
-<span class="w-10 h-10 rounded-xl bg-white/20 grid place-items-center"><i class="fa <?= $stt[3] ?>"></i></span>
-<p class="text-3xl font-extrabold mt-3" data-count="<?= $stt[1] ?>" data-suffix="<?= $stt[2] ?>">0</p>
-<p class="font-bold text-sm"><?= $stt[0] ?></p><p class="text-[11px] text-white/75"><?= $stt[5] ?></p>
+<span class="w-10 h-10 rounded-xl bg-white/20 grid place-items-center"><i class="fa <?= Helper::e($stt['icon']??'fa-chart-simple') ?>"></i></span>
+<p class="text-3xl font-extrabold mt-3" data-count="<?= (int)$stt['value'] ?>" data-suffix="<?= Helper::e($stt['suffix']??'') ?>">0</p>
+<p class="font-bold text-sm"><?= Helper::e($stt['name']) ?></p><p class="text-[11px] text-white/75"><?= Helper::e($stt['description']??'') ?></p>
 </div><?php endforeach; ?>
-</div>
+</div><?php endif; ?>
 <?php elseif($type==='berita'): $rows=array_slice($postsAll,0,$lim); $grid=$s['grid']??'cards-3'; ?>
 <?php if(!$rows): ?><p class="opacity-70 text-sm">Belum ada berita</p>
 <?php elseif($grid==='featured'): $f=array_shift($rows); $fc=Helper::cover($f['featured_image']??'', 'berita-'.$f['slug'], 1000, 600); ?>

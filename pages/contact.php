@@ -19,7 +19,7 @@ $wa = preg_replace('/\D+/', '', $phone);
 <div class="relative max-w-3xl">
 <span class="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-[.16em]"><i class="fa fa-headset text-amber-300"></i>Hubungi Kami</span>
 <h1 class="text-3xl md:text-5xl font-extrabold leading-tight mt-4">Kontak <?= Helper::e(Database::setting('school_name','Sekolah')) ?></h1>
-<p class="text-white/80 text-sm md:text-base max-w-2xl mt-4">Silakan hubungi kami melalui alamat, telepon, email, atau formulir pesan. Kami merespons pada jam kerja sekolah.</p>
+<?php $contactDesc=Database::setting('contact_desc',''); if($contactDesc!==''): ?><p class="text-white/80 text-sm md:text-base max-w-2xl mt-4"><?= nl2br(Helper::e($contactDesc)) ?></p><?php endif; ?>
 <div class="mt-5 flex flex-wrap gap-2">
 <?php if($phone): ?><a href="tel:<?= Helper::e($phone) ?>" class="inline-flex items-center gap-2 bg-white text-emerald-700 px-4 py-2.5 rounded-xl font-bold text-sm"><i class="fa fa-phone"></i><?= Helper::e($phone) ?></a><?php endif; ?>
 <?php if($wa): ?><a href="https://wa.me/<?= Helper::e($wa) ?>" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/40 px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-white/10"><i class="fab fa-whatsapp"></i>WhatsApp</a><?php endif; ?>

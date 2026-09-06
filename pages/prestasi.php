@@ -1,12 +1,14 @@
 <?php $rows=$db->query("SELECT * FROM achievements WHERE is_active=1 ORDER BY id DESC")->fetchAll(); $metaTitle='Prestasi - '.Database::setting('school_name','Sekolah'); require ROOT.'/templates/frontend/header.php'; ?>
-<div class="bg-gradient-to-r from-amber-600 via-orange-500 to-rose-500 text-white">
-<div class="max-w-7xl mx-auto px-4 py-12 reveal">
-<nav class="text-xs text-amber-100 mb-2"><a href="<?= Helper::url() ?>" class="hover:text-white">Beranda</a> / Prestasi</nav>
-<h1 class="text-3xl md:text-4xl font-extrabold">Prestasi Sekolah</h1>
-<p class="text-amber-50 mt-1 max-w-2xl">Kebanggaan siswa dan sekolah di berbagai ajang.</p>
-<div class="mt-4 text-sm"><span class="bg-white/15 px-3 py-1.5 rounded-full"><b><?= count($rows) ?></b> prestasi</span></div>
-</div></div>
-<div class="max-w-7xl mx-auto px-4 py-8">
+<div class="w-full px-4 md:px-8 py-10">
+<?php
+$heroBadge='<i class="fa fa-trophy text-amber-300"></i>Prestasi Sekolah';
+$heroTitle='Prestasi Sekolah';
+$heroDesc='';
+$heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Prestasi';
+$heroTheme='amber';
+$heroStats=[['icon'=>'fa-trophy','label'=>count($rows).' prestasi','solid'=>true]];
+require ROOT.'/templates/frontend/page-hero.php'; ?>
+<div class="mt-4">
 <?php if(!$rows): ?><div class="bg-white dark:bg-slate-800 border rounded-3xl p-12 text-center text-slate-500 reveal"><span class="w-14 h-14 rounded-2xl bg-amber-100 grid place-items-center mx-auto text-2xl">🏆</span><p class="font-extrabold text-lg mt-3">Belum ada prestasi</p></div><?php else: ?>
 <div class="grid md:grid-cols-3 gap-4"><?php foreach($rows as $r): ?>
 <article class="rounded-3xl overflow-hidden border dark:border-slate-700 bg-white dark:bg-slate-800 card-hover reveal">

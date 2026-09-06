@@ -88,7 +88,9 @@ function openModal(d){
   document.getElementById('f_id').value=d?.id||0;
   document.getElementById('f_title').value=d?.title||'';
   const s=document.getElementById('f_slug');s.value=d?.slug||'';delete s.dataset.touched;
-  document.getElementById('f_status').value=d?.status||'draft';
+  const st=document.getElementById('f_status');st.value=d?.status||'draft';
+  st.dispatchEvent(new Event('change',{bubbles:true}));
+  if(st._cpaint)st._cpaint(); else if(st._csync)st._csync(); else if(window.__refreshSelects&&window.__refreshSelects.f_status)window.__refreshSelects.f_status();
   document.getElementById('f_seot').value=d?.seo_title||'';
   document.getElementById('f_seod').value=d?.seo_description||'';
   document.getElementById('f_old').value=d?.img||'';

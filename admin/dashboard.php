@@ -9,8 +9,11 @@ foreach (['posts'=>"SELECT COUNT(*) FROM posts WHERE deleted_at IS NULL",'pages'
 try { $db->exec("DELETE FROM activity_logs WHERE created_at < NOW() - INTERVAL 24 HOUR"); } catch (Throwable) {}
 try { $recent = $db->query("SELECT a.*, u.name uname FROM activity_logs a LEFT JOIN users u ON u.id=a.user_id ORDER BY a.created_at DESC LIMIT 50")->fetchAll(); } catch (Throwable) { $recent = []; }
 try { $total24 = (int)$db->query("SELECT COUNT(*) FROM activity_logs")->fetchColumn(); } catch (Throwable) { $total24 = count($recent); }
-try { $drafts = $db->query("SELECT p.id,p.title,p.excerpt,p.updated_at,c.name cat,u.name author FROM posts p LEFT JOIN categories c ON c.id=p.category_id LEFT JOIN users u ON u.id=p.author_id WHERE p.status='draft' AND p.deleted_at IS NULL ORDER BY p.updated_at DESC LIMIT 5")->fetchAll(); } catch (Throwable) { $drafts = []; }
-try { $nDraft = (int)$db->query("SELECT COUNT(*) FROM posts WHERE status='draft' AND deleted_at IS NULL")->fetchColumn(); } catch (Throwable) { $nDraft = count($drafts); }
+try { $drafts = []; } catch (Throwable) { $drafts = []; }
+try { $nDraft = 0; } catch (Throwable) { $nDraft = 0; }
+try { $anns = $db->query("SELECT id,title,content,attachment,published_at,created_at FROM announcements WHERE status='published' ORDER BY published_at DESC, id DESC LIMIT 5")->fetchAll(); } catch (Throwable) { $anns = []; }
+try { $nAnn = (int)$db->query("SELECT COUNT(*) FROM announcements WHERE status='published'")->fetchColumn(); } catch (Throwable) { $nAnn = count($anns); }
+try { $nAnnFile = (int)$db->query("SELECT COUNT(*) FROM announcements WHERE status='published' AND attachment IS NOT NULL AND attachment<>''")->fetchColumn(); } catch (Throwable) { $nAnnFile = 0; }
 try { $upcoming = $db->query("SELECT id,title,event_date,start_time,end_time,location,description FROM agenda WHERE event_date>=CURDATE() ORDER BY event_date LIMIT 5")->fetchAll(); } catch (Throwable) { $upcoming = []; }
 try { $nAgenda = (int)$db->query("SELECT COUNT(*) FROM agenda WHERE event_date>=CURDATE()")->fetchColumn(); } catch (Throwable) { $nAgenda = count($upcoming); }
 // Grafik berita 6 bulan terakhir
@@ -53,15 +56,18 @@ require ROOT.'/templates/admin/header.php';
 <div class="h-64"><canvas id="newsChart"></canvas></div>
 </div>
 <div class="grid lg:grid-cols-2 gap-3 mt-3">
-<div class="bg-white rounded-2xl border p-4">
-<div class="flex flex-wrap items-center gap-2 mb-2"><h2 class="font-bold text-sm"><i class="fa fa-file-pen text-amber-500 mr-1"></i>Draft Menunggu Publish</h2><span class="text-[11px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold"><?= $nDraft ?> draft</span><a href="<?= Helper::url('admin/posts') ?>" class="ml-auto text-[11px] text-emerald-600 font-bold">Kelola →</a></div>
-<?php if(!$drafts): ?><div class="py-6 text-center"><span class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-600 grid place-items-center mx-auto"><i class="fa fa-check"></i></span><p class="text-sm text-slate-500 mt-2 font-semibold">Semua beres, tidak ada draft</p></div>
-<?php else: foreach($drafts as $d): ?>
-<a href="<?= Helper::url('admin/posts?edit='.(int)$d['id']) ?>" class="flex gap-2.5 items-start border border-slate-100 bg-slate-50 hover:bg-amber-50 hover:border-amber-200 rounded-xl px-3 py-2.5 mb-2 transition">
-<span class="w-8 h-8 rounded-lg bg-amber-500 text-white grid place-items-center shrink-0"><i class="fa fa-pen text-xs"></i></span>
-<span class="min-w-0"><b class="text-sm block truncate"><?= Helper::e($d['title']) ?></b>
-<span class="text-[11px] text-slate-500 block mt-0.5"><i class="fa fa-tag mr-1"></i><?= Helper::e($d['cat']??'Tanpa kategori') ?> • <i class="fa fa-user mr-1"></i><?= Helper::e($d['author']??'-') ?> • <i class="fa fa-clock mr-1"></i><?= Helper::e(Helper::ago($d['updated_at'])) ?></span>
-<?php if(!empty($d['excerpt'])): ?><span class="text-xs text-slate-500 block truncate mt-0.5"><?= Helper::e($d['excerpt']) ?></span><?php endif; ?></span></a>
+<div class="relative overflow-hidden rounded-2xl border p-4 bg-gradient-to-br from-rose-600 via-pink-600 to-fuchsia-600 text-white">
+<span class="absolute -right-10 -top-12 w-44 h-44 rounded-full border-[18px] border-white/10"></span>
+<span class="absolute -left-14 -bottom-16 w-52 h-52 rounded-full border-[22px] border-white/10"></span>
+<div class="relative flex flex-wrap items-center gap-2 mb-2"><h2 class="font-bold text-sm"><i class="fa fa-bullhorn mr-1"></i>Pengumuman Terbaru</h2><span class="text-[11px] bg-white text-rose-700 px-2 py-0.5 rounded-full font-bold"><?= $nAnn ?> info</span><?php if($nAnnFile): ?><span class="text-[11px] bg-white/20 border border-white/30 px-2 py-0.5 rounded-full font-bold"><i class="fa fa-paperclip mr-1"></i><?= $nAnnFile ?> lampiran</span><?php endif; ?><a href="<?= Helper::url('admin/announcements') ?>" class="ml-auto text-[11px] bg-white/20 border border-white/30 px-2.5 py-1 rounded-lg font-bold hover:bg-white/30">Kelola →</a></div>
+<?php if(!$anns): ?><div class="relative py-6 text-center"><span class="w-11 h-11 rounded-2xl bg-white/20 grid place-items-center mx-auto"><i class="fa fa-bell-slash"></i></span><p class="text-sm text-white/90 mt-2 font-semibold">Belum ada pengumuman</p></div>
+<?php else: foreach($anns as $i=>$an): $dt=$an['published_at']??$an['created_at']; $hasFile=!empty($an['attachment']); ?>
+<a href="<?= Helper::url('admin/announcements') ?>" class="relative flex gap-2.5 items-start bg-white text-slate-800 rounded-xl px-3 py-2.5 mb-2 hover:-translate-y-0.5 hover:shadow-lg transition">
+<span class="w-9 h-9 rounded-xl text-white grid place-items-center shrink-0 <?= $i===0?'bg-gradient-to-b from-amber-400 to-orange-500':'bg-gradient-to-b from-rose-500 to-pink-600' ?>"><i class="fa <?= $i===0?'fa-star':'fa-bullhorn' ?> text-xs"></i></span>
+<span class="min-w-0 flex-1"><span class="flex flex-wrap items-center gap-1.5"><b class="text-sm truncate flex-1 min-w-[120px]"><?= Helper::e($an['title']) ?></b><?php if($i===0): ?><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">TERBARU</span><?php endif; ?><?php if($hasFile): ?><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-700"><i class="fa fa-paperclip mr-0.5"></i>Lampiran</span><?php endif; ?></span>
+<span class="text-[11px] text-slate-400 block mt-0.5"><i class="fa fa-clock mr-1"></i><?= Helper::e(Helper::ago($dt)) ?> • <?= Helper::e(Helper::tgl($dt)) ?></span>
+<span class="text-xs text-slate-500 block truncate mt-0.5"><?= Helper::e(Helper::excerpt($an['content']??'',90)) ?></span></span>
+<span class="self-center text-rose-500 font-bold text-sm shrink-0">→</span></a>
 <?php endforeach; endif; ?></div>
 <div class="bg-white rounded-2xl border p-4">
 <div class="flex flex-wrap items-center gap-2 mb-2"><h2 class="font-bold text-sm"><i class="fa fa-calendar-days text-violet-500 mr-1"></i>Agenda Terdekat</h2><span class="text-[11px] bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full font-bold"><?= $nAgenda ?> agenda</span><a href="<?= Helper::url('admin/agenda') ?>" class="ml-auto text-[11px] text-emerald-600 font-bold">Kelola →</a></div>

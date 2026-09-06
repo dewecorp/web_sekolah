@@ -4,6 +4,7 @@ $st->execute([$slug??'']); $p=$st->fetch();
 if(!$p){ http_response_code(404); require ROOT.'/templates/error/404.php'; exit; }
 $db->prepare("UPDATE posts SET views=views+1 WHERE id=?")->execute([$p['id']]);
 $metaTitle=$p['title']; $metaDesc=Helper::excerpt($p['excerpt']?:$p['content']);
+$schemaNews=['@context'=>'https://schema.org','@type'=>'NewsArticle','headline'=>$p['title'],'description'=>$metaDesc,'image'=>[Helper::cover($p['featured_image']??'','berita-'.$p['slug'],1200,630)],'datePublished'=>$p['published_at']??$p['created_at'],'dateModified'=>$p['updated_at']??$p['published_at']??$p['created_at'],'author'=>[['@type'=>'Person','name'=>$p['author']??Database::setting('school_name','Redaksi')]],'publisher'=>['@type'=>'Organization','name'=>Database::setting('school_name','Sekolah'),'logo'=>['@type'=>'ImageObject','url'=>Helper::upload(Database::setting('logo',''))]],'mainEntityOfPage'=>['@type'=>'WebPage','@id'=>Helper::url('berita/'.$p['slug'])]];
 require ROOT.'/templates/frontend/header.php'; ?>
 <?php $shareUrl=Helper::url('berita/'.$p['slug']);$shareText=$p['title'].' - '.Database::setting('school_name','Sekolah');$shareHeading=Database::setting('share_heading','Bagikan berita ini');$shareDescription=Database::setting('share_description','Sebarkan informasi kepada keluarga dan teman.'); ?>
 <div class="w-full px-4 md:px-8 py-10">

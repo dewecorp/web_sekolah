@@ -1,7 +1,7 @@
-<?php $ftName = $brandName ?? Database::setting('school_name','SchoolCMS'); $ftText = Database::setting('footer_text',$ftName); $ftPw = Database::setting('powered_by','Powered by SchoolCMS'); ?>
+<?php $ftName = $brandName ?? Database::setting('school_name',''); $ftText = Database::setting('footer_text',$ftName); ?>
 <div aria-hidden="true" class="h-6 shrink-0"></div>
 <footer class="max-w-full w-full border-t border-slate-200 bg-white/80 backdrop-blur px-4 md:px-6 py-3.5 mt-auto flex flex-col md:flex-row items-center gap-1.5 text-xs text-slate-500">
-<span>&copy; <?= date('Y') ?> <?= Helper::e($ftText) ?>. <?= Helper::e($ftPw) ?>.</span>
+<span>&copy; <?= date('Y') ?> <?= Helper::e($ftText) ?>.</span>
 <span class="md:ml-auto flex items-center gap-2"><a href="<?= Helper::url() ?>" target="_blank" rel="noopener noreferrer" class="text-emerald-700 font-bold hover:underline"><i class="fa fa-globe mr-1"></i>Lihat Situs</a><span class="text-slate-300">|</span><a href="<?= Helper::url('admin') ?>" class="hover:text-slate-700">Dashboard Admin</a></span>
 </footer>
 </main>

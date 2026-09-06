@@ -64,9 +64,8 @@ require ROOT.'/templates/admin/header.php'; ?>
 <label class="grid gap-1 font-semibold">Jadwal<input name="schedule" id="e_schedule" placeholder="Sabtu 08:00" class="border rounded-lg p-2 font-normal"></label>
 </div>
 <label class="grid gap-1 font-semibold">Deskripsi<textarea name="description" id="e_desc" rows="3" placeholder="Deskripsi ekskul..." class="border rounded-lg p-2 font-normal"></textarea></label>
-<div class="flex gap-2 bg-white pt-2 pb-1"><button class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl p-2.5 font-bold"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="border rounded-xl px-5">Batal</button></div>
+<div class="flex justify-center md:col-span-2"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
-
 <div id="presModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
 <div class="fixed inset-0 bg-slate-900/60" data-close></div>
 <div class="relative min-h-full flex items-start justify-center p-3 sm:p-6">
@@ -80,7 +79,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <label class="grid gap-1 font-semibold">Tingkat<input name="level" id="p_level" placeholder="Nasional" class="border rounded-lg p-2 font-normal"></label>
 </div>
 <label class="grid gap-1 font-semibold">Deskripsi<textarea name="description" id="p_desc" rows="3" placeholder="Deskripsi prestasi..." class="border rounded-lg p-2 font-normal"></textarea></label>
-<div class="flex gap-2 bg-white pt-2 pb-1"><button class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl p-2.5 font-bold"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="border rounded-xl px-5">Batal</button></div>
+<div class="flex justify-center md:col-span-2"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 
 <script>

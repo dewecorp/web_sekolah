@@ -48,7 +48,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <label class="grid gap-1 font-semibold">Lokasi<input name="location" id="f_loc" placeholder="Aula sekolah" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Deskripsi<textarea name="description" id="f_desc" rows="4" placeholder="Detail agenda..." class="border rounded-lg p-2 font-normal"></textarea></label>
 <label class="grid gap-1 font-semibold">Status<select name="status" id="f_status" class="border rounded-lg p-2 font-normal"><option value="published">published</option><option value="draft">draft</option></select></label>
-<div class="flex gap-2 bg-white pt-2 pb-1"><button class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl p-2.5 font-bold"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="border rounded-xl px-5">Batal</button></div>
+<div class="flex justify-center md:col-span-2"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 
 <script>

@@ -1,9 +1,18 @@
 <?php $uri = Router::uri(); $seoMeta = [];
 try { $seoMeta = Database::conn()->query("SELECT * FROM seo_settings LIMIT 1")->fetch() ?: []; } catch (Throwable) {}
-$metaTitle = $metaTitle ?? Database::setting('meta_title', Database::setting('homepage_title','Sekolah CMS'));
-$metaDesc = $metaDesc ?? Database::setting('meta_description','Website sekolah modern');
-$metaKeys = Database::setting('meta_keywords','sekolah, pendidikan');
+$schoolName = Database::setting('school_name','Sekolah');
+$metaTitle = $metaTitle ?? Database::setting('meta_title', Database::setting('homepage_title',$schoolName.' - Website Resmi Sekolah'));
+$metaDesc = $metaDesc ?? Database::setting('meta_description','Website resmi '.$schoolName.'. Informasi profil, berita, agenda, galeri, prestasi, guru, kurikulum, dan kontak sekolah.');
+$metaKeys = Database::setting('meta_keywords', mb_strtolower($schoolName).', sekolah, pendidikan, profil sekolah, berita sekolah, agenda sekolah, galeri, prestasi, guru, kurikulum, kontak');
 $ogImg = Database::setting('og_image', $seoMeta['og_image'] ?? '');
+if($ogImg===''||$ogImg===null){ $ogImg = Database::setting('logo',''); }
+$canonSet = Database::setting('canonical_url', $seoMeta['canonical_url'] ?? '');
+$canonUrl = $canonSet!=='' ? $canonSet : Helper::url(ltrim($uri,'/'));
+$robotsContent = Database::setting('robots_content','');
+$verifyGoogle = Database::setting('google_verification','');
+$verifyBing = Database::setting('bing_verification','');
+$verifyYandex = Database::setting('yandex_verification','');
+$analyticsId = Database::setting('ga_measurement_id','');
 $siteTheme = Database::setting('site_theme','elegant');
 if (!in_array($siteTheme,['elegant','classic','vibrant','editorial','minimal'],true)) $siteTheme='elegant';
 $themePrimary = Database::setting('theme_primary','#059669');
@@ -17,11 +26,34 @@ if (!in_array($themeRadius,['soft','square','round'],true)) $themeRadius='soft';
 <title><?= Helper::e($metaTitle) ?></title>
 <meta name="description" content="<?= Helper::e($metaDesc) ?>">
 <meta name="keywords" content="<?= Helper::e($metaKeys) ?>">
-<link rel="canonical" href="<?= Helper::e(Helper::url(ltrim($uri,'/'))) ?>">
+<meta name="author" content="<?= Helper::e($schoolName) ?>">
+<meta name="publisher" content="<?= Helper::e($schoolName) ?>">
+<meta name="robots" content="<?= Helper::e($robotsContent!==''?$robotsContent:'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1') ?>">
+<meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="bingbot" content="index, follow">
+<meta name="language" content="Indonesian">
+<meta name="revisit-after" content="1 days">
+<meta name="rating" content="general">
+<meta name="distribution" content="global">
+<meta name="theme-color" content="<?= $themePrimary ?>">
+<link rel="canonical" href="<?= Helper::e($canonUrl) ?>">
+<meta property="og:locale" content="id_ID">
+<meta property="og:site_name" content="<?= Helper::e($schoolName) ?>">
 <meta property="og:title" content="<?= Helper::e($metaTitle) ?>">
 <meta property="og:description" content="<?= Helper::e($metaDesc) ?>">
+<meta property="og:url" content="<?= Helper::e($canonUrl) ?>">
 <meta property="og:type" content="website">
-<?php if($ogImg): ?><meta property="og:image" content="<?= Helper::e(str_starts_with($ogImg,'http')?$ogImg:Helper::upload($ogImg)) ?>"><?php endif; ?>
+<?php if($ogImg): ?><meta property="og:image" content="<?= Helper::e(str_starts_with($ogImg,'http')?$ogImg:Helper::upload($ogImg)) ?>"><meta property="og:image:alt" content="<?= Helper::e($metaTitle) ?>"><?php endif; ?>
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<?= Helper::e($metaTitle) ?>">
+<meta name="twitter:description" content="<?= Helper::e($metaDesc) ?>">
+<?php if($ogImg): ?><meta name="twitter:image" content="<?= Helper::e(str_starts_with($ogImg,'http')?$ogImg:Helper::upload($ogImg)) ?>"><?php endif; ?>
+<?php if($verifyGoogle!==''): ?><meta name="google-site-verification" content="<?= Helper::e($verifyGoogle) ?>"><?php endif; ?>
+<?php if($verifyBing!==''): ?><meta name="msvalidate.01" content="<?= Helper::e($verifyBing) ?>"><?php endif; ?>
+<?php if($verifyYandex!==''): ?><meta name="yandex-verification" content="<?= Helper::e($verifyYandex) ?>"><?php endif; ?>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":<?= json_encode($schoolName,JSON_UNESCAPED_UNICODE) ?>,"url":<?= json_encode(Helper::url(),JSON_UNESCAPED_UNICODE) ?>,"inLanguage":"id-ID","publisher":{"@type":"Organization","name":<?= json_encode($schoolName,JSON_UNESCAPED_UNICODE) ?>,"url":<?= json_encode(Helper::url(),JSON_UNESCAPED_UNICODE) ?>}}</script>
+<?php if(!empty($schemaNews)): ?><script type="application/ld+json"><?= json_encode($schemaNews,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?></script><?php endif; ?>
+<?php if($analyticsId!==''): ?><script async src="https://www.googletagmanager.com/gtag/js?id=<?= Helper::e($analyticsId) ?>"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','<?= Helper::e($analyticsId) ?>')</script><?php endif; ?>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23059669'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'%3ES%3C/text%3E%3C/svg%3E">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['"Plus Jakarta Sans"','system-ui','sans-serif']}}}}</script>

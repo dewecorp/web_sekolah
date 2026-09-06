@@ -37,11 +37,13 @@ html,body{height:100%;max-width:100%;overflow-x:clip}
 @supports not (overflow:clip){html,body{overflow-x:hidden}}
 body{min-height:100vh;display:flex;flex-direction:column}
 body>div.flex{flex:1 0 auto;max-width:100%;min-width:0}
-main{flex:1 0 auto;display:flex;flex-direction:column;min-width:0;max-width:100%;overflow-x:clip}
+main{flex:1 0 auto;display:flex;flex-direction:column;min-width:0}
 main>*{min-width:0;max-width:100%}
 main input,main select,main textarea{max-width:100%;min-width:0}
 .ck-editor,.ck-editor__editable,.ck-content{max-width:100%!important;min-width:0;overflow-wrap:anywhere}
-main .grid>*,main .flex>*{min-width:0;max-width:100%}
+main .grid>*,main .flex>*{min-width:0}
+[id$="Modal"] .relative.w-full{max-width:min(560px,calc(100vw - 2rem))!important}
+[id="pageModal"] .relative.w-full,[id="postModal"] .relative.w-full{max-width:min(720px,calc(100vw - 2rem))!important}
 main>footer{margin-top:auto;flex-shrink:0}
 :root{--adminbar:57px}
 #adminTopbar{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:50!important;background-color:#047857!important;color:#fff!important}

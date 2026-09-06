@@ -41,7 +41,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <h2 class="font-bold"><i class="fa fa-flag text-emerald-600 mr-1"></i>Tujuan</h2>
 <label class="grid gap-1">Isi tujuan<textarea name="s[goals_content]" id="goalsContent" rows="8"><?= Helper::e($sets['goals_content']??'') ?></textarea><span class="editorWarn hidden text-xs font-normal text-red-600">Editor gagal dimuat (CDN diblokir). Textarea biasa tetap bisa disimpan.</span></label>
 </div>
-<button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl py-3 font-bold"><i class="fa fa-floppy-disk mr-1"></i>Simpan Visi, Misi & Tujuan</button>
+<div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2.5 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button></div>
 </form>
 <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mt-3 text-sm"><b><i class="fa fa-list-ul text-amber-600 mr-1"></i>Menampilkan di menu public:</b> buka <a href="<?= Helper::url('admin/menus') ?>" class="text-emerald-700 font-bold">Menu Manager → Tautan Khusus</a> tambah URL <code class="font-mono bg-white px-1 rounded">/visi-misi</code>.</div>
 <script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-build-classic@41.4.2/build/ckeditor.js"></script>

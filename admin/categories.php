@@ -55,7 +55,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <label class="grid gap-1 font-semibold">Slug <span class="font-normal text-slate-400 text-xs">otomatis dari nama</span><input name="slug" id="f_slug" placeholder="berita" class="border rounded-lg p-2 font-normal font-mono text-xs"></label>
 <label class="grid gap-1 font-semibold">Deskripsi<textarea name="description" id="f_desc" rows="3" placeholder="Keterangan kategori..." class="border rounded-lg p-2 font-normal"></textarea></label>
 <label class="grid gap-1 font-semibold">Gaya grid berita<select name="grid_style" id="f_grid" class="border rounded-lg p-2 font-normal"><?php foreach(['cards-2'=>'Kartu 2 Kolom','cards-3'=>'Kartu 3 Kolom','cards-4'=>'Kartu 4 Kolom','magazine'=>'Magazine','masonry'=>'Masonry','horizontal'=>'Horizontal','timeline'=>'Timeline','overlay'=>'Overlay','minimal'=>'Minimal'] as $k=>$v): ?><option value="<?= $k ?>"><?= $v ?></option><?php endforeach; ?></select></label>
-<div class="flex gap-2 bg-white pt-2 pb-1"><button class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl p-2.5 font-bold"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="border rounded-xl px-5">Batal</button></div>
+<div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 
 <script>

@@ -19,6 +19,7 @@ if ($uri === '/agenda') { require ROOT.'/pages/agenda.php'; exit; }
 if ($uri === '/pengumuman') { require ROOT.'/pages/announcements.php'; exit; }
 if ($uri === '/kontak') { require ROOT.'/pages/contact.php'; exit; }
 if ($uri === '/sitemap.xml') { require ROOT.'/pages/sitemap.php'; exit; }
+if ($uri === '/robots.txt') { require ROOT.'/robots.php'; exit; }
 // dynamic page by slug
 $slug = trim($uri, '/');
 $st = $db->prepare("SELECT * FROM pages WHERE slug=? AND status='published' AND deleted_at IS NULL LIMIT 1");

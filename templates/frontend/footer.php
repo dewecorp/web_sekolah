@@ -1,5 +1,5 @@
 </main>
-<?php $ft = Database::setting('footer_text','SMK Nusantara'); $pw = Database::setting('powered_by','Powered by SchoolCMS');
+<?php $ft = Database::setting('footer_text',Database::setting('school_name',''));
 try { $fm = Database::conn()->query("SELECT * FROM menus WHERE location='footer' LIMIT 1")->fetch(); $fitems = [];
 if ($fm) { $fs = Database::conn()->prepare("SELECT * FROM menu_items WHERE menu_id=? AND is_active=1 ORDER BY sort_order"); $fs->execute([$fm['id']]); $fitems = $fs->fetchAll(); } } catch (Throwable) { $fitems = []; }
 if (!$fitems) $fitems = [['label'=>'Profil','url'=>'/profil'],['label'=>'Berita','url'=>'/berita'],['label'=>'Galeri','url'=>'/galeri'],['label'=>'Kontak','url'=>'/kontak']]; ?>
@@ -13,7 +13,7 @@ if (!$fitems) $fitems = [['label'=>'Profil','url'=>'/profil'],['label'=>'Berita'
 <div><h4 class="font-bold text-white mb-3">Ikuti Kami</h4><div class="flex gap-2"><?php foreach(['facebook'=>'fa-facebook-f','instagram'=>'fa-instagram','youtube'=>'fa-youtube','tiktok'=>'fa-tiktok'] as $social=>$icon): $socialUrl=Database::setting($social,''); if(!$socialUrl)continue; ?><a href="<?= Helper::e($socialUrl) ?>" target="_blank" rel="noopener noreferrer" aria-label="<?= ucfirst($social) ?>" class="w-10 h-10 rounded-xl bg-white/10 grid place-items-center hover:bg-emerald-600 hover:text-white hover:-translate-y-1"><i class="fab <?= $icon ?>"></i></a><?php endforeach; ?></div></div>
 </div>
 <div class="border-t border-white/10"><div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between text-xs gap-2">
-<span>&copy; <?= date('Y') ?> <?= Helper::e($ft) ?>. <?= Helper::e($pw) ?>.</span>
+<span>&copy; <?= date('Y') ?> <?= Helper::e($ft) ?>.</span>
 <a href="<?= Helper::url('admin/login') ?>" target="_blank" rel="noopener noreferrer" class="hover:text-white">Login Admin</a>
 </div></div>
 </footer>

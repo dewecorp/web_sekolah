@@ -38,7 +38,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <label class="grid gap-1 font-semibold">Judul<input name="title" id="f_title" required placeholder="AKADEMIK" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Kaitkan ke Menu<select name="menu_item_id" id="f_menu" class="border rounded-lg p-2 font-normal"><option value="">-- Kaitkan ke menu --</option><?php foreach($items as $i): ?><option value="<?= $i['id'] ?>"><?= Helper::e($i['label']) ?></option><?php endforeach; ?></select></label>
 <?php for($k=0;$k<3;$k++): ?><div class="border rounded-lg p-2"><input name="col_title[]" id="f_ct<?= $k ?>" placeholder="Judul kolom <?= $k+1 ?>" class="border rounded p-1.5 w-full mb-1"><textarea name="col_links[]" id="f_cl<?= $k ?>" rows="3" placeholder="Kurikulum|/kurikulum" class="border rounded p-1.5 w-full font-mono text-xs"></textarea></div><?php endfor; ?>
-<div class="flex gap-2"><button class="flex-1 bg-emerald-600 text-white rounded-xl p-2.5 font-bold">Simpan</button><button type="button" data-close class="border rounded-xl px-5">Batal</button></div>
+<div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 <script>
 const modal=document.getElementById('megaModal');

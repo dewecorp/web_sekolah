@@ -61,6 +61,15 @@ document.querySelectorAll('[data-count]').forEach(el=>{
 });
 document.querySelectorAll('[data-confirm]').forEach(f=>{f.addEventListener('submit',e=>{e.preventDefault();Swal.fire({title:'Apakah Anda yakin?',text:'Data yang dihapus tidak dapat dikembalikan.',icon:'warning',showCancelButton:true,confirmButtonText:'Ya, Hapus',cancelButtonText:'Batal'}).then(r=>{if(r.isConfirmed)f.submit()})})});
 document.querySelectorAll('[data-lightbox]').forEach(img=>{img.addEventListener('click',()=>{Swal.fire({imageUrl:img.src,imageAlt:img.alt||'',showConfirmButton:false,showCloseButton:true,width:800})})});
+document.querySelectorAll('[id^="cd-"]').forEach(el=>{
+  const target=(el.dataset.target||'').trim();if(!target)return;
+  const end=new Date(target).getTime();if(isNaN(end))return;
+  const pad=n=>String(n).padStart(2,'0');
+  const box=(v,l)=>'<div class="text-center"><div class="text-3xl font-extrabold bg-white/20 px-4 py-2 rounded-xl tabular-nums">'+v+'</div><div class="text-xs text-white/75 mt-1">'+l+'</div></div>';
+  const tick=()=>{let t=end-Date.now();if(t<0)t=0;const d=Math.floor(t/864e5),h=Math.floor(t/36e5)%24,m=Math.floor(t/6e4)%60,s=Math.floor(t/1e3)%60;el.innerHTML=box(d,'Hari')+box(pad(h),'Jam')+box(pad(m),'Menit')+box(pad(s),'Detik')};
+  tick();setInterval(tick,1000);
+});
+document.querySelectorAll('[data-vid-play]').forEach(b=>b.addEventListener('click',()=>{const f=document.getElementById(b.dataset.vidTarget),t=document.getElementById(b.dataset.vidLabel);if(f)f.src=b.dataset.vidPlay+(b.dataset.vidPlay.includes('?')?'&':'?')+'autoplay=1';if(t)t.textContent=b.dataset.vidTitle||'Video';f?.scrollIntoView({behavior:'smooth',block:'center'})}));
 document.querySelectorAll('[data-carousel]').forEach(box=>{
   const slides=[...box.querySelectorAll('[data-slide]')];const dots=[...box.querySelectorAll('[data-dot]')];
   if(slides.length<2)return;let i=0,timer=null;

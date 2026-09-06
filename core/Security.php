@@ -48,4 +48,17 @@ final class Security {
         $ext = strtolower(pathinfo($orig, PATHINFO_EXTENSION));
         return date('Ymd-His') . '-' . bin2hex(random_bytes(6)) . '.' . $ext;
     }
+    // Validasi upload video: MP4/WebM/Ogg + size + block executable
+    public static function validVideo(array $f, array $cfg): ?string {
+        if (($f['error'] ?? 4) !== 0) return 'Upload gagal.';
+        $maxMb = max(5, (int)($cfg['upload_video_max_mb'] ?? 100));
+        if ($f['size'] > $maxMb * 1024 * 1024) return 'File terlalu besar (max ' . $maxMb . 'MB).';
+        $ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
+        if (in_array($ext, $cfg['blocked_ext'] ?? [], true)) return 'Tipe file dilarang.';
+        if (!in_array($ext, ['mp4','webm','ogg','ogv','mov'], true)) return 'Format video harus MP4/WebM/OGG.';
+        $fi = new finfo(FILEINFO_MIME_TYPE);
+        $mime = (string)$fi->file($f['tmp_name']);
+        if (!preg_match('~^(video/|application/octet-stream)~', $mime)) return 'MIME tidak valid (' . $mime . ').';
+        return null;
+    }
 }

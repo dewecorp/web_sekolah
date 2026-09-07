@@ -84,13 +84,26 @@ window.RichEditorCreate=function(el,options){
     toolbar:['undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor removeformat','alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image imageleft imagecenter imageright media table | blockquote hr charmap emoticons codesample | searchreplace visualblocks code preview fullscreen help'],
     branding:false,promotion:false,convert_urls:false,automatic_uploads:true,file_picker_types:'image',
     image_advtab:true,
-    content_style:'body{font-family:"Plus Jakarta Sans",sans-serif;font-size:14px;line-height:1.65;padding:12px 16px}ul,ol{padding-left:2rem;margin:.75rem 0;list-style-position:outside}ul{list-style-type:disc}ol{list-style-type:decimal}img{max-width:100%;height:auto}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px}',
+    content_style:'body{font-family:"Plus Jakarta Sans",sans-serif;font-size:14px;line-height:1.65;padding:12px 16px}ul,ol{padding-left:2rem;margin:.75rem 0;list-style-position:outside}ul{list-style-type:disc}ol{list-style-type:decimal}img{max-width:100%;height:auto}figure.image{display:table;margin:1rem 0;clear:both}figure.image.align-center{margin-left:auto;margin-right:auto}figure.image.align-left{margin-left:0;margin-right:auto}figure.image.align-right{margin-left:auto;margin-right:0}figure.image img{display:block;max-width:100%;height:auto}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px}',
     setup:function(editor){
-      const alignImage=position=>{const img=editor.selection.getNode();if(!img||img.nodeName!=='IMG')return;const margins=position==='center'?['auto','auto']:position==='right'?['auto','0']:['0','auto'];editor.dom.setStyles(img,{display:'block',float:'none','margin-left':margins[0],'margin-right':margins[1]});editor.nodeChanged()};
+      const alignImage=position=>{
+        let node=editor.selection.getNode();
+        if(!node||node===editor.getBody())return;
+        let figure=node.nodeName==='FIGURE'?node:editor.dom.getParent(node,'FIGURE');
+        let img=node.nodeName==='IMG'?node:(figure?figure.querySelector('img'):editor.dom.getParent(node,'IMG'));
+        if(!figure&&!img)return;
+        const target=figure||img;
+        ['align-left','align-center','align-right'].forEach(c=>editor.dom.removeClass(target,c));
+        editor.dom.addClass(target,position==='center'?'align-center':position==='right'?'align-right':'align-left');
+        const margins=position==='center'?['auto','auto']:position==='right'?['auto','0']:['0','auto'];
+        editor.dom.setStyles(target,{display:figure?'table':'block',float:'none','margin-left':margins[0],'margin-right':margins[1]});
+        if(img&&figure)editor.dom.setStyles(img,{display:'block',float:'none','max-width':'100%',height:'auto'});
+        editor.nodeChanged();
+      };
       editor.ui.registry.addButton('imageleft',{icon:'align-left',tooltip:'Gambar rata kiri',onAction:()=>alignImage('left')});
       editor.ui.registry.addButton('imagecenter',{icon:'align-center',tooltip:'Gambar rata tengah',onAction:()=>alignImage('center')});
       editor.ui.registry.addButton('imageright',{icon:'align-right',tooltip:'Gambar rata kanan',onAction:()=>alignImage('right')});
-      editor.ui.registry.addContextToolbar('imagealignment',{predicate:node=>node&&node.nodeName==='IMG',items:'imageleft imagecenter imageright | imageoptions',position:'node',scope:'node'});
+      editor.ui.registry.addContextToolbar('imagealignment',{predicate:node=>node&&(node.nodeName==='IMG'||node.nodeName==='FIGURE'),items:'imageleft imagecenter imageright | imageoptions',position:'node',scope:'node'});
     },
     images_upload_handler:function(blobInfo){return new Promise((resolve,reject)=>{const fd=new FormData();fd.append('csrf',csrf);fd.append('act','ckeditor');fd.append('upload',blobInfo.blob(),blobInfo.filename());fetch(uploadUrl,{method:'POST',body:fd}).then(r=>r.json()).then(j=>{if(j&&j.uploaded&&j.url)resolve(j.url);else reject(j&&(j.msg||j.message)||'Upload gagal')}).catch(()=>reject('Upload gagal'))})}
   },options||{})).then(editors=>{const editor=editors[0];editor.setData=value=>editor.setContent(value||'');editor.getData=()=>editor.getContent();editor.sourceElement=el;return editor});

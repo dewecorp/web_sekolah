@@ -20,7 +20,7 @@ function renderFw($fw,$db){
     $schoolLogo=Helper::upload(Database::setting('logo',''));
     echo '<span class="inline-flex w-11 h-11 rounded-xl bg-emerald-600 text-white items-center justify-center font-extrabold mb-3">';
     if(Database::setting('logo','')){echo '<img src="'.$schoolLogo.'" alt="" class="w-full h-full object-contain p-1">';}else{echo Helper::e(mb_substr($school,0,1));}
-    echo '</span><h4 class="font-bold text-white mb-2">'.Helper::e($school).'</h4><p>'.Helper::e($school).' - '.Helper::e($tagline).'</p><p class="mt-2 text-slate-400">'.Helper::e($addr).'</p>';
+    echo '</span><h4 class="font-bold text-white mb-2">'.Helper::e($school).'</h4><p>'.Helper::e($tagline).'</p><p class="mt-2 text-slate-400">'.Helper::e($addr).'</p>';
     return;
   }
   if($t==='image'&&$fwc!==''){ $fwi=(preg_match('~^(?:https?:)?//~i',$fwc)||str_starts_with($fwc,'/'))?$fwc:Helper::upload($fwc); echo '<img src="'.Helper::e($fwi).'" alt="'.Helper::e($fw['title']??'').'" class="max-w-full max-h-36 rounded-xl object-contain">'; return; }

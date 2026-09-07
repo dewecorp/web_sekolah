@@ -106,3 +106,5 @@ document.getElementById('f_teacher').addEventListener('change',e=>{const o=e.tar
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
 
+
+

@@ -45,3 +45,5 @@ if ($seg === 'academic') { header('Location: ' . Helper::url('admin/structure'))
 if (!in_array($seg, $allow, true)) { http_response_code(403); require ROOT.'/templates/error/403.php'; exit; }
 require ROOT.'/admin/'.$seg.'.php';
 
+
+

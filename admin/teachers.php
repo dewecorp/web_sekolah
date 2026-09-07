@@ -211,3 +211,5 @@ document.getElementById('f_photo').addEventListener('change',e=>{const f=e.targe
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
 
+
+

@@ -46,7 +46,23 @@ document.querySelectorAll('[data-confirm]')?.forEach(f=>{f.addEventListener('sub
 document.querySelectorAll('[data-confirm-logout]')?.forEach(f=>{f.addEventListener('submit',e=>{e.preventDefault();Swal.fire({title:'Logout?',text:'Keluar dari dashboard?',icon:'question',showCancelButton:true,confirmButtonText:'Ya, Logout',cancelButtonText:'Batal'}).then(r=>{if(r.isConfirmed)f.submit()})})});
 document.querySelectorAll('form[data-loading]')?.forEach(f=>{f.addEventListener('submit',()=>{const b=f.querySelector('[type=submit]');if(b){b.disabled=true;b.dataset.t=b.innerHTML;b.innerHTML='Menyimpan...'}})});
 (function(){const el=document.querySelector('[data-clock-admin]');if(!el)return;const pad=n=>String(n).padStart(2,'0');const tick=()=>{const n=new Date();el.textContent=n.toLocaleDateString('id-ID',{weekday:'long',day:'2-digit',month:'short',year:'numeric'})+' • '+pad(n.getHours())+':'+pad(n.getMinutes())+':'+pad(n.getSeconds())};tick();setInterval(tick,1000)})();
-window.CKUploadAdapter=(function(){
+window.CKEditorConfig=(function(){
+  const up=window.CKUploadAdapter;
+  return {
+    toolbar:{items:['heading','|','bold','italic','underline','strikethrough','subscript','superscript','removeFormat','|','fontSize','fontFamily','fontColor','fontBackgroundColor','highlight','|','alignment','bulletedList','numberedList','todoList','outdent','indent','|','link','blockQuote','insertTable','tableColumn','tableRow','mergeTableCells','tableCellProperties','tableProperties','toggleTableCaption','imageUpload','imageInsert','mediaEmbed','code','codeBlock','htmlEmbed','horizontalLine','pageBreak','specialCharacters','|','undo','redo','findAndReplace','selectAll','|','sourceEditing','showBlocks']},
+    heading:{options:[{model:'paragraph',title:'Paragraph',class:'ck-heading_paragraph'},{model:'heading1',view:'h1',title:'Heading 1',class:'ck-heading_heading1'},{model:'heading2',view:'h2',title:'Heading 2',class:'ck-heading_heading2'},{model:'heading3',view:'h3',title:'Heading 3',class:'ck-heading_heading3'},{model:'heading4',view:'h4',title:'Heading 4',class:'ck-heading_heading4'}]},
+    fontSize:{options:[9,11,12,14,16,18,20,22,24,28,32,36]},
+    image:{toolbar:['imageTextAlternative','toggleImageCaption','imageStyle:inline','imageStyle:block','imageStyle:side','linkImage'],resizeOptions:[{name:'resizeImage:original',value:null},{name:'resizeImage:50',value:'50'},{name:'resizeImage:75',value:'75'}]},
+    table:{contentToolbar:['tableColumn','tableRow','mergeTableCells','tableCellProperties','tableProperties','toggleTableCaption']},
+    htmlSupport:{allow:[{name:/.*/ ,attributes:true,classes:true,styles:true}]},
+    extraPlugins:up?[up]:[]
+  };
+})();
+window.CKCreate=function(el){
+  if(!window.ClassicEditor&&!window.CKEDITOR)return Promise.reject(new Error('no editor'));
+  if(window.ClassicEditor&&window.ClassicEditor.create)return window.ClassicEditor.create(el,window.CKEditorConfig);
+  return window.CKEDITOR.ClassicEditor.create(el,window.CKEditorConfig);
+};
   function UploadAdapter(loader,url,csrf){this.loader=loader;this.url=url;this.csrf=csrf}
   UploadAdapter.prototype.upload=function(){
     return this.loader.file.then(file=>new Promise((resolve,reject)=>{

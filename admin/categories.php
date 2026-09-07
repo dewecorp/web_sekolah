@@ -84,3 +84,5 @@ document.getElementById('f_slug').addEventListener('input',e=>e.target.dataset.t
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
 
+
+

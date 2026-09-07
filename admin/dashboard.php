@@ -110,3 +110,5 @@ options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bo
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
 
+
+

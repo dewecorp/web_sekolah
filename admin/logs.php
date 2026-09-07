@@ -145,3 +145,5 @@ document.querySelectorAll('[data-confirm-del]')?.forEach(a=>{a.addEventListener(
 </script>
 <?php require ROOT . '/templates/admin/footer.php'; ?>
 
+
+

@@ -128,7 +128,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 </div>
 </div></div></div></div>
 
-<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/super-build/ckeditor.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-build-classic@41.4.2/build/ckeditor.js"></script>
 <script>
 const modal=document.getElementById('postModal');
 const slugify=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
@@ -259,6 +259,7 @@ mup.addEventListener('click',()=>{
 </script>
 <style>.ck-editor__editable{min-height:280px}.ck-content h1{font-size:1.6rem;font-weight:800}.ck-content h2{font-size:1.35rem;font-weight:800}.ck-content h3{font-size:1.15rem;font-weight:700}.ck-content table{width:100%}.ck-balloon-panel,.ck-dropdown__panel{z-index:9999!important}#postModal{z-index:50}</style>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+
 
 
 

@@ -45,7 +45,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <label class="grid gap-1">Jam Tutup<input type="time" name="s[service_close]" value="<?= Helper::e($sets['service_close']??'15:30') ?>" class="border rounded-lg p-2"></label></div></div>
 </div>
 <div class="lg:col-span-2 flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-10 py-2.5 font-bold w-full sm:w-auto sm:min-w-[220px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan Identitas</button></div></form>
-<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/super-build/ckeditor.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-build-classic@41.4.2/build/ckeditor.js"></script>
 <script>
 let greetEditor=null;
 (function(){
@@ -58,6 +58,7 @@ document.getElementById('identityForm').addEventListener('submit',()=>{ if(greet
 </script>
 <style>.ck-editor__editable{min-height:220px}</style>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+
 
 
 

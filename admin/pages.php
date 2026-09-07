@@ -68,7 +68,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 
-<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/super-build/ckeditor.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-build-classic@41.4.2/build/ckeditor.js"></script>
 <script>
 (function(){const ca=document.getElementById('checkAll'),rows=()=>document.querySelectorAll('.rowcheck'),sc=document.getElementById('selCount'),bb=document.getElementById('btnBulk'),bf=document.getElementById('bulkForm');if(!ca||!bb||!bf)return;const up=()=>{const n=document.querySelectorAll('.rowcheck:checked').length;sc.textContent=n+' dipilih'};ca.addEventListener('change',()=>{rows().forEach(c=>c.checked=ca.checked);up()});document.addEventListener('change',e=>{if(e.target.classList&&e.target.classList.contains('rowcheck'))up()});bb.addEventListener('click',()=>{const n=document.querySelectorAll('.rowcheck:checked').length;if(!n){Swal.fire('Pilih dulu','Centang minimal 1 data.','warning');return}Swal.fire({title:'Hapus '+n+' data?',text:'Tidak dapat dikembalikan.',icon:'warning',showCancelButton:true,confirmButtonText:'Ya Hapus',cancelButtonText:'Batal',confirmButtonColor:'#dc2626'}).then(r=>{if(r.isConfirmed)bf.submit()})});})();
 </script>
@@ -115,6 +115,7 @@ document.getElementById('pageForm').addEventListener('submit',()=>{ if(pageEdito
 </script>
 <style>.ck-editor__editable{min-height:280px}.ck-content h1{font-size:1.6rem;font-weight:800}.ck-content h2{font-size:1.35rem;font-weight:800}.ck-content h3{font-size:1.15rem;font-weight:700}.ck-content table{width:100%}.ck-balloon-panel,.ck-dropdown__panel{z-index:9999!important}#pageModal{z-index:50}</style>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+
 
 
 

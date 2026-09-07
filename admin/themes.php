@@ -12,3 +12,4 @@ $sets=[];foreach($db->query('SELECT `key`,`value` FROM settings') as $r)$sets[$r
 
 
 
+

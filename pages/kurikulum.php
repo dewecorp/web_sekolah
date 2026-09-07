@@ -11,7 +11,7 @@ $plain=trim(preg_replace('/\s+/', ' ', strip_tags($content)));
 $words=$plain!==''?str_word_count($plain):0; $mins=max(1,(int)ceil($words/200));
 $liCount=substr_count(strtolower($content),'<li');
 ?>
-<div class="w-full px-4 md:px-8 py-10">
+<div class="w-full max-w-full px-4 md:px-8 py-10">
 <?php
 $heroBadge='<i class="fa fa-book-open text-amber-300"></i>Kurikulum Sekolah';
 $heroTitle=$title;
@@ -26,7 +26,7 @@ require ROOT.'/templates/frontend/page-hero.php'; ?>
 <aside class="grid gap-4 content-start">
 <div class="rounded-2xl border dark:border-slate-700 bg-white dark:bg-slate-800 p-5 reveal">
 <h2 class="font-extrabold text-sm"><i class="fa fa-layer-group text-emerald-600 mr-1"></i>Komponen utama</h2>
-<?php if($comps): ?><ul class="text-xs text-slate-500 mt-2 grid gap-1.5 leading-relaxed"><?php foreach($comps as $i=>$cp): $parts=preg_split('/\s*[—–]\s*/u', $cp, 2); if(count($parts)<2)$parts=[$cp,'']; ?><li><b><?= $i+1 ?>. <?= Helper::e(trim($parts[0])) ?></b><?php if(trim($parts[1])!==''): ?> — <?= Helper::e(trim($parts[1])) ?><?php endif; ?></li><?php endforeach; ?></ul><?php else: ?><p class="text-xs text-slate-400 mt-2">Belum diisi. Kelola via Sekolah &gt; Kurikulum.</p><?php endif; ?>
+<?php if($comps): ?><ul class="text-xs text-slate-500 mt-2 grid gap-1.5 leading-relaxed"><?php foreach($comps as $i=>$cp): $parts=preg_split('/^(.+?)\s+[—–-]\s+(.+)$/u', trim($cp), -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY); if(count($parts)>=2){$t0=trim($parts[0]);$t1=trim($parts[1]);}else{$t0=trim($cp);$t1='';} ?><li><b><?= $i+1 ?>. <?= Helper::e($t0) ?></b><?php if($t1!==''): ?> — <?= Helper::e($t1) ?><?php endif; ?></li><?php endforeach; ?></ul><?php else: ?><p class="text-xs text-slate-400 mt-2">Belum diisi. Kelola via Sekolah &gt; Kurikulum.</p><?php endif; ?>
 <a href="<?= Helper::url('ekstrakurikuler') ?>" class="text-emerald-600 text-xs font-bold mt-3 inline-block">Lihat ekstrakurikuler &rarr;</a>
 </div>
 </aside>

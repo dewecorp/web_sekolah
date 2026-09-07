@@ -12,7 +12,7 @@ html,body,input,select,textarea,button{font-family:var(--font-body)!important}
 h1,h2,h3{font-family:var(--font-body)!important;letter-spacing:-.02em}
 .font-mono,code,kbd,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace!important}
 .swal2-popup{font-family:var(--font-body)!important}
-.ck.ck-editor,.ck-content{font-family:var(--font-body)!important}
+.tox-tinymce,.tox .tox-edit-area__iframe{font-family:var(--font-body)!important}
 #sideNav{scrollbar-width:thin;scrollbar-color:#10b981 #f1f5f9;overscroll-behavior:contain}
 #sideNav::-webkit-scrollbar{width:6px}
 #sideNav::-webkit-scrollbar-track{background:#f1f5f9}
@@ -31,7 +31,7 @@ select{appearance:none!important;-webkit-appearance:none!important;background-im
 .cselect-opt{display:flex;align-items:center;width:100%;text-align:left;padding:.5rem .7rem;border-radius:.6rem;font-size:.875rem;background:transparent;border:0}
 .cselect-opt:hover{background:#ecfdf5}
 main label.grid{gap:.3rem!important}
-main label.grid input,main label.grid select,main label.grid textarea,main label.grid .ck-editor{margin-top:0!important}
+main label.grid input,main label.grid select,main label.grid textarea,main label.grid .tox-tinymce{margin-top:0!important}
 form.grid{gap:.6rem!important;align-content:start;align-items:start}
 form.grid>div{min-height:0;height:auto;align-content:start}
 main table{min-width:0}
@@ -43,7 +43,25 @@ body>div.flex{flex:1 0 auto;max-width:100%;min-width:0}
 main{flex:1 0 auto;display:flex;flex-direction:column;min-width:0}
 main>*{min-width:0;max-width:100%}
 main input,main select,main textarea{max-width:100%;min-width:0}
-.ck-editor,.ck-editor__editable,.ck-content{max-width:100%!important;min-width:0;overflow-wrap:anywhere}
+.tox-tinymce{width:100%!important;max-width:100%!important;min-width:0;border-radius:.65rem!important}
+.tox-tinymce-aux{z-index:10000!important}
+.tox .tox-menubar{padding:2px 6px!important;font-size:11px!important}
+.tox .tox-toolbar__group{padding:2px!important;gap:1px!important}
+.tox .tox-toolbar__primary{padding:2px 3px!important}
+.tox .tox-tbtn{width:34px!important;height:32px!important;margin:1px!important;border-radius:5px!important;color:#0f172a!important}
+.tox .tox-tbtn svg,.tox .tox-icon svg{width:20px!important;height:20px!important;color:#0f172a!important;opacity:1!important}
+.tox .tox-tbtn svg path,.tox .tox-icon svg path{fill:currentColor!important;stroke:none!important}
+.tox .tox-tbtn__icon-wrap{width:24px!important;height:24px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;overflow:visible!important}
+.tox .tox-tbtn svg,.tox .tox-icon svg{overflow:visible!important;flex:none!important}
+.tox .tox-tbtn:hover{background:#e2e8f0!important}
+.tox .tox-tbtn:hover,.tox .tox-tbtn:focus{color:#047857!important}
+.tox .tox-tbtn:hover svg,.tox .tox-tbtn:focus svg{color:#047857!important}
+.tox .tox-tbtn--enabled,.tox .tox-tbtn--enabled:hover{background:#d1fae5!important}
+.tox .tox-tbtn--enabled,.tox .tox-tbtn--enabled svg{color:#047857!important}
+.tox .tox-tbtn:disabled,.tox .tox-tbtn:disabled svg{color:#64748b!important;opacity:.85!important}
+.tox .tox-tbtn--select{width:auto!important;min-width:62px!important;padding:0 5px!important;font-size:11px!important}
+.tox .tox-tbtn__select-label{color:#0f172a!important;font-weight:600!important}
+.tox .tox-statusbar{font-size:10px!important;padding:2px 6px!important}
 main .grid>*,main .flex>*{min-width:0}
 [id$="Modal"] .relative.w-full{max-width:min(560px,calc(100vw - 2rem))!important}
 [id="pageModal"] .relative.w-full,[id="postModal"] .relative.w-full{max-width:min(720px,calc(100vw - 2rem))!important}
@@ -55,6 +73,29 @@ body{padding-top:var(--adminbar)!important}
 @media(max-width:767px){#sidebar:not(.open){display:none!important}}
 @media(min-width:768px){body>div.flex{padding-left:15rem}}</style></head>
 <body class="bg-slate-100 text-slate-800 flex flex-col min-h-screen">
+<script>
+window.RichEditorCreate=function(el,options){
+  if(!window.tinymce)return Promise.reject(new Error('Editor tidak tersedia'));
+  const uploadUrl=<?= json_encode(Helper::url('admin/media'),JSON_UNESCAPED_SLASHES) ?>;
+  const csrf=<?= json_encode(Security::csrfToken()) ?>;
+  return window.tinymce.init(Object.assign({
+    target:el,base_url:'https://cdn.jsdelivr.net/npm/tinymce@7.6.1',suffix:'.min',license_key:'gpl',height:460,menubar:'file edit view insert format tools table help',toolbar_mode:'wrap',
+    plugins:'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount codesample directionality emoticons',
+    toolbar:['undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor removeformat','alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image imageleft imagecenter imageright media table | blockquote hr charmap emoticons codesample | searchreplace visualblocks code preview fullscreen help'],
+    branding:false,promotion:false,convert_urls:false,automatic_uploads:true,file_picker_types:'image',
+    image_advtab:true,
+    content_style:'body{font-family:"Plus Jakarta Sans",sans-serif;font-size:14px;line-height:1.65;padding:12px 16px}ul,ol{padding-left:2rem;margin:.75rem 0;list-style-position:outside}ul{list-style-type:disc}ol{list-style-type:decimal}img{max-width:100%;height:auto}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px}',
+    setup:function(editor){
+      const alignImage=position=>{const img=editor.selection.getNode();if(!img||img.nodeName!=='IMG')return;const margins=position==='center'?['auto','auto']:position==='right'?['auto','0']:['0','auto'];editor.dom.setStyles(img,{display:'block',float:'none','margin-left':margins[0],'margin-right':margins[1]});editor.nodeChanged()};
+      editor.ui.registry.addButton('imageleft',{icon:'align-left',tooltip:'Gambar rata kiri',onAction:()=>alignImage('left')});
+      editor.ui.registry.addButton('imagecenter',{icon:'align-center',tooltip:'Gambar rata tengah',onAction:()=>alignImage('center')});
+      editor.ui.registry.addButton('imageright',{icon:'align-right',tooltip:'Gambar rata kanan',onAction:()=>alignImage('right')});
+      editor.ui.registry.addContextToolbar('imagealignment',{predicate:node=>node&&node.nodeName==='IMG',items:'imageleft imagecenter imageright | imageoptions',position:'node',scope:'node'});
+    },
+    images_upload_handler:function(blobInfo){return new Promise((resolve,reject)=>{const fd=new FormData();fd.append('csrf',csrf);fd.append('act','ckeditor');fd.append('upload',blobInfo.blob(),blobInfo.filename());fetch(uploadUrl,{method:'POST',body:fd}).then(r=>r.json()).then(j=>{if(j&&j.uploaded&&j.url)resolve(j.url);else reject(j&&(j.msg||j.message)||'Upload gagal')}).catch(()=>reject('Upload gagal'))})}
+  },options||{})).then(editors=>{const editor=editors[0];editor.setData=value=>editor.setContent(value||'');editor.getData=()=>editor.getContent();editor.sourceElement=el;return editor});
+};
+</script>
 <?php require ROOT.'/templates/admin/navbar.php'; ?>
 <div class="flex items-stretch flex-1 w-full">
 <?php require ROOT.'/templates/admin/sidebar.php'; ?>

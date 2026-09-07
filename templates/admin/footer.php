@@ -46,40 +46,6 @@ document.querySelectorAll('[data-confirm]')?.forEach(f=>{f.addEventListener('sub
 document.querySelectorAll('[data-confirm-logout]')?.forEach(f=>{f.addEventListener('submit',e=>{e.preventDefault();Swal.fire({title:'Logout?',text:'Keluar dari dashboard?',icon:'question',showCancelButton:true,confirmButtonText:'Ya, Logout',cancelButtonText:'Batal'}).then(r=>{if(r.isConfirmed)f.submit()})})});
 document.querySelectorAll('form[data-loading]')?.forEach(f=>{f.addEventListener('submit',()=>{const b=f.querySelector('[type=submit]');if(b){b.disabled=true;b.dataset.t=b.innerHTML;b.innerHTML='Menyimpan...'}})});
 (function(){const el=document.querySelector('[data-clock-admin]');if(!el)return;const pad=n=>String(n).padStart(2,'0');const tick=()=>{const n=new Date();el.textContent=n.toLocaleDateString('id-ID',{weekday:'long',day:'2-digit',month:'short',year:'numeric'})+' • '+pad(n.getHours())+':'+pad(n.getMinutes())+':'+pad(n.getSeconds())};tick();setInterval(tick,1000)})();
-window.CKUploadAdapter=(function(){
-  function UploadAdapter(loader,url,csrf){this.loader=loader;this.url=url;this.csrf=csrf}
-  UploadAdapter.prototype.upload=function(){
-    return this.loader.file.then(file=>new Promise((resolve,reject)=>{
-      const fd=new FormData();fd.append('csrf',this.csrf);fd.append('act','ckeditor');fd.append('upload',file,file.name);
-      fetch(this.url,{method:'POST',body:fd}).then(r=>r.json()).then(j=>{
-        if(j&&j.uploaded&&j.url)resolve({default:j.url});
-        else reject(j&&(j.msg||j.message||j.error&&j.error.message)||'Upload gagal');
-      }).catch(reject);
-    }));
-  };
-  UploadAdapter.prototype.abort=function(){};
-  return function(editor){
-    const url=document.body.dataset.ckUpload||'',csrf=document.body.dataset.csrf||'';
-    editor.plugins.get('FileRepository').createUploadAdapter=loader=>new UploadAdapter(loader,url,csrf);
-  };
-})();
-window.CKEditorConfig=(function(){
-  const up=window.CKUploadAdapter;
-  return {
-    toolbar:{items:['heading','|','bold','italic','underline','strikethrough','subscript','superscript','removeFormat','|','fontSize','fontFamily','fontColor','fontBackgroundColor','highlight','|','alignment','bulletedList','numberedList','todoList','outdent','indent','|','link','blockQuote','insertTable','imageUpload','mediaEmbed','code','codeBlock','htmlEmbed','horizontalLine','|','undo','redo']},
-    heading:{options:[{model:'paragraph',title:'Paragraph',class:'ck-heading_paragraph'},{model:'heading1',view:'h1',title:'Heading 1',class:'ck-heading_heading1'},{model:'heading2',view:'h2',title:'Heading 2',class:'ck-heading_heading2'},{model:'heading3',view:'h3',title:'Heading 3',class:'ck-heading_heading3'}]},
-    fontSize:{options:[9,11,12,14,16,18,20,22,24,28,32,36]},
-    image:{toolbar:['imageTextAlternative','toggleImageCaption','imageStyle:inline','imageStyle:block','imageStyle:side','linkImage']},
-    table:{contentToolbar:['tableColumn','tableRow','mergeTableCells','tableCellProperties','tableProperties','toggleTableCaption']},
-    extraPlugins:up?[up]:[]
-  };
-})();
-window.CKCreate=function(el){
-  if(!window.ClassicEditor)return Promise.reject(new Error('no editor'));
-  return window.ClassicEditor.create(el,window.CKEditorConfig);
-};
-document.body.dataset.ckUpload=<?= json_encode(Helper::url('admin/media'),JSON_UNESCAPED_SLASHES) ?>;
-document.body.dataset.csrf=<?= json_encode(Security::csrfToken()) ?>;
 const _ok=<?= json_encode((string)(Session::flash('ok') ?? ''), JSON_UNESCAPED_UNICODE) ?>,_warn=<?= json_encode((string)(Session::flash('warn') ?? ''), JSON_UNESCAPED_UNICODE) ?>,_er=<?= json_encode((string)(Session::flash('err') ?? ''), JSON_UNESCAPED_UNICODE) ?>;
 const _toast=(icon,title,color)=>Swal.mixin({toast:true,position:'top-end',showConfirmButton:false,timer:2600,timerProgressBar:true,didOpen:t=>{t.style.borderLeft='5px solid '+color;t.addEventListener('mouseenter',Swal.stopTimer);t.addEventListener('mouseleave',Swal.resumeTimer)}}).fire({icon,title});
 if(_ok)_toast('success',_ok,'#10b981');

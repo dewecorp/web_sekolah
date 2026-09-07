@@ -44,14 +44,14 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2.5 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button></div>
 </form>
 <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mt-3 text-sm"><b><i class="fa fa-list-ul text-amber-600 mr-1"></i>Menampilkan di menu public:</b> buka <a href="<?= Helper::url('admin/menus') ?>" class="text-emerald-700 font-bold">Menu Manager → Tautan Khusus</a> tambah URL <code class="font-mono bg-white px-1 rounded">/visi-misi</code>.</div>
-<script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-build-classic@41.4.2/build/ckeditor.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tinymce@7.6.1/tinymce.min.js"></script>
 <script>
 let vmEditors=[];
 (function(){
-  if(!window.ClassicEditor){ document.querySelectorAll('.editorWarn').forEach(x=>x.classList.remove('hidden')); return; }
+  if(!window.tinymce||!window.RichEditorCreate){ document.querySelectorAll('.editorWarn').forEach(x=>x.classList.remove('hidden')); return; }
   ['visionContent','missionContent','goalsContent'].forEach(id=>{
     const el=document.getElementById(id); if(!el)return;
-    window.CKCreate(el).then(e=>{vmEditors.push(e)}).catch(()=>{ el.closest('label')?.querySelector('.editorWarn')?.classList.remove('hidden') });
+    window.RichEditorCreate(el,{height:400}).then(e=>{vmEditors.push(e)}).catch(()=>{ el.closest('label')?.querySelector('.editorWarn')?.classList.remove('hidden') });
   });
 })();
 document.getElementById('vmForm').addEventListener('submit',()=>{
@@ -59,7 +59,6 @@ document.getElementById('vmForm').addEventListener('submit',()=>{
   vmEditors.forEach(e=>{ try{ const el=e.sourceElement; if(el&&ids.includes(el.id)) el.value=e.getData() }catch(_){} });
 });
 </script>
-<style>.ck-editor__editable{min-height:220px}.ck-content h1{font-size:1.6rem;font-weight:800}.ck-content h2{font-size:1.35rem;font-weight:800}.ck-content h3{font-size:1.15rem;font-weight:700}.ck-content table{width:100%}</style>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
 
 

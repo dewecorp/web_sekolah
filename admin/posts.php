@@ -128,7 +128,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 </div>
 </div></div></div></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-build-classic@41.4.2/build/ckeditor.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tinymce@7.6.1/tinymce.min.js"></script>
 <script>
 const modal=document.getElementById('postModal');
 const slugify=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
@@ -168,11 +168,11 @@ document.getElementById('f_img').addEventListener('change',e=>{const f=e.target.
 function ensureEditor(){
   const warn=document.getElementById('editorWarn');
   if(postEditor)return;
-  if(!window.ClassicEditor){ if(warn)warn.classList.remove('hidden'); return; }
+  if(!window.tinymce||!window.RichEditorCreate){ if(warn)warn.classList.remove('hidden'); return; }
   const el=document.querySelector('#postContent');
   const done=e=>{postEditor=e;if(pendingData){try{e.setData(pendingData)}catch(_){}pendingData=null}};
   const fail=()=>{ const w=document.getElementById('editorWarn'); if(w)w.classList.remove('hidden') };
-  try{ window.CKCreate(el).then(done).catch(fail); }catch(_){ fail(); }}
+  try{ window.RichEditorCreate(el,{height:500}).then(done).catch(fail); }catch(_){ fail(); }}
 document.getElementById('postForm').addEventListener('submit',()=>{ if(postEditor){ try{document.getElementById('postContent').value=postEditor.getData()}catch(_){} } });
 // ---- Pemilih gambar ala WordPress: centang dulu, tombol Masukkan baru isi ----
 const picker=document.getElementById('mediaPicker'),mgrid=document.getElementById('mgrid'),msearch=document.getElementById('msearch'),mup=document.getElementById('mup'),mfile=document.getElementById('mfile'),mInsert=document.getElementById('mInsert'),mSelInfo=document.getElementById('mSelInfo');
@@ -257,7 +257,7 @@ mup.addEventListener('click',()=>{
 <script>
 (function(){const ca=document.getElementById('checkAllPosts'),sc=document.getElementById('selCount'),bb=document.getElementById('btnBulk'),bf=document.getElementById('bulkForm');if(!ca||!bb||!bf)return;const up=()=>{sc.textContent=document.querySelectorAll('.rowcheck:checked').length+' dipilih'};ca.addEventListener('change',()=>{document.querySelectorAll('.rowcheck').forEach(c=>c.checked=ca.checked);up()});document.addEventListener('change',e=>{if(e.target.classList&&e.target.classList.contains('rowcheck'))up()});bb.addEventListener('click',()=>{const n=document.querySelectorAll('.rowcheck:checked').length;if(!n){Swal.fire('Pilih dulu','Centang minimal 1 data.','warning');return}Swal.fire({title:'Hapus '+n+' data?',text:'Tidak dapat dikembalikan.',icon:'warning',showCancelButton:true,confirmButtonText:'Ya Hapus',cancelButtonText:'Batal',confirmButtonColor:'#dc2626'}).then(r=>{if(r.isConfirmed)bf.submit()})});})();
 </script>
-<style>.ck-editor__editable{min-height:280px}.ck-content h1{font-size:1.6rem;font-weight:800}.ck-content h2{font-size:1.35rem;font-weight:800}.ck-content h3{font-size:1.15rem;font-weight:700}.ck-content table{width:100%}.ck-balloon-panel,.ck-dropdown__panel{z-index:9999!important}#postModal{z-index:50}</style>
+<style>#postModal{z-index:50}</style>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
 
 

@@ -24,7 +24,8 @@
 <p class="px-3 mt-3 text-[11px] font-bold uppercase tracking-wide text-emerald-200/70">Tampilan</p>
 <?= $link('admin/menus', 'fa-list-ul', 'Menu') ?>
 <?= $link('admin/megamenu', 'fa-layer-group', 'Mega Menu') ?>
-<?= $link('admin/widgets', 'fa-puzzle-piece', 'Widget & Footer') ?>
+<?= $link('admin/widgets', 'fa-puzzle-piece', 'Widget Sidebar') ?>
+<?= $link('admin/footer', 'fa-shoe-prints', 'Footer') ?>
 <?= $link('admin/sections', 'fa-table-columns', 'Section & Slider') ?>
 <?= $link('admin/themes', 'fa-palette', 'Tema & Warna') ?>
 <?= $link('admin/appearance', 'fa-display', 'Pengaturan Tampilan') ?>

@@ -273,6 +273,7 @@ CREATE TABLE IF NOT EXISTS widgets (
   type VARCHAR(60) NOT NULL,
   title VARCHAR(150) DEFAULT NULL,
   content MEDIUMTEXT DEFAULT NULL,
+  animation VARCHAR(30) NOT NULL DEFAULT 'zoom',
   sort_order INT DEFAULT 0,
   is_active TINYINT(1) DEFAULT 1,
   INDEX idx_area (area, is_active, sort_order)

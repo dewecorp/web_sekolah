@@ -16,7 +16,8 @@
 <?= $link('admin/agenda', 'fa-calendar-days', 'Agenda') ?>
 <p class="px-3 mt-3 text-[11px] font-bold uppercase tracking-wide text-emerald-200/70">Sekolah</p>
 <?= $link('admin/teachers', 'fa-chalkboard-user', 'Guru & Staff') ?>
-<?= $link('admin/extras', 'fa-trophy', 'Ekskul & Prestasi') ?>
+<?= $link('admin/ekskul', 'fa-futbol', 'Ekstrakurikuler') ?>
+<?= $link('admin/prestasi', 'fa-trophy', 'Prestasi') ?>
 <?= $link('admin/structure', 'fa-sitemap', 'Struktur') ?>
 <?= $link('admin/curriculum', 'fa-book-open', 'Kurikulum') ?>
 <?= $link('admin/vision', 'fa-bullseye', 'Visi, Misi & Tujuan') ?>

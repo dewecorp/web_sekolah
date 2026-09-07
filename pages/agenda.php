@@ -1,7 +1,8 @@
 <?php
 $all = $db->query("SELECT * FROM agenda WHERE status='published' ORDER BY event_date ASC LIMIT 100")->fetchAll();
 $today = date('Y-m-d');
-$up = array_values(array_filter($all, fn($x) => ($x['event_date'] ?? '') >= $today));
+$endOf = fn($x) => ($x['end_date']??'')!=='' ? $x['end_date'] : ($x['event_date']??'');
+$up = array_values(array_filter($all, fn($x) => $endOf($x) >= $today));
 $monthFull = [1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',9=>'September',10=>'Oktober',11=>'November',12=>'Desember'];
 $monthShort = [1=>'Jan',2=>'Feb',3=>'Mar',4=>'Apr',5=>'Mei',6=>'Jun',7=>'Jul',8=>'Agu',9=>'Sep',10=>'Okt',11=>'Nov',12=>'Des'];
 $byMonth = [];
@@ -59,12 +60,12 @@ require ROOT . '/templates/frontend/header.php'; ?>
 <div class="mgroup" data-month="<?= Helper::e($mk) ?>">
 <div class="flex items-center gap-3 mt-8 mb-3 reveal"><span class="text-sm font-extrabold bg-slate-900 dark:bg-white dark:text-slate-900 text-white px-3.5 py-1.5 rounded-full"><?= $monthFull[(int)date('n', $ts)] ?> <?= date('Y', $ts) ?></span><span class="text-xs text-slate-400 font-bold"><?= count($list) ?> kegiatan</span><span class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></span></div>
 <div class="grid gap-3">
-<?php foreach ($list as $x): $ed = $x['event_date']; $isUp = $ed >= $today; $dd = (int)floor((strtotime($ed) - strtotime($today)) / 86400); $when = !$isUp ? 'Selesai' : ($dd === 0 ? 'Hari ini' : ($dd === 1 ? 'Besok' : "H-$dd")); ?>
+<?php foreach ($list as $x): $ed = $x['event_date']; $edEnd = ($x['end_date']??'')!==''?$x['end_date']:$ed; $isUp = $edEnd >= $today; $dd = (int)floor((strtotime($ed) - strtotime($today)) / 86400); $ddEnd = (int)floor((strtotime($edEnd) - strtotime($today)) / 86400); $when = !$isUp ? 'Selesai' : ($dd <= 0 && $ddEnd >= 0 ? 'Berlangsung' : ($dd === 1 ? 'Besok' : "H-$dd")); ?>
 <article data-kind="<?= $isUp ? 'up' : 'past' ?>" data-t="<?= Helper::e(strtolower($x['title'] . ' ' . ($x['location'] ?? ''))) ?>" class="aitem group bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-3xl p-4 sm:p-5 flex gap-4 hover:shadow-xl hover:-translate-y-0.5 hover:border-emerald-300 dark:hover:border-emerald-700 transition-all reveal <?= $isUp ? '' : 'opacity-70 saturate-50' ?>">
 <div class="text-center rounded-2xl px-3.5 py-3 h-fit min-w-[68px] <?= $isUp ? 'bg-gradient-to-b from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25' : 'bg-slate-100 dark:bg-slate-700 text-slate-400' ?>"><p class="text-2xl font-extrabold leading-none"><?= date('d', strtotime($ed)) ?></p><p class="text-[11px] font-bold uppercase mt-1"><?= $monthShort[(int)date('n', strtotime($ed))] ?></p></div>
 <div class="min-w-0 flex-1">
 <div class="flex flex-wrap items-center gap-2"><h2 class="font-extrabold text-[15px] group-hover:text-emerald-600 transition-colors"><?= Helper::e($x['title']) ?></h2><span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full <?= !$isUp ? 'bg-slate-200 dark:bg-slate-700 text-slate-500' : ($dd === 0 ? 'bg-red-500 text-white animate-pulse' : 'bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-200') ?>"><?= $when ?></span></div>
-<p class="text-xs text-slate-500 mt-1.5 flex flex-wrap gap-x-4 gap-y-1"><span><i class="fa fa-calendar-day mr-1.5 text-emerald-500"></i><?= Helper::tgl($ed) ?></span><?php if (!empty($x['start_time'])): ?><span><i class="fa fa-clock mr-1.5 text-emerald-500"></i><?= Helper::e($x['start_time']) ?><?php if (!empty($x['end_time'])): ?>–<?= Helper::e($x['end_time']) ?><?php endif; ?></span><?php endif; ?><?php if (!empty($x['location'])): ?><span><i class="fa fa-location-dot mr-1.5 text-emerald-500"></i><?= Helper::e($x['location']) ?></span><?php endif; ?></p>
+<p class="text-xs text-slate-500 mt-1.5 flex flex-wrap gap-x-4 gap-y-1"><span><i class="fa fa-calendar-day mr-1.5 text-emerald-500"></i><?= Helper::tgl($ed) ?><?php if($edEnd!==$ed): ?> – <?= Helper::tgl($edEnd) ?><?php endif; ?></span><?php if (!empty($x['start_time'])): ?><span><i class="fa fa-clock mr-1.5 text-emerald-500"></i><?= Helper::e($x['start_time']) ?><?php if (!empty($x['end_time'])): ?>–<?= Helper::e($x['end_time']) ?><?php endif; ?></span><?php endif; ?><?php if (!empty($x['location'])): ?><span><i class="fa fa-location-dot mr-1.5 text-emerald-500"></i><?= Helper::e($x['location']) ?></span><?php endif; ?></p>
 <?php if (!empty($x['description'])): ?><p class="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed text-justify"><?= nl2br(Helper::e($x['description'])) ?></p><?php endif; ?>
 </div></article>
 <?php endforeach; ?>

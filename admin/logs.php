@@ -144,3 +144,4 @@ require ROOT . '/templates/admin/header.php'; ?>
 document.querySelectorAll('[data-confirm-del]')?.forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();Swal.fire({title:'Hapus backup?',text:'File tidak bisa dikembalikan.',icon:'warning',showCancelButton:true,confirmButtonText:'Ya, Hapus',cancelButtonText:'Batal'}).then(r=>{if(r.isConfirmed)location.href=a.href})})});
 </script>
 <?php require ROOT . '/templates/admin/footer.php'; ?>
+

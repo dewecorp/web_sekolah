@@ -22,7 +22,13 @@
       b.addEventListener('click',()=>{sel.value=o.value; sel.dispatchEvent(new Event('change',{bubbles:true})); paint(); wrap.classList.remove('open'); list.hidden=true});
       list.appendChild(b);
     });
-    btn.addEventListener('click',e=>{e.stopPropagation(); const was=wrap.classList.contains('open'); closeAll(); wrap.classList.toggle('open',!was); list.hidden=was});
+    btn.addEventListener('click',e=>{e.stopPropagation(); const was=wrap.classList.contains('open'); closeAll();
+      if(!was){
+        wrap.classList.add('open'); list.hidden=false;
+        const r=btn.getBoundingClientRect(),h=list.offsetHeight||200;
+        const openUp=r.bottom+h>window.innerHeight-16&&r.top-h>16;
+        list.style.top=openUp?'auto':''; list.style.bottom=openUp?'calc(100% + 6px)':'';
+      }else{wrap.classList.remove('open'); list.hidden=true}});
     document.addEventListener('click',e=>{if(!wrap.contains(e.target)){wrap.classList.remove('open'); list.hidden=true}});
     document.addEventListener('keydown',e=>{if(e.key==='Escape'){wrap.classList.remove('open'); list.hidden=true}});
     wrap.appendChild(btn); wrap.appendChild(list); paint();
@@ -40,6 +46,25 @@ document.querySelectorAll('[data-confirm]')?.forEach(f=>{f.addEventListener('sub
 document.querySelectorAll('[data-confirm-logout]')?.forEach(f=>{f.addEventListener('submit',e=>{e.preventDefault();Swal.fire({title:'Logout?',text:'Keluar dari dashboard?',icon:'question',showCancelButton:true,confirmButtonText:'Ya, Logout',cancelButtonText:'Batal'}).then(r=>{if(r.isConfirmed)f.submit()})})});
 document.querySelectorAll('form[data-loading]')?.forEach(f=>{f.addEventListener('submit',()=>{const b=f.querySelector('[type=submit]');if(b){b.disabled=true;b.dataset.t=b.innerHTML;b.innerHTML='Menyimpan...'}})});
 (function(){const el=document.querySelector('[data-clock-admin]');if(!el)return;const pad=n=>String(n).padStart(2,'0');const tick=()=>{const n=new Date();el.textContent=n.toLocaleDateString('id-ID',{weekday:'long',day:'2-digit',month:'short',year:'numeric'})+' • '+pad(n.getHours())+':'+pad(n.getMinutes())+':'+pad(n.getSeconds())};tick();setInterval(tick,1000)})();
+window.CKUploadAdapter=(function(){
+  function UploadAdapter(loader,url,csrf){this.loader=loader;this.url=url;this.csrf=csrf}
+  UploadAdapter.prototype.upload=function(){
+    return this.loader.file.then(file=>new Promise((resolve,reject)=>{
+      const fd=new FormData();fd.append('csrf',this.csrf);fd.append('act','ckeditor');fd.append('upload',file,file.name);
+      fetch(this.url,{method:'POST',body:fd}).then(r=>r.json()).then(j=>{
+        if(j&&j.uploaded&&j.url)resolve({default:j.url});
+        else reject(j&&(j.msg||j.message||j.error&&j.error.message)||'Upload gagal');
+      }).catch(reject);
+    }));
+  };
+  UploadAdapter.prototype.abort=function(){};
+  return function(editor){
+    const url=document.body.dataset.ckUpload||'',csrf=document.body.dataset.csrf||'';
+    editor.plugins.get('FileRepository').createUploadAdapter=loader=>new UploadAdapter(loader,url,csrf);
+  };
+})();
+document.body.dataset.ckUpload=<?= json_encode(Helper::url('admin/media'),JSON_UNESCAPED_SLASHES) ?>;
+document.body.dataset.csrf=<?= json_encode(Security::csrfToken()) ?>;
 const _ok=<?= json_encode((string)(Session::flash('ok') ?? ''), JSON_UNESCAPED_UNICODE) ?>,_warn=<?= json_encode((string)(Session::flash('warn') ?? ''), JSON_UNESCAPED_UNICODE) ?>,_er=<?= json_encode((string)(Session::flash('err') ?? ''), JSON_UNESCAPED_UNICODE) ?>;
 const _toast=(icon,title,color)=>Swal.mixin({toast:true,position:'top-end',showConfirmButton:false,timer:2600,timerProgressBar:true,didOpen:t=>{t.style.borderLeft='5px solid '+color;t.addEventListener('mouseenter',Swal.stopTimer);t.addEventListener('mouseleave',Swal.resumeTimer)}}).fire({icon,title});
 if(_ok)_toast('success',_ok,'#10b981');

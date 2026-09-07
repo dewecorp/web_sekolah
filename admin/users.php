@@ -38,9 +38,9 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div id="userModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
 <div class="fixed inset-0 bg-slate-900/60" data-close></div>
 <div class="relative min-h-full flex items-start justify-center p-3 sm:p-6">
-<div class="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl my-4 overflow-hidden">
+<div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl my-4">
 <div class="flex items-center gap-2 px-4 py-3 border-b bg-white"><h2 class="font-extrabold text-sm" id="modalTitle"><i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah User</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
-<form method="post" enctype="multipart/form-data" data-loading class="p-4 grid gap-2.5 text-sm bg-white md:grid-cols-2"><?= Security::csrfField() ?>
+<form method="post" enctype="multipart/form-data" data-loading class="p-4 grid gap-2.5 text-sm bg-white"><?= Security::csrfField() ?>
 <input type="hidden" name="id" id="f_id" value="0"><input type="hidden" name="old_avatar" id="f_old" value="">
 <label class="grid gap-1 font-semibold">Nama<input name="name" id="f_name" required placeholder="Nama" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Username<input name="username" id="f_username" required placeholder="Username" class="border rounded-lg p-2 font-normal"></label>
@@ -53,7 +53,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div class="grid gap-1 flex-1 min-w-0"><input type="file" name="avatar" id="f_avatar" accept="image/*" class="border rounded-lg p-1.5 w-full bg-white text-xs">
 <label class="text-xs flex gap-1.5 items-center" id="wrapClear" style="display:none"><input type="checkbox" name="clear_avatar" value="1"> Hapus foto</label></div>
 </div></div>
-<div class="flex justify-center md:col-span-2"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
+<div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 
 <script>
@@ -90,3 +90,4 @@ modal.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',clo
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

@@ -32,9 +32,10 @@ let currEditor=null;
   const warn=document.getElementById('editorWarn');
   if(!el)return;
   if(!window.ClassicEditor){ warn&&warn.classList.remove('hidden'); return; }
-  ClassicEditor.create(el).then(e=>{currEditor=e}).catch(()=>warn&&warn.classList.remove('hidden'));
+  ClassicEditor.create(el,{extraPlugins:[window.CKUploadAdapter]}).then(e=>{currEditor=e}).catch(()=>warn&&warn.classList.remove('hidden'));
 })();
 document.getElementById('currForm').addEventListener('submit',()=>{ if(currEditor){ try{document.getElementById('kurikulumContent').value=currEditor.getData()}catch(_){} } });
 </script>
 <style>.ck-editor__editable{min-height:320px}.ck-content h1{font-size:1.6rem;font-weight:800}.ck-content h2{font-size:1.35rem;font-weight:800}.ck-content h3{font-size:1.15rem;font-weight:700}.ck-content table{width:100%}</style>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

@@ -50,28 +50,22 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div id="pageModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
 <div class="fixed inset-0 bg-slate-900/60" data-close></div>
 <div class="relative min-h-full flex items-start justify-center p-3 sm:p-6">
-<div class="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl my-4 overflow-hidden">
+<div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl my-4">
 <div class="flex items-center gap-2 px-5 py-3.5 border-b bg-white"><h2 class="font-extrabold" id="modalTitle"><i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Halaman</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
 <form method="post" enctype="multipart/form-data" data-loading class="p-5 grid gap-3 text-sm bg-white" id="pageForm"><?= Security::csrfField() ?>
 <input type="hidden" name="id" id="f_id" value="0"><input type="hidden" name="old_img" id="f_old" value="">
-<div class="grid md:grid-cols-2 gap-3">
 <label class="grid gap-1 font-semibold">Judul<input name="title" id="f_title" required placeholder="Tentang Kami" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Slug <span class="font-normal text-slate-400 text-xs">otomatis dari judul</span><input name="slug" id="f_slug" placeholder="tentang-kami" class="border rounded-lg p-2 font-normal font-mono text-xs"></label>
-</div>
 <label class="grid gap-1 font-semibold">Konten<textarea name="content" id="pageContent" rows="8"></textarea><span id="editorWarn" class="hidden text-xs font-normal text-red-600">Editor gagal dimuat (CDN diblokir). Textarea biasa tetap bisa disimpan.</span></label>
-<div class="grid md:grid-cols-2 gap-3">
 <div class="border rounded-xl p-3 bg-slate-50"><p class="text-xs font-bold mb-1.5"><i class="fa fa-image mr-1 text-emerald-600"></i>Featured Image</p>
 <img id="f_prev" alt="" class="hidden h-28 w-full object-cover rounded-lg border mb-1.5">
 <input type="file" name="img" id="f_img" accept="image/*" class="border rounded-lg p-2 w-full bg-white text-xs">
 <label class="text-xs flex gap-1.5 items-center mt-1.5" id="wrapClear" style="display:none"><input type="checkbox" name="clear_img" value="1"> Hapus gambar</label></div>
 <label class="grid gap-1 font-semibold">Status<select name="status" id="f_status" class="border rounded-lg p-2 font-normal"><option value="draft">Draft</option><option value="published">Published</option></select>
 <span class="text-xs font-normal text-slate-400">Published langsung tampil di URL /slug</span></label>
-</div>
-<div class="grid md:grid-cols-2 gap-3">
 <label class="grid gap-1 font-semibold">SEO Title<input name="seo_title" id="f_seot" placeholder="Tentang Kami - Sekolah" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">SEO Description<textarea name="seo_description" id="f_seod" rows="2" placeholder="Ringkasan untuk Google..." class="border rounded-lg p-2 font-normal"></textarea></label>
-</div>
-<div class="flex justify-center md:col-span-2"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
+<div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-build-classic@41.4.2/build/ckeditor.js"></script>
@@ -116,8 +110,9 @@ function ensureEditor(){
   const el=document.querySelector('#pageContent');
   const done=e=>{pageEditor=e;if(pendingData){try{e.setData(pendingData)}catch(_){}pendingData=null}};
   const fail=()=>{ const w=document.getElementById('editorWarn'); if(w)w.classList.remove('hidden') };
-  try{ ClassicEditor.create(el).then(done).catch(fail); }catch(_){ fail(); }}
+  try{ ClassicEditor.create(el,{extraPlugins:[window.CKUploadAdapter]}).then(done).catch(fail); }catch(_){ fail(); }}
 document.getElementById('pageForm').addEventListener('submit',()=>{ if(pageEditor){ try{document.getElementById('pageContent').value=pageEditor.getData()}catch(_){} } });
 </script>
 <style>.ck-editor__editable{min-height:280px}.ck-content h1{font-size:1.6rem;font-weight:800}.ck-content h2{font-size:1.35rem;font-weight:800}.ck-content h3{font-size:1.15rem;font-weight:700}.ck-content table{width:100%}.ck-balloon-panel,.ck-dropdown__panel{z-index:9999!important}#pageModal{z-index:50}</style>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

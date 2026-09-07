@@ -24,7 +24,10 @@ select{appearance:none!important;-webkit-appearance:none!important;background-im
 .cselect{position:relative;min-width:0}
 .cselect-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:.5rem;background:#fff;border:1px solid #e2e8f0;border-radius:.65rem;padding:.5rem .75rem;box-shadow:0 1px 2px rgba(15,23,42,.06),0 4px 12px rgba(15,23,42,.04);font-size:.875rem;text-align:left}
 .cselect.open .cselect-btn,.cselect-btn:focus{outline:none;border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.18),0 4px 14px rgba(16,185,129,.12)}
-.cselect-list{position:absolute;z-index:60;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid #e2e8f0;border-radius:.9rem;box-shadow:0 18px 45px rgba(15,23,42,.16);padding:.35rem;max-height:240px;overflow:auto}
+.cselect-list{position:absolute;z-index:9999;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid #e2e8f0;border-radius:.9rem;box-shadow:0 18px 45px rgba(15,23,42,.16);padding:.35rem;max-height:240px;overflow:auto}
+[id$="Modal"] .relative.w-full.bg-white{overflow:visible!important;border-radius:1rem!important}
+[id$="Modal"] .relative.w-full.bg-white>div:first-child{border-radius:1rem 1rem 0 0!important}
+[id$="Modal"] form{overflow:visible!important;border-radius:0 0 1rem 1rem!important;background:#fff}
 .cselect-opt{display:flex;align-items:center;width:100%;text-align:left;padding:.5rem .7rem;border-radius:.6rem;font-size:.875rem;background:transparent;border:0}
 .cselect-opt:hover{background:#ecfdf5}
 main label.grid{gap:.3rem!important}

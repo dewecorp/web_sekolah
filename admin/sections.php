@@ -77,74 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
   if ($act === 'delete') { $db->prepare("DELETE FROM homepage_sections WHERE id=?")->execute([(int)$_POST['id']]); Auth::log($db,'delete','sections','Hapus section'); Session::flash('ok','Section dihapus.'); }
   elseif ($act === 'toggle') { $db->prepare("UPDATE homepage_sections SET is_active=1-is_active WHERE id=?")->execute([(int)$_POST['id']]); Session::flash('ok','Status diubah.'); }
-  elseif ($act === 'video_save') {
-    $sid = (int)($_POST['section_id'] ?? $edit['id'] ?? 0);
-    if ($sid <= 0) { Session::flash('err', 'Simpan section dulu.'); header('Location: ' . Helper::url('admin/sections')); exit; }
-    $st = $db->prepare("SELECT type FROM homepage_sections WHERE id=?"); $st->execute([$sid]); $stype = $st->fetchColumn();
-    if ($stype !== 'video') { Session::flash('err', 'Daftar video hanya untuk widget Video.'); header('Location: ' . Helper::url('admin/sections?edit=' . $sid)); exit; }
-    $normUrl = function(string $u): string {
-      $u = trim($u);
-      if ($u === '') return '';
-      if (preg_match('~(?:youtube\.com/(?:watch\?.*v=|shorts/|embed/)|youtu\.be/)([\w-]{6,})~', $u, $m)) return 'https://www.youtube.com/embed/' . $m[1];
-      if (preg_match('~dailymotion\.com/video/([\w]+)~', $u, $m)) return 'https://www.dailymotion.com/embed/video/' . $m[1];
-      if (preg_match('~dai\.ly/([\w]+)~', $u, $m)) return 'https://www.dailymotion.com/embed/video/' . $m[1];
-      if (preg_match('~vimeo\.com/(?:video/)?(\d+)~', $u, $m)) return 'https://player.vimeo.com/video/' . $m[1];
-      return $u;
-    };
-    $old = null;
-    if (!empty($_POST['slide_id'])) { $os = $db->prepare("SELECT * FROM section_slides WHERE id=? AND section_id=?"); $os->execute([(int)$_POST['slide_id'], $sid]); $old = $os->fetch(); }
-    $fileUrl = $old['subheading'] ?? '';
-    if (!empty($_FILES['slide_video']['name'] ?? '') && (($_FILES['slide_video']['error'] ?? 4) === 0)) {
-      $e = Security::validVideo($_FILES['slide_video'], $APP);
-      if ($e) { Session::flash('err', $e); header('Location: ' . Helper::url('admin/sections?edit=' . $sid)); exit; }
-      $n = Security::safeName($_FILES['slide_video']['name']); move_uploaded_file($_FILES['slide_video']['tmp_name'], ROOT . '/assets/uploads/' . $n);
-      if ($old && !empty($old['subheading']) && !preg_match('~^https?://~i', (string)$old['subheading'])) @unlink(ROOT . '/assets/uploads/' . basename((string)$old['subheading']));
-      $fileUrl = $n;
-    }
-    if (!empty($_POST['clear_video'])) { if ($old && !empty($old['subheading']) && !preg_match('~^https?://~i', (string)$old['subheading'])) @unlink(ROOT . '/assets/uploads/' . basename((string)$old['subheading'])); $fileUrl = ''; }
-    $linkUrl = $normUrl((string)($_POST['slide_url'] ?? ''));
-    if ($fileUrl === '' && ($linkUrl === '' || !preg_match('~^https?://~i', $linkUrl))) { Session::flash('err', 'Upload file video ATAU isi tautan (YouTube/Dailymotion/Vimeo/MP4).'); header('Location: ' . Helper::url('admin/sections?edit=' . $sid)); exit; }
-    $heading = trim((string)($_POST['slide_heading'] ?? ''));
-    if ($heading === '' && $linkUrl !== '') {
-      $heading = trim((string)($_POST['slide_fetched_title'] ?? ''));
-      if ($heading === '') {
-        $fetchTitle = function(string $embedUrl, string $origUrl): string {
-          $candidates = [];
-          if (str_contains($embedUrl, 'youtube.com/embed/') && preg_match('~embed/([\w-]{6,})~', $embedUrl, $m)) {
-            $candidates[] = 'https://www.youtube.com/oembed?url=' . urlencode('https://www.youtube.com/watch?v=' . $m[1]) . '&format=json';
-            $candidates[] = 'https://noembed.com/embed?url=' . urlencode($origUrl);
-          } elseif (str_contains($embedUrl, 'dailymotion.com/embed/video/') && preg_match('~embed/video/([\w]+)~', $embedUrl, $m)) {
-            $candidates[] = 'https://www.dailymotion.com/services/oembed?url=' . urlencode('https://www.dailymotion.com/video/' . $m[1]) . '&format=json';
-            $candidates[] = 'https://noembed.com/embed?url=' . urlencode($origUrl);
-          } elseif (str_contains($embedUrl, 'player.vimeo.com/video/') && preg_match('~video/(\d+)~', $embedUrl, $m)) {
-            $candidates[] = 'https://vimeo.com/api/oembed.json?url=' . urlencode('https://vimeo.com/' . $m[1]);
-            $candidates[] = 'https://noembed.com/embed?url=' . urlencode($origUrl);
-          } else {
-            $candidates[] = 'https://noembed.com/embed?url=' . urlencode($origUrl !== '' ? $origUrl : $embedUrl);
-          }
-          foreach ($candidates as $api) {
-            $ctx = stream_context_create(['http' => ['timeout' => 6, 'header' => "User-Agent: SchoolCMS/1.0\r\n"]]);
-            $json = @file_get_contents($api, false, $ctx);
-            if (!$json) continue;
-            $d = json_decode($json, true);
-            if (is_array($d) && !empty($d['title'])) return trim((string)$d['title']);
-          }
-          return '';
-        };
-        $heading = $fetchTitle($linkUrl, (string)($_POST['slide_url'] ?? ''));
-      }
-      if ($heading === '' && $fileUrl !== '') $heading = pathinfo($fileUrl, PATHINFO_FILENAME);
-    }
-    if (!empty($_POST['slide_id'])) {
-      $db->prepare("UPDATE section_slides SET heading=?,image=?,subheading=?,sort_order=?,is_active=? WHERE id=? AND section_id=?")->execute([$heading, $linkUrl, $fileUrl, (int)($_POST['slide_order'] ?? 0), !empty($_POST['slide_active']) ? 1 : 0, (int)$_POST['slide_id'], $sid]);
-      Auth::log($db, 'update', 'sections', "Ubah video #$sid"); Session::flash('ok', 'Video diubah.');
-    } else {
-      $mx = (int)$db->query("SELECT COALESCE(MAX(sort_order),0) FROM section_slides WHERE section_id=$sid")->fetchColumn();
-      $db->prepare("INSERT INTO section_slides(section_id,heading,subheading,image,sort_order,is_active) VALUES(?,?,?,?,?,1)")->execute([$sid, $heading, $fileUrl, $linkUrl, ++$mx]);
-      Auth::log($db, 'create', 'sections', "Tambah video #$sid"); Session::flash('ok', 'Video ditambah.');
-    }
-    header('Location: ' . Helper::url('admin/sections?edit=' . $sid)); exit;
-  } elseif ($act === 'slide_del') {
+  elseif ($act === 'slide_del') {
     $sid = (int)($_POST['section_id'] ?? 0);
     $s = $db->prepare("SELECT * FROM section_slides WHERE id=?"); $s->execute([(int)$_POST['slide_id']]); $sl = $s->fetch();
     if ($sl) {
@@ -208,8 +141,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   else {
     $key = Security::slug(trim($_POST['section_key'] ?? $_POST['title'] ?? 'section'));
     if ($key === '') { Session::flash('err','Key/judul wajib.'); header('Location: '.Helper::url('admin/sections')); exit; }
+    $stype = $_POST['type'] ?? 'custom';
     $img = $_POST['old_image'] ?? ($edit['image'] ?? null);
-    if (!empty($_FILES['image']['name'] ?? '')) {
+    if ($stype === 'video') $img = null;
+    elseif (!empty($_FILES['image']['name'] ?? '')) {
       $e = Security::validImage($_FILES['image'], $APP);
       if ($e) { Session::flash('err',$e); header('Location: '.Helper::url('admin/sections')); exit; }
       $n = Security::safeName($_FILES['image']['name']); move_uploaded_file($_FILES['image']['tmp_name'], ROOT.'/assets/uploads/'.$n); $img = $n;
@@ -232,8 +167,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $b2 = $buttons[1] ?? ['text' => '', 'url' => '', 'target' => '_self'];
     $d = [$_POST['type'] ?? 'custom', $_POST['title'] ?? '', $_POST['subtitle'] ?? '', $_POST['content'] ?? '', $img, $b1['text'], $b1['url'], $b1['target'], $b2['text'], $b2['url'], $b2['target'], $buttonsJson, $_POST['style'] ?? 'default', $_POST['bg'] ?? 'white', $_POST['padding'] ?? 'lg', $_POST['align'] ?? 'left', (int)($_POST['items_limit'] ?? 3), (int)($_POST['sort_order'] ?? 0), !empty($_POST['is_active']) ? 1 : 0, $_POST['effect'] ?? 'fade-up', $_POST['grid'] ?? 'cards-3'];
     try {
-      if (!empty($_POST['id'])) { $db->prepare("UPDATE homepage_sections SET type=?,title=?,subtitle=?,content=?,image=?,btn_text=?,btn_url=?,btn_target=?,btn2_text=?,btn2_url=?,btn2_target=?,buttons_json=?,style=?,bg=?,padding=?,align=?,items_limit=?,sort_order=?,is_active=?,effect=?,grid=? WHERE id=?")->execute([...$d, (int)$_POST['id']]); Auth::log($db,'update','sections',"Ubah $key"); }
-      else { $db->prepare("INSERT INTO homepage_sections(section_key,type,title,subtitle,content,image,btn_text,btn_url,btn_target,btn2_text,btn2_url,btn2_target,buttons_json,style,bg,padding,align,items_limit,sort_order,is_active,effect,grid) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")->execute([$key, ...$d]); Auth::log($db,'create','sections',"Tambah $key"); }
+      if (!empty($_POST['id'])) { $db->prepare("UPDATE homepage_sections SET type=?,title=?,subtitle=?,content=?,image=?,btn_text=?,btn_url=?,btn_target=?,btn2_text=?,btn2_url=?,btn2_target=?,buttons_json=?,style=?,bg=?,padding=?,align=?,items_limit=?,sort_order=?,is_active=?,effect=?,grid=? WHERE id=?")->execute([...$d, (int)$_POST['id']]); Auth::log($db,'update','sections',"Ubah $key"); $secId=(int)$_POST['id']; }
+      else { $db->prepare("INSERT INTO homepage_sections(section_key,type,title,subtitle,content,image,btn_text,btn_url,btn_target,btn2_text,btn2_url,btn2_target,buttons_json,style,bg,padding,align,items_limit,sort_order,is_active,effect,grid) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")->execute([$key, ...$d]); $secId=(int)$db->lastInsertId(); Auth::log($db,'create','sections',"Tambah $key"); }
+      if ($stype === 'video' && $secId > 0) {
+        $normUrl = function(string $u): string {
+          $u = trim($u);
+          if ($u === '') return '';
+          if (preg_match('~(?:youtube\.com/(?:watch\?.*v=|shorts/|embed/)|youtu\.be/)([\w-]{6,})~', $u, $m)) return 'https://www.youtube.com/embed/' . $m[1];
+          if (preg_match('~dailymotion\.com/video/([\w]+)~', $u, $m)) return 'https://www.dailymotion.com/embed/video/' . $m[1];
+          if (preg_match('~dai\.ly/([\w]+)~', $u, $m)) return 'https://www.dailymotion.com/embed/video/' . $m[1];
+          if (preg_match('~vimeo\.com/(?:video/)?(\d+)~', $u, $m)) return 'https://player.vimeo.com/video/' . $m[1];
+          return $u;
+        };
+        $fetchTitle = function(string $embedUrl, string $origUrl): string {
+          $cands = [];
+          if (preg_match('~youtube\.com/embed/([\w-]{6,})~', $embedUrl, $m)) { $cands[] = 'https://www.youtube.com/oembed?url=' . urlencode('https://www.youtube.com/watch?v=' . $m[1]) . '&format=json'; $cands[] = 'https://noembed.com/embed?url=' . urlencode($origUrl); }
+          elseif (preg_match('~dailymotion\.com/embed/video/([\w]+)~', $embedUrl, $m)) { $cands[] = 'https://www.dailymotion.com/services/oembed?url=' . urlencode('https://www.dailymotion.com/video/' . $m[1]) . '&format=json'; $cands[] = 'https://noembed.com/embed?url=' . urlencode($origUrl); }
+          elseif (preg_match('~player\.vimeo\.com/video/(\d+)~', $embedUrl, $m)) { $cands[] = 'https://vimeo.com/api/oembed.json?url=' . urlencode('https://vimeo.com/' . $m[1]); $cands[] = 'https://noembed.com/embed?url=' . urlencode($origUrl); }
+          else $cands[] = 'https://noembed.com/embed?url=' . urlencode($origUrl !== '' ? $origUrl : $embedUrl);
+          foreach ($cands as $api) {
+            $ctx = stream_context_create(['http' => ['timeout' => 6, 'header' => "User-Agent: SchoolCMS/1.0\r\n"]]);
+            $json = @file_get_contents($api, false, $ctx);
+            if (!$json) continue;
+            $dd = json_decode($json, true);
+            if (is_array($dd) && !empty($dd['title'])) return trim((string)$dd['title']);
+          }
+          return '';
+        };
+        $ids = (array)($_POST['vids_id'] ?? []);
+        $titles = (array)($_POST['vids_title'] ?? []);
+        $urls = (array)($_POST['vids_url'] ?? []);
+        $fetched = (array)($_POST['vids_fetched'] ?? []);
+        $files = [];
+        if (!empty($_FILES['vids_file']['name']) && is_array($_FILES['vids_file']['name'])) {
+          $n = count($_FILES['vids_file']['name']);
+          for ($i = 0; $i < $n; $i++) {
+            if (empty($_FILES['vids_file']['name'][$i]) || (($_FILES['vids_file']['error'][$i] ?? 4) !== 0)) { $files[$i] = null; continue; }
+            $files[$i] = ['name' => $_FILES['vids_file']['name'][$i], 'tmp_name' => $_FILES['vids_file']['tmp_name'][$i], 'error' => $_FILES['vids_file']['error'][$i], 'size' => $_FILES['vids_file']['size'][$i]];
+          }
+        }
+        $keep = [];
+        $nRow = max(count($ids), count($titles), count($urls));
+        $mx = (int)$db->query("SELECT COALESCE(MAX(sort_order),0) FROM section_slides WHERE section_id=$secId")->fetchColumn();
+        for ($i = 0; $i < $nRow; $i++) {
+          $vid = (int)($ids[$i] ?? 0);
+          $old = null;
+          if ($vid > 0) { $os = $db->prepare("SELECT * FROM section_slides WHERE id=? AND section_id=?"); $os->execute([$vid, $secId]); $old = $os->fetch(); if (!$old) continue; }
+          $fileUrl = $old['subheading'] ?? '';
+          if (!empty($files[$i])) {
+            $e = Security::validVideo($files[$i], $APP);
+            if ($e) { Session::flash('err', $e); header('Location: ' . Helper::url('admin/sections?edit=' . $secId)); exit; }
+            $fn = Security::safeName($files[$i]['name']); move_uploaded_file($files[$i]['tmp_name'], ROOT . '/assets/uploads/' . $fn);
+            if ($old && !empty($old['subheading']) && !preg_match('~^https?://~i', (string)$old['subheading'])) @unlink(ROOT . '/assets/uploads/' . basename((string)$old['subheading']));
+            $fileUrl = $fn;
+          }
+          if (!empty($_POST['vids_clear'][$i])) { if ($old && !empty($old['subheading']) && !preg_match('~^https?://~i', (string)$old['subheading'])) @unlink(ROOT . '/assets/uploads/' . basename((string)$old['subheading'])); $fileUrl = ''; }
+          $rawUrl = trim((string)($urls[$i] ?? ''));
+          $linkUrl = $normUrl($rawUrl);
+          if ($fileUrl === '' && ($linkUrl === '' || !preg_match('~^https?://~i', $linkUrl))) continue;
+          $hd = trim((string)($titles[$i] ?? ''));
+          if ($hd === '') $hd = trim((string)($fetched[$i] ?? ''));
+          if ($hd === '' && $linkUrl !== '') $hd = $fetchTitle($linkUrl, $rawUrl);
+          if ($hd === '' && $fileUrl !== '') $hd = pathinfo($fileUrl, PATHINFO_FILENAME);
+          if ($vid > 0) { $db->prepare("UPDATE section_slides SET heading=?,image=?,subheading=? WHERE id=? AND section_id=?")->execute([$hd, $linkUrl, $fileUrl, $vid, $secId]); $keep[] = $vid; }
+          else { $db->prepare("INSERT INTO section_slides(section_id,heading,subheading,image,sort_order,is_active) VALUES(?,?,?,?,?,1)")->execute([$secId, $hd, $fileUrl, $linkUrl, ++$mx]); $keep[] = (int)$db->lastInsertId(); }
+        }
+        if ($keep) { $ph = implode(',', array_fill(0, count($keep), '?')); $db->prepare("DELETE FROM section_slides WHERE section_id=? AND id NOT IN ($ph)")->execute([$secId, ...$keep]); }
+        else $db->prepare("DELETE FROM section_slides WHERE section_id=?")->execute([$secId]);
+      }
       Session::flash('ok','Section disimpan.');
     } catch (Throwable $e) { Session::flash('err','Gagal: key sudah dipakai.'); }
   }
@@ -287,15 +288,14 @@ $editSlides = [];
 if (!empty($edit['id'])) { $ss = $db->prepare("SELECT * FROM section_slides WHERE section_id=? ORDER BY sort_order,id"); $ss->execute([(int)$edit['id']]); $editSlides = $ss->fetchAll(); }
 $isCarousel = ($edit['type'] ?? '') === 'carousel';
 $isVideo = ($edit['type'] ?? '') === 'video';
-$useSlides = $isCarousel || $isVideo;
+$useSlides = $isCarousel;
 ?>
 <div class="lg:col-span-2 bg-white rounded-2xl border p-4 lg:sticky lg:top-16">
 <h2 class="font-bold text-sm mb-2"><i class="fa fa-sliders mr-1 text-emerald-600"></i><?= $edit ? 'Inspector: '.Helper::e($edit['section_key']) : 'Inspector' ?></h2>
-<?php $tabCols=$useSlides?4:3; ?>
+<?php $tabCols=3; ?>
 <div class="grid grid-cols-<?= $tabCols ?> gap-1 mb-3 bg-slate-100 rounded-lg p-1 text-xs font-bold" data-tabs>
 <button type="button" data-tab="konten" class="tab-btn px-2 py-1.5 rounded-md bg-white shadow">Konten</button>
-<?php if($isVideo): ?><button type="button" data-tab="slide" class="tab-btn px-2 py-1.5 rounded-md text-slate-500">Video<?= $editSlides ? ' (' . count($editSlides) . ')' : '' ?></button>
-<?php elseif($isCarousel): ?><button type="button" data-tab="slide" class="tab-btn px-2 py-1.5 rounded-md text-slate-500">Slide<?= $editSlides ? ' (' . count($editSlides) . ')' : '' ?></button><?php endif; ?>
+<?php if($isCarousel): ?><button type="button" data-tab="slide" class="tab-btn px-2 py-1.5 rounded-md text-slate-500">Slide<?= $editSlides ? ' (' . count($editSlides) . ')' : '' ?></button><?php endif; ?>
 <button type="button" data-tab="gaya" class="tab-btn px-2 py-1.5 rounded-md text-slate-500">Gaya</button>
 <button type="button" data-tab="lanjut" class="tab-btn px-2 py-1.5 rounded-md text-slate-500">Lanjut</button>
 </div>
@@ -306,9 +306,10 @@ $curType = $edit['type'] ?? '';
 // Field per fungsi section (tak semua section butuh semua field)
 $showTitle = !in_array($curType, [], true);
 $showSubtitle = in_array($curType, ['hero', 'carousel', 'countdown', 'image', 'video', 'audio', 'berita', 'galeri', 'guru', 'prestasi', 'ekskul', 'cta', 'custom', 'html', 'agenda', 'pengumuman', 'sambutan', 'statistik', ''], true);
-$showContent = in_array($curType, ['custom', 'countdown', 'audio', 'html', 'cta', ''], true); // video pakai tab Video, bukan konten tunggal
-$showImage = in_array($curType, ['hero', 'image', 'custom', 'html', ''], true); // hero/image 1 gambar; carousel/video via tab Slide/Video, tanpa upload hero
+$showContent = in_array($curType, ['custom', 'countdown', 'audio', 'html', 'cta', ''], true);
+$showImage = in_array($curType, ['hero', 'image', 'custom', 'html', ''], true); // hero/image 1 gambar; carousel via tab Slide; video via field khusus
 $showBtns = in_array($curType, ['hero', 'image', 'cta', 'custom', 'html', ''], true); // default 1 tombol + tambah
+$showVideo = ($curType === 'video');
 $showLimit = in_array($curType, ['carousel', 'berita', 'galeri', 'guru', 'prestasi', 'ekskul', 'agenda', 'pengumuman', ''], true);
 $showGrid = ($curType === 'berita') || $curType === '';
 $showSlide = ($curType === 'carousel');
@@ -322,6 +323,30 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'galer
 <div class="border rounded-xl p-2.5 bg-slate-50" data-f="image"<?= $showImage ? '' : ' style="display:none"' ?>><p class="text-xs font-bold mb-1.5"><i class="fa fa-image mr-1 text-emerald-600"></i>Gambar <span class="font-normal text-slate-400">(1 gambar)</span></p>
 <?php if(!empty($edit['image'])): ?><img src="<?= Helper::upload($edit['image']) ?>" alt="" class="h-24 w-full object-cover rounded-lg border mb-1.5"><label class="text-xs flex gap-1.5 items-center"><input type="checkbox" name="clear_image" value="1"> Hapus gambar</label><?php endif; ?>
 <input type="file" name="image" accept="image/*" class="border rounded-lg p-2 w-full bg-white text-xs"></div>
+<?php if($showVideo): $vids=$editSlides; ?>
+<div class="border rounded-xl p-2.5 bg-slate-50 grid gap-1.5">
+<p class="text-xs font-bold"><i class="fa fa-video mr-1 text-emerald-600"></i>Daftar Video (<?= count($vids) ?>) <span class="font-normal text-slate-400">— upload / tautan, edit judul, hapus per baris</span></p>
+<div id="vidList" class="grid gap-1.5">
+<?php foreach($vids as $vi=>$vv): $vvFile=trim((string)($vv['subheading']??'')); $vvHasFile=$vvFile!==''&&!preg_match('~^https?://~i',$vvFile); $vvLink=trim((string)($vv['image']??'')); if(!preg_match('~^https?://~i',$vvLink))$vvLink=''; ?>
+<div class="flex items-center gap-2 border rounded-xl p-1.5 bg-white text-xs" data-vidrow>
+<input type="hidden" name="vids_id[]" value="<?= (int)$vv['id'] ?>">
+<span class="w-9 h-9 rounded-lg bg-slate-900 text-white grid place-items-center shrink-0"><i class="fa fa-play text-[10px]"></i></span>
+<span class="flex-1 min-w-0 grid gap-1">
+<input name="vids_title[]" value="<?= Helper::e($vv['heading']??'') ?>" placeholder="Judul video (auto bila kosong)" class="border rounded-lg p-1.5">
+<span class="flex gap-1.5"><input type="file" name="vids_file[]" accept="video/mp4,video/webm,video/ogg" class="border rounded-lg p-1.5 bg-white flex-1 min-w-0 text-[11px]" title="Upload MP4/WebM"><input name="vids_url[]" value="<?= Helper::e($vvLink) ?>" placeholder="ATAU tautan YouTube/Dailymotion/Vimeo/MP4" class="border rounded-lg p-1.5 bg-white font-mono flex-1 min-w-0"></span>
+<?php if($vvHasFile): ?><span class="text-emerald-600 font-mono text-[11px] truncate"><?= Helper::e(basename($vvFile)) ?> <label class="font-normal"><input type="checkbox" name="vids_clear[]" value="<?= $vi ?>"> hapus file</label></span><?php endif; ?>
+<input type="hidden" name="vids_fetched[]" value="">
+</span>
+<span class="flex flex-col gap-1 shrink-0">
+<button type="button" class="vidFetch w-7 h-7 border rounded-lg bg-white grid place-items-center hover:text-emerald-600" title="Ambil judul otomatis"><i class="fa fa-wand-magic-sparkles text-[10px]"></i></button>
+<button type="button" class="vidDel w-7 h-7 border rounded-lg bg-white grid place-items-center text-red-600" title="Hapus video ini"><i class="fa fa-trash text-[10px]"></i></button>
+</span>
+</div>
+<?php endforeach; ?>
+</div>
+<button type="button" id="vidAdd" class="text-[11px] font-bold border rounded-lg px-2 py-1.5 hover:border-emerald-400"><i class="fa fa-plus mr-1"></i>Tambah Video</button>
+</div>
+<?php endif; ?>
 <div class="grid gap-1.5" data-f="btns"<?= $showBtns ? '' : ' style="display:none"' ?>>
 <div class="flex items-center gap-2"><p class="text-xs font-bold"><i class="fa fa-hand-pointer mr-1 text-emerald-600"></i>Tombol</p><button type="button" id="btnAddMore" class="ml-auto text-[11px] font-bold border rounded-lg px-2 py-1 hover:border-emerald-400"><i class="fa fa-plus mr-1"></i>Tambah Tombol</button></div>
 <div id="btnList" class="grid gap-1.5">
@@ -375,36 +400,9 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'galer
 <div class="hidden" id="saveBar"></div></form>
 <div data-pane="slide" class="hidden mt-2">
 <?php if (empty($edit)): ?>
-<p class="text-xs text-slate-500 bg-slate-50 border rounded-lg p-3">Simpan section dulu, lalu tambah item di sini. Berlaku untuk widget <b>Carousel</b> dan <b>Video</b>.</p>
+<p class="text-xs text-slate-500 bg-slate-50 border rounded-lg p-3">Simpan section dulu, lalu tambah item di sini. Berlaku untuk widget <b>Carousel</b>.</p>
 <?php elseif (!$useSlides): ?>
-<p class="text-xs text-slate-500 bg-slate-50 border rounded-lg p-3">Tab ini khusus widget <b>Carousel</b> (daftar gambar) dan <b>Video</b> (daftar video). Widget lain tidak pakai tab ini.</p>
-<?php elseif ($isVideo): ?>
-<p class="text-[11px] text-slate-500 mb-2"><i class="fa fa-video mr-1"></i>Video section ini (<?= count($editSlides) ?>). Upload file MP4/WebM ATAU tempel tautan YouTube / Dailymotion / Vimeo / file langsung.</p>
-<div class="grid gap-1.5 mb-2">
-<?php foreach ($editSlides as $sl): ?>
-<div class="flex items-center gap-2 border rounded-xl p-1.5 bg-slate-50 text-xs">
-<span class="w-12 h-9 rounded-lg bg-slate-900 text-white grid place-items-center"><i class="fa fa-play"></i></span>
-<span class="flex-1 min-w-0"><b class="block truncate"><?= Helper::e($sl['heading'] ?: '(tanpa judul)') ?></b><span class="text-slate-400 font-mono truncate block"><?= Helper::e($sl['image']?:$sl['subheading']??'') ?> • #<?= (int)$sl['sort_order'] ?> <?= $sl['is_active'] ? '' : '• off' ?></span></span>
-<button type="button" class="sl-edit w-7 h-7 border rounded-lg bg-white grid place-items-center hover:text-emerald-600" title="Edit" data-slide='<?= htmlspecialchars(json_encode($sl), ENT_QUOTES) ?>'><i class="fa fa-pen text-[10px]"></i></button>
-<form method="post" class="inline"><input type="hidden" name="csrf" value="<?= Security::csrfToken() ?>"><input type="hidden" name="act" value="slide_toggle"><input type="hidden" name="section_id" value="<?= $edit['id'] ?>"><input type="hidden" name="slide_id" value="<?= $sl['id'] ?>"><button class="w-7 h-7 border rounded-lg bg-white grid place-items-center <?= $sl['is_active'] ? 'text-emerald-600' : 'text-slate-400' ?>" title="On/Off"><i class="fa fa-power-off text-[10px]"></i></button></form>
-<form method="post" data-confirm class="inline"><?= Security::csrfField() ?><input type="hidden" name="act" value="slide_del"><input type="hidden" name="section_id" value="<?= $edit['id'] ?>"><input type="hidden" name="slide_id" value="<?= $sl['id'] ?>"><button class="w-7 h-7 border rounded-lg bg-white grid place-items-center text-red-600" title="Hapus"><i class="fa fa-trash text-[10px]"></i></button></form>
-</div>
-<?php endforeach; ?>
-<?php if (!$editSlides): ?><p class="text-xs text-slate-400 text-center py-2">Belum ada video. Tambah di bawah.</p><?php endif; ?>
-</div>
-<form method="post" data-loading enctype="multipart/form-data" class="grid gap-1.5 border rounded-xl p-2.5 bg-slate-50"><?= Security::csrfField() ?>
-<input type="hidden" name="act" value="video_save"><input type="hidden" name="section_id" value="<?= $edit['id'] ?>"><input type="hidden" name="slide_id" id="sl_id" value="0"><input type="hidden" name="old_slide_video" id="sl_old" value="">
-<p class="text-xs font-bold" id="slTitle">Tambah Video</p>
-<label class="grid gap-0.5 text-xs">Judul <span class="text-slate-400">(kosong = ambil otomatis dari sumber)</span><span class="flex gap-1.5"><input name="slide_heading" id="sl_h" placeholder="Judul video (auto bila kosong)" class="border rounded-lg p-1.5 bg-white flex-1"><input type="hidden" name="slide_fetched_title" id="sl_fetched"><button type="button" id="slFetch" class="border rounded-lg px-2.5 text-xs font-bold hover:border-emerald-400 whitespace-nowrap"><i class="fa fa-wand-magic-sparkles mr-1"></i>Ambil</button></span></label>
-<label class="grid gap-0.5 text-xs">Upload video (MP4/WebM, max <?= (int)($APP['upload_max_mb']??5) ?>MB)<input type="file" name="slide_video" id="sl_file" accept="video/mp4,video/webm,video/ogg" class="border rounded-lg p-1.5 bg-white"></label>
-<video id="sl_prev" class="hidden w-full max-h-32 rounded-lg border bg-black" controls></video>
-<label class="grid gap-0.5 text-xs">ATAU tautan (YouTube / Dailymotion / Vimeo / file MP4)<input name="slide_url" id="sl_u" placeholder="https://www.youtube.com/watch?v=... / https://...mp4" class="border rounded-lg p-1.5 bg-white font-mono"></label>
-<div class="grid grid-cols-2 gap-1.5">
-<label class="grid gap-0.5 text-xs">Urutan<input type="number" name="slide_order" id="sl_o" value="0" class="border rounded-lg p-1.5 bg-white"></label>
-<label class="flex gap-1.5 items-center text-xs mt-5"><input type="checkbox" name="slide_active" id="sl_a" value="1" checked> Aktif</label>
-</div>
-<div class="flex gap-1.5"><button class="flex-1 bg-emerald-600 text-white rounded-lg py-1.5 text-xs font-bold" id="slSave">Tambah Video</button><button type="button" id="slReset" class="border rounded-lg px-3 text-xs">Reset</button></div>
-</form>
+<p class="text-xs text-slate-500 bg-slate-50 border rounded-lg p-3">Tab ini khusus widget <b>Carousel</b> (daftar gambar). Video diatur langsung di tab Konten.</p>
 <?php else: ?>
 <p class="text-[11px] text-slate-500 mb-2"><i class="fa fa-clone mr-1"></i>Slide section ini (<?= count($editSlides) ?>). Upload beberapa gambar sekaligus.</p>
 <div class="grid gap-1.5 mb-2">
@@ -440,6 +438,8 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'galer
 const TYPEHINT={hero:'Hero: 1 gambar + judul + subjudul + tombol. Tanpa slide, tanpa limit item.',carousel:'Carousel: multi-gambar lewat tab Slide. Tanpa tombol section, input tombol disembunyikan.',countdown:'Countdown: judul + subjudul + target waktu di Konten (cth: 2026-12-31 23:59).',image:'Image: 1 gambar + judul + subjudul overlay + tombol.',video:'Video: tempel link YouTube biasa (watch?v= / youtu.be / shorts) ATAU embed. Auto jadi embed. Tinggi proporsional max 420px.',audio:'Audio: URL file MP3 di Konten + judul. Auto render audio player.',html:'Custom HTML: tulis HTML bebas di Konten + tombol (tambah bila perlu).',sambutan:'Sambutan: otomatis dari Profil (nama, foto, sambutan). Cukup judul section.',statistik:'Statistik: otomatis dari Sekolah > Statistik. Cukup judul section.',berita:'Berita: judul + limit + gaya grid. Tanpa tombol section.',agenda:'Agenda: judul + limit agenda mendatang.',pengumuman:'Pengumuman: judul + limit info terbaru.',galeri:'Galeri: judul + limit foto.',guru:'Guru: judul + limit guru aktif.',prestasi:'Prestasi: judul + limit.',ekskul:'Ekskul: judul + limit.',cta:'CTA: judul + subjudul + tombol (tambah bila perlu). Tanpa limit item.',custom:'Custom: konten HTML + gambar + tombol.'};
 const TYPELIMIT={carousel:'Jumlah slide',berita:'Jumlah berita',galeri:'Jumlah foto',guru:'Jumlah guru',prestasi:'Jumlah prestasi',ekskul:'Jumlah ekskul',agenda:'Jumlah agenda',pengumuman:'Jumlah pengumuman'};
 function applyType(){
+  // Tipe terkunci (hidden input) — field sudah dirender server per fungsi. Jangan paksa tampil.
+  if(!document.getElementById('f_type'))return;
   const t=document.getElementById('f_type')?.value||'';
   const show=n=>document.querySelectorAll('[data-f="'+n+'"]').forEach(e=>e.style.display='');
   const hide=n=>document.querySelectorAll('[data-f="'+n+'"]').forEach(e=>e.style.display='none');
@@ -519,17 +519,48 @@ document.querySelectorAll('.gridpick').forEach(b=>b.addEventListener('click',()=
   b.classList.add('ring-2','ring-emerald-500','border-emerald-500');
   const hid=document.querySelector('input[name="grid"]'); if(hid)hid.value=b.dataset.grid;
 }));
-const IS_VIDEO=<?= json_encode(($edit['type'] ?? '')==='video') ?>;
+document.getElementById('vidAdd')?.addEventListener('click',()=>{
+  const list=document.getElementById('vidList');
+  const div=document.createElement('div');
+  div.className='flex items-center gap-2 border rounded-xl p-1.5 bg-white text-xs';div.setAttribute('data-vidrow','');
+  div.innerHTML='<input type="hidden" name="vids_id[]" value="0">'
+  +'<span class="w-9 h-9 rounded-lg bg-slate-900 text-white grid place-items-center shrink-0"><i class="fa fa-play text-[10px]"></i></span>'
+  +'<span class="flex-1 min-w-0 grid gap-1"><span class="flex gap-1.5"><input name="vids_title[]" placeholder="Judul video (auto bila kosong)" class="border rounded-lg p-1.5 flex-1 min-w-0"><input type="hidden" name="vids_fetched[]"><button type="button" class="vidFetch border rounded-lg px-2 text-xs font-bold hover:border-emerald-400 whitespace-nowrap" title="Ambil judul otomatis"><i class="fa fa-wand-magic-sparkles"></i></button></span>'
+  +'<span class="flex gap-1.5"><input type="file" name="vids_file[]" accept="video/mp4,video/webm,video/ogg" class="border rounded-lg p-1.5 bg-white flex-1 min-w-0 text-[11px]" title="Upload MP4/WebM"><input name="vids_url[]" placeholder="ATAU tautan YouTube/Dailymotion/Vimeo/MP4" class="border rounded-lg p-1.5 bg-white font-mono flex-1 min-w-0"></span></span>'
+  +'<button type="button" class="vidDel w-7 h-7 border rounded-lg bg-white grid place-items-center text-red-600 shrink-0" title="Hapus video ini"><i class="fa fa-trash text-[10px]"></i></button>';
+  list.appendChild(div);wireVidRow(div);
+});
+function wireVidRow(row){
+  row.querySelector('.vidDel')?.addEventListener('click',()=>{
+    const idIn=row.querySelector('input[name="vids_id[]"]');
+    if(idIn&&parseInt(idIn.value||'0',10)>0){
+      Swal.fire({title:'Hapus video ini?',text:'Baris hilang + file ikut terhapus saat Simpan.',icon:'warning',showCancelButton:true,confirmButtonText:'Ya, Hapus',cancelButtonText:'Batal',confirmButtonColor:'#dc2626'}).then(r=>{if(r.isConfirmed)row.remove()});
+    }else row.remove();
+  });
+  row.querySelector('.vidFetch')?.addEventListener('click',async()=>{
+    const urlIn=row.querySelector('input[name="vids_url[]"]'),tIn=row.querySelector('input[name="vids_title[]"]'),fIn=row.querySelector('input[name="vids_fetched[]"]'),btn=row.querySelector('.vidFetch');
+    const url=(urlIn?.value||'').trim();
+    if(!url){Swal.fire('Isi dulu','Tempel tautan video dulu.','warning');return}
+    btn.disabled=true;const old=btn.innerHTML;btn.innerHTML='<i class="fa fa-spinner fa-spin"></i>';
+    try{
+      const r=await fetch('',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'csrf=<?= Security::csrfToken() ?>&ajax=1&act=video_title&url='+encodeURIComponent(url)});
+      const j=await r.json();
+      if(j.ok&&j.title){tIn.value=j.title;if(fIn)fIn.value=j.title;Swal.fire({icon:'success',title:'Judul diambil',text:j.title,timer:1800,showConfirmButton:false})}
+      else Swal.fire('Gagal',j.msg||'Judul tidak ditemukan','error');
+    }catch(_){Swal.fire('Gagal','Tidak bisa ambil judul','error')}
+    btn.disabled=false;btn.innerHTML=old;
+  });
+}
+document.querySelectorAll('#vidList [data-vidrow]').forEach(wireVidRow);
 function resetSlide(){
   document.getElementById('sl_id').value=0;
   const oldEl=document.getElementById('sl_old');if(oldEl)oldEl.value='';
-  ['sl_h','sl_s','sl_c1','sl_u1','sl_c2','sl_u2','sl_u'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  ['sl_h','sl_s','sl_c1','sl_u1','sl_c2','sl_u2'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
   document.getElementById('sl_o').value=0;document.getElementById('sl_a').checked=true;
   const fi=document.getElementById('sl_img');if(fi)fi.value='';
-  const ff=document.getElementById('sl_file');if(ff)ff.value='';
   const pv=document.getElementById('sl_prev');if(pv)pv.classList.add('hidden');
-  document.getElementById('slTitle').textContent=IS_VIDEO?'Tambah Video':'Tambah Slide';
-  document.getElementById('slSave').textContent=IS_VIDEO?'Tambah Video':'Tambah Slide';
+  document.getElementById('slTitle').textContent='Tambah Slide';
+  document.getElementById('slSave').textContent='Tambah Slide';
 }
 document.querySelectorAll('.sl-edit').forEach(b=>b.addEventListener('click',()=>{
   const d=JSON.parse(b.dataset.slide);
@@ -537,24 +568,17 @@ document.querySelectorAll('.sl-edit').forEach(b=>b.addEventListener('click',()=>
   const oldEl=document.getElementById('sl_old');if(oldEl)oldEl.value=d.image||'';
   document.getElementById('sl_h').value=d.heading||'';
   const sEl=document.getElementById('sl_s');if(sEl)sEl.value=d.subheading||'';
-  const uEl=document.getElementById('sl_u');
-  if(uEl)uEl.value=IS_VIDEO?(d.image||''):'';
-  else{
-    document.getElementById('sl_c1').value=d.cta_text||'';
-    document.getElementById('sl_u1').value=d.cta_url||'';
-    document.getElementById('sl_c2').value=d.cta2_text||'';
-    document.getElementById('sl_u2').value=d.cta2_url||'';
-  }
+  document.getElementById('sl_c1').value=d.cta_text||'';
+  document.getElementById('sl_u1').value=d.cta_url||'';
+  document.getElementById('sl_c2').value=d.cta2_text||'';
+  document.getElementById('sl_u2').value=d.cta2_url||'';
   document.getElementById('sl_o').value=d.sort_order||0;
   document.getElementById('sl_a').checked=(d.is_active==1);
   const pv=document.getElementById('sl_prev');
   if(pv){
-    if(IS_VIDEO){
-      const src=d.subheading&&!/^https?:\/\//i.test(d.subheading)?'<?= Helper::url('assets/uploads/') ?>/'+d.subheading:(d.image||'');
-      if(src){pv.src=src;pv.classList.remove('hidden')}else pv.classList.add('hidden');
-    }else if(d.image){pv.src='<?= Helper::url('assets/uploads/') ?>/'+d.image;pv.classList.remove('hidden')}else pv.classList.add('hidden');
+    if(d.image){pv.src='<?= Helper::url('assets/uploads/') ?>/'+d.image;pv.classList.remove('hidden')}else pv.classList.add('hidden');
   }
-  document.getElementById('slTitle').textContent=(IS_VIDEO?'Edit Video #':'Edit Slide #')+d.id;
+  document.getElementById('slTitle').textContent='Edit Slide #'+d.id;
   document.getElementById('slSave').textContent='Simpan Perubahan';
   document.querySelector('[data-tab="slide"]')?.click();
 }));
@@ -562,24 +586,6 @@ document.getElementById('slReset')?.addEventListener('click',resetSlide);
 document.getElementById('sl_img')?.addEventListener('change',e=>{
   const f=e.target.files[0];if(!f)return;
   const pv=document.getElementById('sl_prev');pv.src=URL.createObjectURL(f);pv.classList.remove('hidden');
-});
-document.getElementById('sl_file')?.addEventListener('change',e=>{
-  const f=e.target.files[0];if(!f)return;
-  const pv=document.getElementById('sl_prev');pv.src=URL.createObjectURL(f);pv.classList.remove('hidden');
-  const h=document.getElementById('sl_h');if(h&&!h.value)h.value=f.name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ');
-});
-document.getElementById('slFetch')?.addEventListener('click',async()=>{
-  const uEl=document.getElementById('sl_u'),hEl=document.getElementById('sl_h'),fEl=document.getElementById('sl_fetched'),btn=document.getElementById('slFetch');
-  const url=(uEl?.value||'').trim();
-  if(!url){Swal.fire('Isi dulu','Tempel tautan video dulu.','warning');return}
-  btn.disabled=true;const old=btn.innerHTML;btn.innerHTML='<i class="fa fa-spinner fa-spin"></i>';
-  try{
-    const r=await fetch('',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'csrf=<?= Security::csrfToken() ?>&ajax=1&act=video_title&url='+encodeURIComponent(url)});
-    const j=await r.json();
-    if(j.ok&&j.title){hEl.value=j.title;if(fEl)fEl.value=j.title;Swal.fire({icon:'success',title:'Judul diambil',text:j.title,timer:1800,showConfirmButton:false})}
-    else Swal.fire('Gagal',j.msg||'Judul tidak ditemukan','error');
-  }catch(_){Swal.fire('Gagal','Tidak bisa ambil judul','error')}
-  btn.disabled=false;btn.innerHTML=old;
 });
 const cv=document.getElementById('canvas');let dragCard=null,dragType=null;
 document.querySelectorAll('.pal-btn').forEach(b=>{
@@ -613,3 +619,4 @@ function saveOrder(){
 }
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

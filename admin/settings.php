@@ -52,9 +52,10 @@ let greetEditor=null;
   const el=document.getElementById('principalGreeting'),warn=document.getElementById('editorWarn');
   if(!el)return;
   if(!window.ClassicEditor){ warn&&warn.classList.remove('hidden'); return; }
-  ClassicEditor.create(el).then(e=>{greetEditor=e}).catch(()=>warn&&warn.classList.remove('hidden'));
+  ClassicEditor.create(el,{extraPlugins:[window.CKUploadAdapter]}).then(e=>{greetEditor=e}).catch(()=>warn&&warn.classList.remove('hidden'));
 })();
 document.getElementById('identityForm').addEventListener('submit',()=>{ if(greetEditor){ try{document.getElementById('principalGreeting').value=greetEditor.getData()}catch(_){} } });
 </script>
 <style>.ck-editor__editable{min-height:220px}</style>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

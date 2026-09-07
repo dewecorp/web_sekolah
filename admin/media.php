@@ -1,10 +1,12 @@
 <?php
 declare(strict_types=1);
-$title='Media'; $q=trim($_GET['q']??'');
+$title='Media'; $q=trim($_GET['q']??''); $fdate=trim($_GET['date']??''); $fmonth=trim($_GET['month']??''); $fyear=trim($_GET['year']??'');
 // AJAX untuk pemilih gambar (dipakai modal berita/laman): list + upload JSON
 if(($_GET['ajax']??'')==='1'&&($_GET['act']??'')==='list'){
   header('Content-Type: application/json');
-  $qq=trim($_GET['qq']??''); $w=$qq?"WHERE filename LIKE ? OR mime LIKE ?":""; $pr=$qq?["%$qq%","%$qq%"]:[];
+  $qq=trim($_GET['qq']??''); $w=[]; $pr=[];
+  if($qq){$w[]="(filename LIKE ? OR mime LIKE ?)";$pr[]="%$qq%";$pr[]="%$qq%";}
+  $w=$w?('WHERE '.implode(' AND ',$w)):'';
   $st=$db->prepare("SELECT id,filename,mime,size_bytes,created_at FROM media $w ORDER BY id DESC LIMIT 60"); $st->execute($pr);
   $rows=$st->fetchAll();
   foreach($rows as &$r)$r['url']=Helper::upload($r['filename']);
@@ -14,6 +16,19 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
   $isAjax=($_POST['ajax']??'')==='1';
   $jerr=function($m){ header('Content-Type: application/json'); echo json_encode(['ok'=>false,'msg'=>$m]); exit; };
   if(!Security::verifyCsrf($_POST['csrf']??null)){ if($isAjax)$jerr('CSRF tidak valid.'); Session::flash('err','CSRF tidak valid.'); header('Location: '.Helper::url('admin/media')); exit; }
+  if(($_POST['act']??'')==='ckeditor'){
+    $f=$_FILES['upload']??null;
+    $jok=function($url){ header('Content-Type: application/json'); echo json_encode(['uploaded'=>1,'fileName'=>basename($url),'url'=>$url]); exit; };
+    if(!$f||(($f['error']??4)!==0))$jerr('Upload gagal.');
+    $e=Security::validImage($f,$APP);
+    if($e)$jerr($e);
+    $n=Security::safeName($f['name']); move_uploaded_file($f['tmp_name'],ROOT.'/assets/uploads/'.$n);
+    $fi=new finfo(FILEINFO_MIME_TYPE);
+    $mime=$fi->file(ROOT.'/assets/uploads/'.$n);
+    $db->prepare("INSERT INTO media(filename,filepath,mime,extension,size_bytes,uploaded_by) VALUES(?,?,?,?,?,?)")->execute([$n,'assets/uploads/'.$n,$mime,strtolower(pathinfo($n,PATHINFO_EXTENSION)),filesize(ROOT.'/assets/uploads/'.$n),$_SESSION['user']['id']]);
+    Auth::log($db,'create','media',"Upload CKEditor $n");
+    $jok(Helper::upload($n));
+  }
   if(($_POST['act']??'')==='delete'){ $s=$db->prepare("SELECT * FROM media WHERE id=?"); $s->execute([(int)$_POST['id']]); $m=$s->fetch();
     if($m){ @unlink(ROOT.'/assets/uploads/'.$m['filename']); $db->prepare("DELETE FROM media WHERE id=?")->execute([$m['id']]); Auth::log($db,'delete','media','Hapus '.$m['filename']); }
     if($isAjax){ header('Content-Type: application/json'); echo json_encode(['ok'=>true]); exit; }
@@ -41,15 +56,30 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
   }
   header('Location: '.Helper::url('admin/media')); exit;
 }
-$w=$q?"WHERE filename LIKE ? OR mime LIKE ?":""; $pr=$q?["%$q%","%$q%"]:[];
-$st=$db->prepare("SELECT * FROM media $w ORDER BY id DESC LIMIT 60"); $st->execute($pr); $rows=$st->fetchAll();
+$w=[]; $pr=[];
+if($q){$w[]="(filename LIKE ? OR mime LIKE ?)";$pr[]="%$q%";$pr[]="%$q%";}
+if(preg_match('/^\d{4}-\d{2}-\d{2}$/',$fdate)){$w[]="DATE(created_at)=?";$pr[]=$fdate;}
+if(preg_match('/^\d{4}-\d{2}$/',$fmonth)){$w[]="DATE_FORMAT(created_at,'%Y-%m')=?";$pr[]=$fmonth;}
+if(preg_match('/^\d{4}$/',$fyear)){$w[]="YEAR(created_at)=?";$pr[]=$fyear;}
+$w=$w?('WHERE '.implode(' AND ',$w)):'';
+$st=$db->prepare("SELECT * FROM media $w ORDER BY id DESC LIMIT 200"); $st->execute($pr); $rows=$st->fetchAll();
+try{ $years=$db->query("SELECT DISTINCT YEAR(created_at) y FROM media ORDER BY y DESC")->fetchAll(PDO::FETCH_COLUMN); }catch(Throwable){ $years=[]; }
 require ROOT.'/templates/admin/header.php'; ?>
 <h1 class="text-xl font-extrabold mb-4">Media Library</h1>
 <div class="bg-white rounded-2xl border p-4">
 <form method="post" enctype="multipart/form-data" data-loading class="flex gap-2 mb-3 flex-wrap"><?= Security::csrfField() ?>
 <input type="file" name="f" accept="image/*" required class="border rounded-lg p-2 text-sm"><button class="bg-emerald-600 text-white px-4 rounded-lg text-sm font-bold">Upload</button>
 <a href="<?= Helper::url('admin/media') ?>" class="px-3 py-2 border rounded-lg text-sm">Reset</a></form>
-<form class="flex gap-2 mb-3"><input name="q" value="<?= Helper::e($q) ?>" placeholder="Cari file..." class="border rounded-lg p-2 text-sm w-full"><button type="submit" title="Cari" aria-label="Cari" class="bg-slate-800 text-white px-3 rounded-lg text-sm"><i class="fa fa-search text-xs"></i></button></form>
+<form id="mediaFilter" class="grid sm:grid-cols-2 lg:grid-cols-5 gap-2 mb-3"><input name="q" id="fq" value="<?= Helper::e($q) ?>" placeholder="Cari file..." class="border rounded-lg p-2 text-sm"><input type="date" name="date" id="fdate" value="<?= Helper::e($fdate) ?>" title="Filter tanggal" class="border rounded-lg p-2 text-sm"><input type="month" name="month" id="fmonth" value="<?= Helper::e($fmonth) ?>" title="Filter bulan" class="border rounded-lg p-2 text-sm"><select name="year" id="fyear" class="border rounded-lg p-2 text-sm"><option value="">Semua tahun</option><?php foreach($years as $y): ?><option value="<?= $y ?>" <?= (string)$fyear===(string)$y?'selected':'' ?>><?= $y ?></option><?php endforeach; ?></select><a href="<?= Helper::url('admin/media') ?>" class="px-3 py-2 border rounded-lg text-sm text-center" title="Reset">Reset</a></form>
+<script>
+(function(){
+  const f=document.getElementById('mediaFilter');if(!f)return;
+  let t=null;
+  const go=()=>f.submit();
+  f.querySelector('#fq')?.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(go,500)});
+  ['fdate','fmonth','fyear'].forEach(id=>f.querySelector('#'+id)?.addEventListener('change',go));
+})();
+</script>
 <form method="post" id="bulkForm"><?= Security::csrfField() ?><input type="hidden" name="act" value="bulk_delete"></form>
 <div class="flex items-center gap-2 mb-3 text-sm">
 <label class="flex gap-1.5 items-center text-xs"><input type="checkbox" id="checkAll"> Pilih semua</label>
@@ -80,3 +110,4 @@ require ROOT.'/templates/admin/header.php'; ?>
 })();
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

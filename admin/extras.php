@@ -20,7 +20,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 </div>
 <form method="post" id="bulkEks"><?= Security::csrfField() ?><input type="hidden" name="act" value="bulk_delete"><input type="hidden" name="kind" value="ekskul"></form>
 <form method="post" id="bulkPres"><?= Security::csrfField() ?><input type="hidden" name="act" value="bulk_delete"><input type="hidden" name="kind" value="prestasi"></form>
-<div class="grid lg:grid-cols-2 gap-3 text-sm items-start">
+<div class="grid gap-3 text-sm items-start">
 <div class="bg-white rounded-2xl border overflow-hidden">
 <div class="px-4 py-3 font-bold border-b">Ekstrakurikuler</div>
 <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 border-b text-sm"><span id="selCountEks" class="text-slate-500">0 dipilih</span><button type="button" id="btnBulkEks" class="ml-auto bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg"><i class="fa fa-trash mr-1"></i>Hapus Terpilih</button></div>
@@ -54,32 +54,28 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div id="eksModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
 <div class="fixed inset-0 bg-slate-900/60" data-close></div>
 <div class="relative min-h-full flex items-start justify-center p-3 sm:p-6">
-<div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl my-4 overflow-hidden">
-<div class="flex items-center gap-2 px-5 py-3.5 border-b bg-white"><h2 class="font-extrabold" id="eksTitle"><i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Ekskul</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
-<form method="post" data-loading class="p-5 grid gap-3 text-sm bg-white"><?= Security::csrfField() ?>
+<div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl my-4">
+<div class="flex items-center gap-2 px-4 py-3 border-b bg-white"><h2 class="font-extrabold text-sm" id="eksTitle"><i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Ekskul</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
+<form method="post" data-loading class="p-4 grid gap-2.5 text-sm bg-white"><?= Security::csrfField() ?>
 <input type="hidden" name="kind" value="ekskul"><input type="hidden" name="id" id="e_id" value="0">
 <label class="grid gap-1 font-semibold">Nama<input name="name" id="e_name" required placeholder="Pramuka" class="border rounded-lg p-2 font-normal"></label>
-<div class="grid md:grid-cols-2 gap-3">
 <label class="grid gap-1 font-semibold">Pembina<input name="coach" id="e_coach" placeholder="Nama pembina" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Jadwal<input name="schedule" id="e_schedule" placeholder="Sabtu 08:00" class="border rounded-lg p-2 font-normal"></label>
-</div>
 <label class="grid gap-1 font-semibold">Deskripsi<textarea name="description" id="e_desc" rows="3" placeholder="Deskripsi ekskul..." class="border rounded-lg p-2 font-normal"></textarea></label>
-<div class="flex justify-center md:col-span-2"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
+<div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 <div id="presModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
 <div class="fixed inset-0 bg-slate-900/60" data-close></div>
 <div class="relative min-h-full flex items-start justify-center p-3 sm:p-6">
-<div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl my-4 overflow-hidden">
-<div class="flex items-center gap-2 px-5 py-3.5 border-b bg-white"><h2 class="font-extrabold" id="presTitle"><i class="fa fa-trophy text-emerald-600 mr-1"></i>Tambah Prestasi</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
-<form method="post" data-loading class="p-5 grid gap-3 text-sm bg-white"><?= Security::csrfField() ?>
+<div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl my-4">
+<div class="flex items-center gap-2 px-4 py-3 border-b bg-white"><h2 class="font-extrabold text-sm" id="presTitle"><i class="fa fa-trophy text-emerald-600 mr-1"></i>Tambah Prestasi</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
+<form method="post" data-loading class="p-4 grid gap-2.5 text-sm bg-white"><?= Security::csrfField() ?>
 <input type="hidden" name="kind" value="prestasi"><input type="hidden" name="id" id="p_id" value="0">
 <label class="grid gap-1 font-semibold">Judul<input name="title" id="p_title" required placeholder="Juara 1 OSN" class="border rounded-lg p-2 font-normal"></label>
-<div class="grid md:grid-cols-2 gap-3">
 <label class="grid gap-1 font-semibold">Tahun<input name="year" id="p_year" placeholder="2024" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Tingkat<input name="level" id="p_level" placeholder="Nasional" class="border rounded-lg p-2 font-normal"></label>
-</div>
 <label class="grid gap-1 font-semibold">Deskripsi<textarea name="description" id="p_desc" rows="3" placeholder="Deskripsi prestasi..." class="border rounded-lg p-2 font-normal"></textarea></label>
-<div class="flex justify-center md:col-span-2"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
+<div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 
 <script>
@@ -117,3 +113,4 @@ document.querySelectorAll('#eksModal [data-close],#presModal [data-close]').forE
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

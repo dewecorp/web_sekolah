@@ -46,9 +46,9 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div id="statModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
 <div class="fixed inset-0 bg-slate-900/60" data-close></div>
 <div class="relative min-h-full flex items-start justify-center p-3 sm:p-6">
-<div class="relative w-full bg-white shadow-2xl my-4 mx-auto" style="max-width:620px;width:calc(100% - 2rem);overflow:visible;border-radius:1rem">
-<div class="flex items-center gap-2 px-4 py-3 border-b bg-white" style="border-radius:1rem 1rem 0 0"><h2 class="font-extrabold text-sm" id="modalTitle"><i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Statistik</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
-<form method="post" data-loading class="p-3 grid gap-2 text-[13px] bg-white md:grid-cols-2" style="border-radius:0 0 1rem 1rem"><?= Security::csrfField() ?>
+<div class="relative w-full bg-white rounded-2xl shadow-2xl my-4 mx-auto max-w-md overflow-hidden">
+<div class="flex items-center gap-2 px-4 py-3 border-b bg-white"><h2 class="font-extrabold text-sm" id="modalTitle"><i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Statistik</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
+<form method="post" data-loading class="p-4 grid gap-2.5 text-sm bg-white"><?= Security::csrfField() ?>
 <input type="hidden" name="id" id="f_id" value="0">
 <label class="grid gap-1 font-semibold">Nama Statistik<input name="name" id="f_name" required placeholder="Siswa Aktif" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Deskripsi singkat<input name="description" id="f_desc" placeholder="Peserta didik tahun ini" class="border rounded-lg p-2 font-normal"></label>
@@ -60,7 +60,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <?php foreach(['from-emerald-500 to-teal-600'=>'Hijau','from-sky-500 to-indigo-600'=>'Biru','from-amber-500 to-orange-600'=>'Oranye','from-violet-500 to-fuchsia-600'=>'Ungu','from-rose-500 to-pink-600'=>'Merah muda','from-slate-600 to-slate-800'=>'Abu gelap'] as $gv=>$gl): ?><option value="<?= $gv ?>"><?= $gl ?></option><?php endforeach; ?>
 </select></label>
 <label class="grid gap-1 font-semibold">Status<select name="is_active" id="f_active" class="border rounded-lg p-2 font-normal"><option value="1">Aktif</option><option value="0">Nonaktif</option></select></label>
-<div class="flex justify-center md:col-span-2"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
+<div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 <script>
 (function(){const ca=document.getElementById('checkAll'),sc=document.getElementById('selCount'),bb=document.getElementById('btnBulk'),bf=document.getElementById('bulkForm');if(!ca||!bb||!bf)return;const up=()=>{sc.textContent=document.querySelectorAll('.rowcheck:checked').length+' dipilih'};ca.addEventListener('change',()=>{document.querySelectorAll('.rowcheck').forEach(c=>c.checked=ca.checked);up()});document.addEventListener('change',e=>{if(e.target.classList&&e.target.classList.contains('rowcheck'))up()});bb.addEventListener('click',()=>{const n=document.querySelectorAll('.rowcheck:checked').length;if(!n){Swal.fire('Pilih dulu','Centang minimal 1 data.','warning');return}Swal.fire({title:'Hapus '+n+' data?',text:'Tidak dapat dikembalikan.',icon:'warning',showCancelButton:true,confirmButtonText:'Ya Hapus',cancelButtonText:'Batal',confirmButtonColor:'#dc2626'}).then(r=>{if(r.isConfirmed)bf.submit()})});})();
@@ -89,3 +89,4 @@ modal.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',clo
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

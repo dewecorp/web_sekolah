@@ -44,3 +44,4 @@ if ($seg === 'sliders') { header('Location: ' . Helper::url('admin/sections')); 
 if ($seg === 'academic') { header('Location: ' . Helper::url('admin/structure')); exit; }
 if (!in_array($seg, $allow, true)) { http_response_code(403); require ROOT.'/templates/error/403.php'; exit; }
 require ROOT.'/admin/'.$seg.'.php';
+

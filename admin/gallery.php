@@ -32,7 +32,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div id="albumModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
 <div class="fixed inset-0 bg-slate-900/60" data-close></div>
 <div class="relative min-h-full flex items-start justify-center p-3 sm:p-6">
-<div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl my-4 overflow-hidden">
+<div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl my-4">
 <div class="flex items-center gap-2 px-5 py-3.5 border-b"><h2 class="font-extrabold" id="modalTitle"><i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Album</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
 <form method="post" data-loading class="p-5 grid gap-2.5 text-sm"><?= Security::csrfField() ?>
 <input type="hidden" name="act" value="album"><input type="hidden" name="id" id="f_id" value="0">
@@ -45,7 +45,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div id="photoModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
 <div class="fixed inset-0 bg-slate-900/60" data-close></div>
 <div class="relative min-h-full flex items-start justify-center p-3 sm:p-6">
-<div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl my-4 overflow-hidden">
+<div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl my-4">
 <div class="flex items-center gap-2 px-5 py-3.5 border-b"><h2 class="font-extrabold"><i class="fa fa-image text-emerald-600 mr-1"></i>Upload Foto</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
 <form method="post" enctype="multipart/form-data" data-loading class="p-5 grid gap-2.5 text-sm"><?= Security::csrfField() ?>
 <input type="hidden" name="act" value="photo"><input type="hidden" name="gallery_id" value="<?= $sel ?>">
@@ -72,3 +72,4 @@ document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAll()});
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

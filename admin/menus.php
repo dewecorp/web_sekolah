@@ -339,3 +339,4 @@ function saveOrder(silent){
 document.getElementById('btnSaveOrder')?.addEventListener('click',()=>saveOrder(false));
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

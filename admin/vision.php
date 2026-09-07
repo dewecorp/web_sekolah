@@ -51,7 +51,7 @@ let vmEditors=[];
   if(!window.ClassicEditor){ document.querySelectorAll('.editorWarn').forEach(x=>x.classList.remove('hidden')); return; }
   ['visionContent','missionContent','goalsContent'].forEach(id=>{
     const el=document.getElementById(id); if(!el)return;
-    ClassicEditor.create(el).then(e=>{vmEditors.push(e)}).catch(()=>{ el.closest('label')?.querySelector('.editorWarn')?.classList.remove('hidden') });
+    ClassicEditor.create(el,{extraPlugins:[window.CKUploadAdapter]}).then(e=>{vmEditors.push(e)}).catch(()=>{ el.closest('label')?.querySelector('.editorWarn')?.classList.remove('hidden') });
   });
 })();
 document.getElementById('vmForm').addEventListener('submit',()=>{
@@ -61,3 +61,4 @@ document.getElementById('vmForm').addEventListener('submit',()=>{
 </script>
 <style>.ck-editor__editable{min-height:220px}.ck-content h1{font-size:1.6rem;font-weight:800}.ck-content h2{font-size:1.35rem;font-weight:800}.ck-content h3{font-size:1.15rem;font-weight:700}.ck-content table{width:100%}</style>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

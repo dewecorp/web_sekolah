@@ -72,11 +72,11 @@ require ROOT.'/templates/admin/header.php';
 <div class="bg-white rounded-2xl border p-4">
 <div class="flex flex-wrap items-center gap-2 mb-2"><h2 class="font-bold text-sm"><i class="fa fa-calendar-days text-violet-500 mr-1"></i>Agenda Terdekat</h2><span class="text-[11px] bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full font-bold"><?= $nAgenda ?> agenda</span><a href="<?= Helper::url('admin/agenda') ?>" class="ml-auto text-[11px] text-emerald-600 font-bold">Kelola →</a></div>
 <?php if(!$upcoming): ?><div class="py-6 text-center"><span class="w-11 h-11 rounded-2xl bg-slate-100 text-slate-400 grid place-items-center mx-auto"><i class="fa fa-calendar-xmark"></i></span><p class="text-sm text-slate-500 mt-2 font-semibold">Belum ada agenda mendatang</p></div>
-<?php else: foreach($upcoming as $a): $dd=(int)floor((strtotime($a['event_date'])-strtotime(date('Y-m-d')))/86400); $when=$dd===0?'Hari ini':($dd===1?'Besok':"H-$dd"); ?>
+<?php else: foreach($upcoming as $a): $edEnd=(($a['end_date']??'')!=='')?$a['end_date']:$a['event_date']; $dd=(int)floor((strtotime($a['event_date'])-strtotime(date('Y-m-d')))/86400); $ddEnd=(int)floor((strtotime($edEnd)-strtotime(date('Y-m-d')))/86400); $when=$ddEnd<0?'Selesai':(($dd<=0&&$ddEnd>=0)?'Berlangsung':($dd===1?'Besok':($dd<=0?'Hari ini':"H-$dd"))); ?>
 <div class="flex gap-2.5 items-start border border-slate-100 bg-slate-50 rounded-xl px-3 py-2.5 mb-2">
 <span class="w-11 shrink-0 text-center bg-white border rounded-lg py-1"><b class="block text-base leading-none text-violet-600"><?= date('d',strtotime($a['event_date'])) ?></b><span class="text-[10px] text-slate-500 uppercase"><?= $blnId[(int)date('n',strtotime($a['event_date']))] ?></span></span>
 <span class="min-w-0 flex-1"><b class="text-sm block truncate"><?= Helper::e($a['title']) ?></b>
-<span class="text-[11px] text-slate-500 block mt-0.5"><i class="fa fa-location-dot mr-1"></i><?= Helper::e($a['location']?:'Lokasi TBD') ?><?php if(!empty($a['start_time'])): ?> • <i class="fa fa-clock mr-1"></i><?= Helper::e($a['start_time']) ?><?php endif; ?></span>
+<span class="text-[11px] text-slate-500 block mt-0.5"><i class="fa fa-calendar-day mr-1"></i><?= date('d-m-Y',strtotime($a['event_date'])) ?><?= ($edEnd!==$a['event_date'])?' – '.date('d-m-Y',strtotime($edEnd)):'' ?> • <i class="fa fa-location-dot mr-1"></i><?= Helper::e($a['location']?:'Lokasi TBD') ?><?php if(!empty($a['start_time'])): ?> • <i class="fa fa-clock mr-1"></i><?= Helper::e($a['start_time']) ?><?php endif; ?></span>
 <?php if(!empty($a['description'])): ?><span class="text-xs text-slate-500 block truncate mt-0.5"><?= Helper::e($a['description']) ?></span><?php endif; ?></span>
 <span class="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 <?= $dd===0?'bg-red-100 text-red-700':'bg-violet-100 text-violet-700' ?>"><?= $when ?></span></div>
 <?php endforeach; endif; ?></div>
@@ -109,3 +109,4 @@ data:{labels:<?= json_encode($labels) ?>,datasets:[
 options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

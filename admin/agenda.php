@@ -5,8 +5,9 @@ $act=$_POST['act']??'save';
 if($act==='bulk_delete'){ $ids=array_filter(array_map('intval',(array)($_POST['ids']??[]))); if(!$ids){ Session::flash('err','Pilih minimal 1 data.'); } else { $ph=implode(',',array_fill(0,count($ids),'?')); $db->prepare("DELETE FROM agenda WHERE id IN ($ph)")->execute(array_values($ids)); Auth::log($db,'delete','agenda','Hapus bulk agenda'); Session::flash('ok',count($ids).' data dihapus.'); } }
 elseif($act==='delete'){ $db->prepare("DELETE FROM agenda WHERE id=?")->execute([(int)$_POST['id']]); Auth::log($db,'delete','agenda','Hapus agenda'); Session::flash('ok','Dihapus.'); }
 else{ $t=trim($_POST['title']??''); if($t===''){ Session::flash('err','Judul wajib.'); } else {
-if(!empty($_POST['id'])) $db->prepare("UPDATE agenda SET title=?,event_date=?,start_time=?,end_time=?,location=?,description=?,status=? WHERE id=?")->execute([$t,$_POST['event_date']??date('Y-m-d'),$_POST['start_time']??'',$_POST['end_time']??'',$_POST['location']??'',$_POST['description']??'',$_POST['status']??'published',(int)$_POST['id']]);
-else $db->prepare("INSERT INTO agenda(title,event_date,start_time,end_time,location,description,status) VALUES(?,?,?,?,?,?,?)")->execute([$t,$_POST['event_date']??date('Y-m-d'),$_POST['start_time']??'',$_POST['end_time']??'',$_POST['location']??'',$_POST['description']??'',$_POST['status']??'published']);
+$sd=$_POST['event_date']??date('Y-m-d'); $ed=trim($_POST['end_date']??''); if($ed===''||$ed<$sd)$ed=$sd;
+if(!empty($_POST['id'])) $db->prepare("UPDATE agenda SET title=?,event_date=?,end_date=?,start_time=?,end_time=?,location=?,description=?,status=? WHERE id=?")->execute([$t,$sd,$ed,$_POST['start_time']??'',$_POST['end_time']??'',$_POST['location']??'',$_POST['description']??'',$_POST['status']??'published',(int)$_POST['id']]);
+else $db->prepare("INSERT INTO agenda(title,event_date,end_date,start_time,end_time,location,description,status) VALUES(?,?,?,?,?,?,?,?)")->execute([$t,$sd,$ed,$_POST['start_time']??'',$_POST['end_time']??'',$_POST['location']??'',$_POST['description']??'',$_POST['status']??'published']);
 Auth::log($db,'save','agenda',"Simpan $t"); Session::flash('ok','Disimpan.'); } }
 header('Location: '.Helper::url('admin/agenda')); exit; }
 $rows=$db->query("SELECT * FROM agenda ORDER BY event_date DESC LIMIT 100")->fetchAll();
@@ -25,30 +26,30 @@ require ROOT.'/templates/admin/header.php'; ?>
 <?php $no=1; foreach($rows as $r): ?>
 <tr class="border-t hover:bg-slate-50">
 <td class="p-3"><input type="checkbox" form="bulkForm" name="ids[]" value="<?= $r['id'] ?>" class="rowcheck"></td><td class="p-3 text-slate-500"><?= $no++ ?></td><td class="p-3 font-semibold"><?= Helper::e($r['title']) ?><span class="block text-[11px] font-normal text-slate-400"><?= Helper::e(Helper::excerpt($r['description']??'',80)) ?></span></td>
-<td class="p-3 text-xs whitespace-nowrap"><?= Helper::e($r['event_date']) ?><?= $r['start_time']?' <span class="text-slate-400">'.Helper::e(substr((string)$r['start_time'],0,5)).($r['end_time']?'-'.Helper::e(substr((string)$r['end_time'],0,5)):'').'</span>':'' ?></td>
+<?php $fmtD=fn($d)=>$d?date('d-m-Y',strtotime($d)):''; ?>
+<td class="p-3 text-xs whitespace-nowrap"><?= Helper::e($fmtD($r['event_date'])) ?><?= ($r['end_date']&&$r['end_date']!==$r['event_date'])?' – '.Helper::e($fmtD($r['end_date'])):'' ?><?= $r['start_time']?' <span class="text-slate-400">'.Helper::e(substr((string)$r['start_time'],0,5)).($r['end_time']?'-'.Helper::e(substr((string)$r['end_time'],0,5)):'').'</span>':'' ?></td>
 <td class="p-3 text-xs text-slate-500"><?= Helper::e($r['location']??'') ?></td>
 <td class="p-3"><span class="flex gap-1 justify-end">
-<button class="btn-edit w-8 h-8 border rounded-lg grid place-items-center bg-white hover:text-emerald-600" title="Edit" data-row='<?= htmlspecialchars(json_encode(['id'=>$r['id'],'title'=>$r['title'],'event_date'=>$r['event_date'],'start_time'=>substr((string)($r['start_time']??''),0,5),'end_time'=>substr((string)($r['end_time']??''),0,5),'location'=>$r['location']??'','description'=>$r['description']??'','status'=>$r['status']]),ENT_QUOTES) ?>'><i class="fa fa-pen text-xs"></i></button>
+<button class="btn-edit w-8 h-8 border rounded-lg grid place-items-center bg-white hover:text-emerald-600" title="Edit" data-row='<?= htmlspecialchars(json_encode(['id'=>$r['id'],'title'=>$r['title'],'event_date'=>$r['event_date'],'end_date'=>$r['end_date']??$r['event_date'],'start_time'=>substr((string)($r['start_time']??''),0,5),'end_time'=>substr((string)($r['end_time']??''),0,5),'location'=>$r['location']??'','description'=>$r['description']??'','status'=>$r['status']]),ENT_QUOTES) ?>'><i class="fa fa-pen text-xs"></i></button>
 <form method="post" data-confirm><?= Security::csrfField() ?><input type="hidden" name="act" value="delete"><input type="hidden" name="id" value="<?= $r['id'] ?>"><button class="w-8 h-8 border rounded-lg grid place-items-center bg-white text-red-600" title="Hapus"><i class="fa fa-trash text-xs"></i></button></form>
 </span></td></tr><?php endforeach; ?></table></div></div>
 
 <div id="agendaModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
 <div class="fixed inset-0 bg-slate-900/60" data-close></div>
 <div class="relative min-h-full flex items-start justify-center p-3 sm:p-6">
-<div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl my-4 overflow-hidden">
-<div class="flex items-center gap-2 px-5 py-3.5 border-b bg-white"><h2 class="font-extrabold" id="modalTitle"><i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Agenda</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
-<form method="post" data-loading class="p-5 grid gap-3 text-sm bg-white"><?= Security::csrfField() ?>
+<div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl my-4">
+<div class="flex items-center gap-2 px-4 py-3 border-b bg-white"><h2 class="font-extrabold text-sm" id="modalTitle"><i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Agenda</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
+<form method="post" data-loading class="p-4 grid gap-2.5 text-sm bg-white"><?= Security::csrfField() ?>
 <input type="hidden" name="id" id="f_id" value="0">
 <label class="grid gap-1 font-semibold">Judul<input name="title" id="f_title" required placeholder="Rapat wali murid" class="border rounded-lg p-2 font-normal"></label>
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-<label class="grid gap-1 font-semibold">Tanggal<input type="date" name="event_date" id="f_date" class="border rounded-lg p-2 font-normal"></label>
+<label class="grid gap-1 font-semibold">Tanggal Mulai<input type="date" name="event_date" id="f_date" class="border rounded-lg p-2 font-normal"></label>
+<label class="grid gap-1 font-semibold">Tanggal Selesai<input type="date" name="end_date" id="f_end_date" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Mulai<input type="time" name="start_time" id="f_start" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Selesai<input type="time" name="end_time" id="f_end" class="border rounded-lg p-2 font-normal"></label>
-</div>
 <label class="grid gap-1 font-semibold">Lokasi<input name="location" id="f_loc" placeholder="Aula sekolah" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Deskripsi<textarea name="description" id="f_desc" rows="4" placeholder="Detail agenda..." class="border rounded-lg p-2 font-normal"></textarea></label>
 <label class="grid gap-1 font-semibold">Status<select name="status" id="f_status" class="border rounded-lg p-2 font-normal"><option value="published">published</option><option value="draft">draft</option></select></label>
-<div class="flex justify-center md:col-span-2"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
+<div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 
 <script>
@@ -61,6 +62,7 @@ function openModal(d){
   document.getElementById('f_id').value=d?.id||0;
   document.getElementById('f_title').value=d?.title||'';
   document.getElementById('f_date').value=d?.event_date||'<?= date('Y-m-d') ?>';
+  document.getElementById('f_end_date').value=d?.end_date||d?.event_date||'<?= date('Y-m-d') ?>';
   document.getElementById('f_start').value=d?.start_time||'';
   document.getElementById('f_end').value=d?.end_time||'';
   document.getElementById('f_loc').value=d?.location||'';
@@ -76,3 +78,4 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 <?php if($edit): ?>openModal(<?= json_encode(['id'=>$edit['id'],'title'=>$edit['title'],'event_date'=>$edit['event_date'],'start_time'=>substr((string)($edit['start_time']??''),0,5),'end_time'=>substr((string)($edit['end_time']??''),0,5),'location'=>$edit['location']??'','description'=>$edit['description']??'','status'=>$edit['status']]) ?>);<?php endif; ?>
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

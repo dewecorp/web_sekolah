@@ -72,9 +72,9 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div id="teacherModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
 <div class="fixed inset-0 bg-slate-900/60" data-close></div>
 <div class="relative min-h-full flex items-start justify-center p-3 sm:p-6">
-<div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl my-4 overflow-hidden">
-<div class="flex items-center gap-2 px-5 py-3.5 border-b bg-white"><h2 class="font-extrabold" id="modalTitle"><i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Guru/Staff</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
-<form method="post" enctype="multipart/form-data" data-loading class="p-5 grid gap-3 text-sm bg-white md:grid-cols-2" id="teacherForm"><?= Security::csrfField() ?>
+<div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl my-4">
+<div class="flex items-center gap-2 px-4 py-3 border-b bg-white"><h2 class="font-extrabold text-sm" id="modalTitle"><i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Guru/Staff</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
+<form method="post" enctype="multipart/form-data" data-loading class="p-4 grid gap-2.5 text-sm bg-white" id="teacherForm"><?= Security::csrfField() ?>
 <input type="hidden" name="id" id="f_id" value="0"><input type="hidden" name="old_photo" id="f_old" value="">
 <label class="grid gap-1 font-semibold">Nama<input name="name" id="f_name" required placeholder="Nama lengkap" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">NUPTK<input name="nip" id="f_nip" placeholder="NUPTK" class="border rounded-lg p-2 font-normal"></label>
@@ -90,13 +90,13 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div class="grid gap-1 flex-1"><input type="file" name="photo" id="f_photo" accept="image/*" class="border rounded-lg p-2 w-full bg-white text-xs"></div>
 </div></div>
 <label class="grid gap-1 font-semibold">Deskripsi<textarea name="description" id="f_desc" rows="4" placeholder="Profil singkat..." class="border rounded-lg p-2 font-normal"></textarea></label>
-<div class="flex justify-center md:col-span-2"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
+<div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 
 <div id="importModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
 <div class="fixed inset-0 bg-slate-900/60" data-close-import></div>
 <div class="relative min-h-full flex items-start justify-center p-3 sm:p-6">
-<div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl my-4 overflow-hidden">
+<div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl my-4">
 <div class="flex items-center gap-2 px-5 py-3.5 border-b bg-white"><h2 class="font-extrabold"><i class="fa fa-file-excel text-emerald-600 mr-1"></i>Impor Excel Guru</h2><button data-close-import class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
 <form method="post" data-loading id="importForm" class="p-5 grid gap-3 text-sm bg-white" novalidate><?= Security::csrfField() ?>
 <input type="hidden" name="act" value="import"><input type="hidden" name="rows_json" id="rows_json">
@@ -210,3 +210,4 @@ document.getElementById('f_photo').addEventListener('change',e=>{const f=e.targe
 })();
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

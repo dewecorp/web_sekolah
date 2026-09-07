@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-$title='Berita'; $q=trim($_GET['q']??''); $page=max(1,(int)($_GET['page']??1)); $per=10; $off=($page-1)*$per;
+$title='Berita'; $q=trim($_GET['q']??''); $fcat=trim($_GET['cat']??''); $fdate=trim($_GET['date']??''); $fmonth=trim($_GET['month']??''); $fyear=trim($_GET['year']??''); $page=max(1,(int)($_GET['page']??1)); $per=10; $off=($page-1)*$per;
 $edit=null; if(isset($_GET['edit'])){ $s=$db->prepare("SELECT * FROM posts WHERE id=? AND deleted_at IS NULL"); $s->execute([(int)$_GET['edit']]); $edit=$s->fetch(); }
 if($_SERVER['REQUEST_METHOD']==='POST'){
   if(!Security::verifyCsrf($_POST['csrf']??null)){ Session::flash('err','CSRF tidak valid.'); header('Location: '.Helper::url('admin/posts')); exit; }
@@ -26,9 +26,15 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
   header('Location: '.Helper::url('admin/posts')); exit;
 }
 $cats=$db->query("SELECT * FROM categories ORDER BY name")->fetchAll();
+try{ $pyears=$db->query("SELECT DISTINCT YEAR(COALESCE(published_at,created_at)) y FROM posts WHERE deleted_at IS NULL ORDER BY y DESC")->fetchAll(PDO::FETCH_COLUMN); }catch(Throwable){ $pyears=[]; }
 $isAuthor = ($_SESSION['user']['role'] ?? '') === 'author'; $uid = (int)$_SESSION['user']['id'];
 if ($isAuthor && $edit && (int)($edit['author_id'] ?? 0) !== $uid) $edit = null;
-$w="WHERE p.deleted_at IS NULL".($q?" AND p.title LIKE ?":""); $pr=$q?["%$q%"]:[];
+$w="WHERE p.deleted_at IS NULL"; $pr=[];
+if($q){$w.=" AND p.title LIKE ?";$pr[]="%$q%";}
+if($fcat!==''){if($fcat==='0'){$w.=" AND p.category_id IS NULL";}else{$w.=" AND p.category_id=?";$pr[]=(int)$fcat;}}
+if(preg_match('/^\d{4}-\d{2}-\d{2}$/',$fdate)){$w.=" AND DATE(COALESCE(p.published_at,p.created_at))=?";$pr[]=$fdate;}
+if(preg_match('/^\d{4}-\d{2}$/',$fmonth)){$w.=" AND DATE_FORMAT(COALESCE(p.published_at,p.created_at),'%Y-%m')=?";$pr[]=$fmonth;}
+if(preg_match('/^\d{4}$/',$fyear)){$w.=" AND YEAR(COALESCE(p.published_at,p.created_at))=?";$pr[]=$fyear;}
 if ($isAuthor) { $w .= " AND p.author_id=$uid"; }
 $st=$db->prepare("SELECT COUNT(*) FROM posts p $w"); $st->execute($pr); $total=(int)$st->fetchColumn();
 $st=$db->prepare("SELECT p.*,c.name cat FROM posts p LEFT JOIN categories c ON c.id=p.category_id $w ORDER BY p.id DESC LIMIT $per OFFSET $off"); $st->execute($pr); $rows=$st->fetchAll();
@@ -39,6 +45,15 @@ require ROOT.'/templates/admin/header.php'; ?>
 <form class="ml-2 hidden sm:flex gap-1"><input name="q" value="<?= Helper::e($q) ?>" placeholder="Cari judul..." class="border rounded-lg px-3 py-1.5 text-sm w-52"><button type="submit" title="Cari" aria-label="Cari" class="bg-slate-800 text-white px-3 rounded-lg text-sm"><i class="fa fa-search text-xs"></i></button></form>
 <button id="btnAdd" class="ml-auto bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-4 py-2 rounded-xl shadow"><i class="fa fa-plus mr-1"></i>Tambah Berita</button>
 </div>
+<form id="postFilter" class="grid sm:grid-cols-2 lg:grid-cols-6 gap-2 mb-4 text-sm"><input name="q" id="pq" value="<?= Helper::e($q) ?>" placeholder="Cari judul..." class="border rounded-lg px-3 py-1.5"><select name="cat" id="pcat" class="border rounded-lg px-3 py-1.5"><option value="">Semua kategori</option><option value="0" <?= $fcat==='0'?'selected':'' ?>>Tanpa kategori</option><?php foreach($cats as $c): ?><option value="<?= $c['id'] ?>" <?= (string)$fcat===(string)$c['id']?'selected':'' ?>><?= Helper::e($c['name']) ?></option><?php endforeach; ?></select><input type="date" name="date" id="pdate" value="<?= Helper::e($fdate) ?>" title="Filter tanggal" class="border rounded-lg px-3 py-1.5"><input type="month" name="month" id="pmonth" value="<?= Helper::e($fmonth) ?>" title="Filter bulan" class="border rounded-lg px-3 py-1.5"><select name="year" id="pyear" class="border rounded-lg px-3 py-1.5"><option value="">Semua tahun</option><?php foreach($pyears as $y): ?><option value="<?= $y ?>" <?= (string)$fyear===(string)$y?'selected':'' ?>><?= $y ?></option><?php endforeach; ?></select><a href="<?= Helper::url('admin/posts') ?>" class="px-3 py-1.5 border rounded-lg text-center" title="Reset">Reset</a></form>
+<script>
+(function(){
+  const f=document.getElementById('postFilter');if(!f)return;
+  let t=null;
+  f.querySelector('#pq')?.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>f.submit(),500)});
+  ['pcat','pdate','pmonth','pyear'].forEach(id=>f.querySelector('#'+id)?.addEventListener('change',()=>f.submit()));
+})();
+</script>
 <form method="post" id="bulkForm"><?= Security::csrfField() ?><input type="hidden" name="act" value="bulk_delete"></form>
 <div class="bg-white rounded-2xl border overflow-hidden">
 <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 border-b text-sm"><span id="selCount" class="text-slate-500">0 dipilih</span><button type="button" id="btnBulk" class="ml-auto bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg"><i class="fa fa-trash mr-1"></i>Hapus Terpilih</button></div>
@@ -48,7 +63,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <?php $no=$off+1; foreach($rows as $r): ?>
 <tr class="border-t hover:bg-slate-50">
 <td class="p-3"><input type="checkbox" form="bulkForm" name="ids[]" value="<?= $r['id'] ?>" class="rowcheck"></td><td class="p-3 text-slate-500"><?= $no++ ?></td><td class="p-3 font-semibold"><?= Helper::e($r['title']) ?><span class="block text-[11px] font-normal text-slate-400"><?= Helper::e($r['cat']??'Tanpa kategori') ?> • /berita/<?= Helper::e($r['slug']) ?></span></td>
-<td class="p-3"><span class="text-xs font-semibold px-2 py-1 rounded-full bg-sky-50 text-sky-700"><?= Helper::e($r['cat']??'Tanpa kategori') ?></span></td>
+<td class="p-3"><span class="inline-block text-xs font-semibold px-2 py-1 rounded-full bg-sky-50 text-sky-700 whitespace-nowrap"><?= Helper::e($r['cat']??'Tanpa kategori') ?></span></td>
 <td class="p-3"><span class="text-xs font-bold px-2 py-0.5 rounded-full <?= $r['status']==='published'?'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-700' ?>"><?= $r['status'] ?></span></td>
 <td class="p-3 text-xs text-slate-500"><?= Helper::e(Helper::tgl($r['published_at']??$r['created_at'])) ?></td>
 <td class="p-3"><span class="flex gap-1 justify-end">
@@ -62,21 +77,16 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div id="postModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
 <div class="fixed inset-0 bg-slate-900/60" data-close></div>
 <div class="relative min-h-full flex items-start justify-center p-3 sm:p-6">
-<div class="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl my-4 overflow-hidden">
+<div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl my-4">
 <div class="flex items-center gap-2 px-5 py-3.5 border-b bg-white"><h2 class="font-extrabold" id="modalTitle"><i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Berita</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
 <form method="post" enctype="multipart/form-data" data-loading class="p-5 grid gap-3 text-sm bg-white" id="postForm"><?= Security::csrfField() ?>
 <input type="hidden" name="id" id="f_id" value="0"><input type="hidden" name="old_img" id="f_old" value="">
-<div class="grid md:grid-cols-2 gap-3">
 <label class="grid gap-1 font-semibold">Judul<input name="title" id="f_title" required placeholder="Judul berita" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Slug <span class="font-normal text-slate-400 text-xs">otomatis dari judul</span><input name="slug" id="f_slug" placeholder="judul-berita" class="border rounded-lg p-2 font-normal font-mono text-xs"></label>
-</div>
-<div class="grid md:grid-cols-2 gap-3">
 <label class="grid gap-1 font-semibold">Kategori<select name="category_id" id="f_cat" class="border rounded-lg p-2 font-normal"><option value="">- Tanpa kategori -</option><?php foreach($cats as $c): ?><option value="<?= $c['id'] ?>"><?= Helper::e($c['name']) ?></option><?php endforeach; ?></select></label>
 <label class="grid gap-1 font-semibold">Tanggal Publish<input type="datetime-local" name="published_at" id="f_pub" value="<?= date('Y-m-d\TH:i') ?>" class="border rounded-lg p-2 font-normal"></label>
-</div>
 <label class="grid gap-1 font-semibold">Excerpt <span class="font-normal text-slate-400 text-xs">ringkasan kartu berita</span><textarea name="excerpt" id="f_ex" rows="2" placeholder="Ringkasan singkat..." class="border rounded-lg p-2 font-normal"></textarea></label>
 <label class="grid gap-1 font-semibold">Konten<textarea name="content" id="postContent" rows="10"></textarea><span id="editorWarn" class="hidden text-xs font-normal text-red-600">Editor gagal dimuat (CDN diblokir). Textarea biasa tetap bisa disimpan.</span></label>
-<div class="grid md:grid-cols-2 gap-3">
 <div class="border rounded-xl p-3 bg-slate-50"><p class="text-xs font-bold mb-1.5"><i class="fa fa-image mr-1 text-emerald-600"></i>Featured Image</p>
 <img id="f_prev" alt="" class="hidden h-28 w-full object-cover rounded-lg border mb-1.5">
 <div class="flex gap-1.5 mb-1.5">
@@ -87,14 +97,13 @@ require ROOT.'/templates/admin/header.php'; ?>
 <label class="text-xs flex gap-1.5 items-center mt-1.5" id="wrapClear" style="display:none"><input type="checkbox" name="clear_img" value="1"> Hapus gambar</label></div>
 <label class="grid gap-1 font-semibold">Status<select name="status" id="f_status" class="border rounded-lg p-2 font-normal"><option value="draft">Draft</option><option value="published">Published</option></select>
 <span class="text-xs font-normal text-slate-400">Published langsung tampil di /berita/slug</span></label>
-</div>
-<div class="flex justify-center md:col-span-2"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
+<div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 
 <div id="mediaPicker" class="hidden fixed inset-0 z-[60] overflow-y-auto">
 <div class="fixed inset-0 bg-slate-900/70" data-close-picker></div>
 <div class="relative min-h-full flex items-start justify-center p-3 sm:p-6">
-<div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl my-4 overflow-hidden">
+<div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl my-4">
 <div class="flex items-center gap-2 px-5 py-3.5 border-b"><h2 class="font-extrabold"><i class="fa fa-photo-film text-emerald-600 mr-1"></i>Pilih Gambar</h2><button data-close-picker class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
 <div class="p-4">
 <div class="grid grid-cols-2 gap-1 mb-3 bg-slate-100 rounded-lg p-1 text-xs font-bold">
@@ -124,14 +133,21 @@ require ROOT.'/templates/admin/header.php'; ?>
 const modal=document.getElementById('postModal');
 const slugify=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 let postEditor=null,pendingData=null;
+function syncSelect(id){
+  const sel=document.getElementById(id);if(!sel)return;
+  sel.dispatchEvent(new Event('change',{bubbles:true}));
+  if(sel._cpaint)sel._cpaint();
+  if(window.__refreshSelects&&window.__refreshSelects[id])window.__refreshSelects[id]();
+}
 function openModal(d){
   document.getElementById('modalTitle').innerHTML=(d?'<i class="fa fa-pen text-emerald-600 mr-1"></i>Edit Berita':'<i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Berita');
   document.getElementById('f_id').value=d?.id||0;
   document.getElementById('f_title').value=d?.title||'';
   const s=document.getElementById('f_slug');s.value=d?.slug||'';delete s.dataset.touched;
-  document.getElementById('f_cat').value=d?.category_id||'';
+  document.getElementById('f_cat').value=d?.category_id!=null?String(d.category_id):'';
   document.getElementById('f_ex').value=d?.excerpt||'';
   document.getElementById('f_status').value=d?.status||'draft';
+  syncSelect('f_cat');syncSelect('f_status');
   document.getElementById('f_pub').value=d?.published_at||'<?= date('Y-m-d\TH:i') ?>';
   document.getElementById('f_old').value=d?.img||'';
   const pv=document.getElementById('f_prev');
@@ -156,7 +172,7 @@ function ensureEditor(){
   const el=document.querySelector('#postContent');
   const done=e=>{postEditor=e;if(pendingData){try{e.setData(pendingData)}catch(_){}pendingData=null}};
   const fail=()=>{ const w=document.getElementById('editorWarn'); if(w)w.classList.remove('hidden') };
-  try{ ClassicEditor.create(el).then(done).catch(fail); }catch(_){ fail(); }}
+  try{ ClassicEditor.create(el,{extraPlugins:[window.CKUploadAdapter]}).then(done).catch(fail); }catch(_){ fail(); }}
 document.getElementById('postForm').addEventListener('submit',()=>{ if(postEditor){ try{document.getElementById('postContent').value=postEditor.getData()}catch(_){} } });
 // ---- Pemilih gambar ala WordPress: centang dulu, tombol Masukkan baru isi ----
 const picker=document.getElementById('mediaPicker'),mgrid=document.getElementById('mgrid'),msearch=document.getElementById('msearch'),mup=document.getElementById('mup'),mfile=document.getElementById('mfile'),mInsert=document.getElementById('mInsert'),mSelInfo=document.getElementById('mSelInfo');
@@ -243,3 +259,4 @@ mup.addEventListener('click',()=>{
 </script>
 <style>.ck-editor__editable{min-height:280px}.ck-content h1{font-size:1.6rem;font-weight:800}.ck-content h2{font-size:1.35rem;font-weight:800}.ck-content h3{font-size:1.15rem;font-weight:700}.ck-content table{width:100%}.ck-balloon-panel,.ck-dropdown__panel{z-index:9999!important}#postModal{z-index:50}</style>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

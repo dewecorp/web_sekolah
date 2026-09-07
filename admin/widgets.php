@@ -29,20 +29,16 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div id="widgetModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
 <div class="fixed inset-0 bg-slate-900/60" data-close></div>
 <div class="relative min-h-full flex items-start justify-center p-3 sm:p-6">
-<div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl my-4 overflow-hidden">
+<div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl my-4">
 <div class="flex items-center gap-2 px-5 py-3.5 border-b bg-white"><h2 class="font-extrabold" id="modalTitle"><i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Widget</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
 <form method="post" data-loading class="p-5 grid gap-3 text-sm bg-white"><?= Security::csrfField() ?>
 <input type="hidden" name="id" id="f_id" value="0">
-<div class="grid md:grid-cols-2 gap-3">
 <label class="grid gap-1 font-semibold">Area<select name="area" id="f_area" class="border rounded-lg p-2 font-normal"><option value="sidebar">sidebar</option><option value="footer">footer</option><option value="homepage">homepage</option></select></label>
 <label class="grid gap-1 font-semibold">Tipe<select name="type" id="f_type" class="border rounded-lg p-2 font-normal"><option value="html">Custom HTML</option><option value="posts">Latest Posts</option><option value="agenda">Agenda</option><option value="announcements">Announcements</option><option value="contact">Contact</option><option value="social">Social Media</option></select></label>
-</div>
 <label class="grid gap-1 font-semibold">Judul<input name="title" id="f_title" placeholder="Judul" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Konten<textarea name="content" id="f_content" rows="4" placeholder="Konten/HTML" class="border rounded-lg p-2 font-normal"></textarea></label>
-<div class="grid md:grid-cols-2 gap-3">
 <label class="grid gap-1 font-semibold">Urutan<input type="number" name="sort_order" id="f_sort" value="0" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Status<select name="is_active" id="f_active" class="border rounded-lg p-2 font-normal"><option value="1">Aktif</option><option value="0">Nonaktif</option></select></label>
-</div>
 <div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 
@@ -66,3 +62,4 @@ modal.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',clo
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

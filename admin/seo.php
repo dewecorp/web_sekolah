@@ -31,3 +31,4 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div class="lg:col-span-2 flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2.5 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button></div>
 </form>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
+

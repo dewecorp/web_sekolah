@@ -11,6 +11,8 @@ if(!empty($_POST['id'])) $db->prepare("UPDATE extracurriculars SET name=?,descri
 Auth::log($db,'save','ekskul',"Simpan $nm"); Session::flash('ok','Disimpan.'); } }
 header('Location: '.Helper::url('admin/ekskul')); exit; }
 $eks=$db->query("SELECT * FROM extracurriculars ORDER BY id DESC")->fetchAll();
+$guruList=$db->query("SELECT name FROM teachers WHERE is_active=1 ORDER BY name")->fetchAll(PDO::FETCH_COLUMN) ?: [];
+$guruList=array_values(array_unique(array_filter(array_map('trim',$guruList))));
 require ROOT.'/templates/admin/header.php'; ?>
 <div class="flex flex-wrap items-center gap-2 mb-4">
 <h1 class="text-xl font-extrabold"><i class="fa fa-futbol text-emerald-600 mr-1"></i>Ekstrakurikuler</h1>
@@ -44,12 +46,10 @@ require ROOT.'/templates/admin/header.php'; ?>
 <form method="post" data-loading class="p-4 grid gap-2.5 text-sm bg-white"><?= Security::csrfField() ?>
 <input type="hidden" name="id" id="e_id" value="0">
 <label class="grid gap-1 font-semibold">Nama<input name="name" id="e_name" required placeholder="Pramuka" class="border rounded-lg p-2 font-normal"></label>
-<div class="grid grid-cols-3 gap-2">
-<label class="grid gap-1 font-semibold">Pembina<input name="coach" id="e_coach" placeholder="Nama pembina" class="border rounded-lg p-2 font-normal"></label>
+<label class="grid gap-1 font-semibold">Pembina<select name="coach" id="e_coach" class="border rounded-lg p-2 font-normal swal2-select" style="width:100%"><option value="">- Pilih pembina -</option><?php foreach($guruList as $g): ?><option value="<?= Helper::e($g) ?>"><?= Helper::e($g) ?></option><?php endforeach; ?></select></label>
 <label class="grid gap-1 font-semibold">Hari<select name="day" id="e_day" class="border rounded-lg p-2 font-normal"><option value="">- Pilih hari -</option><?php foreach($days as $d): ?><option value="<?= $d ?>"><?= $d ?></option><?php endforeach; ?></select></label>
 <label class="grid gap-1 font-semibold">Jam<input type="time" name="time" id="e_time" class="border rounded-lg p-2 font-normal"></label>
-</div>
-<label class="grid gap-1 font-semibold">Keterangan jadwal tambahan<input name="schedule" id="e_schedule" placeholder="Misal: Ruang 101" class="border rounded-lg p-2 font-normal"></label>
+<label class="grid gap-1 font-semibold">Keterangan tambahan / lokasi<input name="schedule" id="e_schedule" placeholder="Misal: Ruang 101" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Deskripsi<textarea name="description" id="e_desc" rows="3" placeholder="Deskripsi ekskul..." class="border rounded-lg p-2 font-normal"></textarea></label>
 <div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
@@ -60,26 +60,27 @@ require ROOT.'/templates/admin/header.php'; ?>
 <script>
 const eksModal=document.getElementById('eksModal');
 function openEks(d){
-  console.log('openEks called with:', d);
   document.getElementById('eksTitle').innerHTML=(d?'<i class="fa fa-pen text-emerald-600 mr-1"></i>Edit Ekskul':'<i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Ekskul');
   document.getElementById('e_id').value=d?.id||0;
   document.getElementById('e_name').value=d?.name||'';
-  document.getElementById('e_coach').value=d?.coach||'';
   document.getElementById('e_schedule').value=d?.schedule||'';
   document.getElementById('e_desc').value=d?.description||'';
-  // format time for input[type="time"]
   let t=d?.time||''; if(t)t=t.substring(0,5);
   document.getElementById('e_time').value=t;
   eksModal.classList.remove('hidden');document.body.style.overflow='hidden';
-  // set day AFTER modal is visible (fixes select value not sticking in hidden container)
-  const dayVal=(d?.day||'').trim();
-  console.log('Setting day to:', dayVal);
+  const coachVal=(d?.coach||'').trim();
+  const coachSel=$('#e_coach');
+  if(coachSel.find('option[value="'+coachVal+'"]').length===0&&coachVal!==''){
+    coachSel.append(new Option(coachVal,coachVal,true,true));
+  }
+  coachSel.val(coachVal).trigger('change');
   const daySel=document.getElementById('e_day');
-  console.log('Day select element:', daySel);
-  console.log('Day select options:', daySel ? [...daySel.options].map(o=>o.value) : 'none');
-  if(daySel && dayVal){
-    daySel.value=dayVal;
-    console.log('After setting, daySel.value =', daySel.value);
+  if(daySel){
+    daySel.value=(d?.day||'').trim();
+    daySel.dispatchEvent(new Event('change',{bubbles:true}));
+    if(typeof daySel._csync==='function')daySel._csync();
+    if(typeof daySel._cpaint==='function')daySel._cpaint();
+    if(window.__refreshSelects&&typeof window.__refreshSelects['e_day']==='function')window.__refreshSelects['e_day']();
   }
 }
 function closeModal(){eksModal.classList.add('hidden');document.body.style.overflow=''}
@@ -87,5 +88,21 @@ document.getElementById('btnAddEks').addEventListener('click',()=>openEks(null))
 document.querySelectorAll('.btn-edit').forEach(b=>b.addEventListener('click',()=>openEks(JSON.parse(b.dataset.row))));
 document.querySelectorAll('#eksModal [data-close]').forEach(b=>b.addEventListener('click',closeModal));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+</script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+<style>
+#eksModal .select2-container .select2-selection--single{height:40px!important;border:1px solid #e2e8f0!important;border-radius:.65rem!important;box-shadow:0 1px 2px rgba(15,23,42,.06),0 4px 12px rgba(15,23,42,.04)!important;display:flex!important;align-items:center}
+#eksModal .select2-container--default .select2-selection--single .select2-selection__rendered{line-height:38px!important;padding-left:.75rem!important;padding-right:2rem!important;color:#0f172a!important;font-weight:400}
+#eksModal .select2-container--default .select2-selection--single .select2-selection__placeholder{color:#94a3b8!important}
+#eksModal .select2-container--default .select2-selection--single .select2-selection__arrow{height:38px!important;right:.5rem!important}
+#eksModal .select2-container--default.select2-container--focus .select2-selection--single{border-color:#10b981!important;box-shadow:0 0 0 3px rgba(16,185,129,.18),0 4px 14px rgba(16,185,129,.12)!important;outline:none!important}
+#eksModal .select2-container .select2-selection--single .select2-selection__clear{margin-right:1.4rem!important}
+</style>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(function(){
+  $('#e_coach').select2({placeholder:'- Pilih pembina -',allowClear:true,width:'100%',dropdownParent:$('#eksModal')});
+});
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>

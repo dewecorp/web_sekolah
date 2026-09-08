@@ -311,7 +311,7 @@ $showImage = in_array($curType, ['hero', 'image', 'custom', 'html', ''], true); 
 $showBtns = in_array($curType, ['hero', 'image', 'cta', 'custom', 'html', ''], true); // default 1 tombol + tambah
 $showVideo = ($curType === 'video');
 $showLimit = in_array($curType, ['carousel', 'berita', 'galeri', 'guru', 'prestasi', 'ekskul', 'agenda', 'pengumuman', ''], true);
-$showGrid = ($curType === 'berita') || $curType === '';
+$showGrid = in_array($curType, ['berita','ekskul','prestasi','guru','galeri'], true) || $curType === '';
 $showSlide = ($curType === 'carousel');
 $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'galeri' => 'Jumlah foto', 'guru' => 'Jumlah guru', 'prestasi' => 'Jumlah prestasi', 'ekskul' => 'Jumlah ekskul', 'agenda' => 'Jumlah agenda', 'pengumuman' => 'Jumlah pengumuman'];
 ?>
@@ -365,10 +365,10 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'galer
 <label class="grid gap-1" data-f="limit"<?= $showLimit ? '' : ' style="display:none"' ?>><span id="limitLabel"><?= Helper::e($limitLabel[$curType] ?? 'Limit item') ?></span><input type="number" name="items_limit" min="1" max="12" value="<?= (int)($edit['items_limit'] ?? 3) ?>" class="border rounded-lg p-2"></label>
 </div>
 <div data-pane="gaya" class="hidden grid gap-2">
-<div data-f="gridpick">
-<p class="text-xs font-bold uppercase text-slate-400">Gaya Grid Berita <span class="font-normal normal-case text-slate-400">(efektif untuk widget Berita)</span></p>
+<div data-f="gridpick"<?= $showGrid ? '' : ' style="display:none"' ?>>
+<p class="text-xs font-bold uppercase text-slate-400">Gaya Grid <span class="font-normal normal-case text-slate-400">(Berita, Ekskul, Prestasi, Guru, Galeri)</span></p>
 <div class="grid grid-cols-2 gap-1.5" data-gridpick>
-<?php $gridPrev=['cards-2'=>'▦▦','cards-3'=>'▦▦▦','cards-4'=>'▦▦▦▦','featured'=>'▦▤','list'=>'☰','overlay'=>'▣','minimal'=>'―']; foreach($grids as $k=>$l): ?><button type="button" data-grid="<?= $k ?>" class="gridpick border rounded-lg p-1.5 text-center <?= ($edit['grid'] ?? 'cards-3') === $k ? 'ring-2 ring-emerald-500 border-emerald-500' : '' ?>"><span class="block text-xl leading-none"><?= $gridPrev[$k] ?? '▦' ?></span><span class="text-[10px] leading-tight block mt-1"><?= $l ?></span></button><?php endforeach; ?>
+<?php $gridPrev=['cards-2'=>'▦▦','cards-3'=>'▦▦▦','cards-4'=>'▦▦▦▦','featured'=>'▦▤','list'=>'☰','overlay'=>'▣','minimal'=>'―']; $gridOpts=in_array($curType,['ekskul','prestasi','guru','galeri'],true)?array_intersect_key($grids,array_flip(['cards-2','cards-3','cards-4'])):$grids; foreach($gridOpts as $k=>$l): ?><button type="button" data-grid="<?= $k ?>" class="gridpick border rounded-lg p-1.5 text-center <?= ($edit['grid'] ?? 'cards-3') === $k ? 'ring-2 ring-emerald-500 border-emerald-500' : '' ?>"><span class="block text-xl leading-none"><?= $gridPrev[$k] ?? '▦' ?></span><span class="text-[10px] leading-tight block mt-1"><?= $l ?></span></button><?php endforeach; ?>
 </div><input type="hidden" name="grid" value="<?= Helper::e($edit['grid'] ?? 'cards-3') ?>">
 </div>
 <p class="text-xs font-bold uppercase text-slate-400">Animasi Masuk (saat scroll)</p>

@@ -27,7 +27,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <?php foreach(['school_name'=>'Nama Sekolah','tagline'=>'Tagline','address'=>'Alamat','phone'=>'Telepon','email'=>'Email','footer_text'=>'Footer Text','homepage_title'=>'Homepage Title'] as $k=>$l): ?>
 <label class="grid gap-1"><?= $l ?><input name="s[<?= $k ?>]" value="<?= Helper::e($sets[$k]??'') ?>" class="border rounded-lg p-2"></label><?php endforeach; ?>
 <label class="grid gap-1">Hero Alignment<select name="s[hero_align]" class="border rounded-lg p-2"><option value="left" <?= ($sets['hero_align']??'center')==='left'?'selected':'' ?>>Kiri</option><option value="center" <?= ($sets['hero_align']??'center')==='center'?'selected':'' ?>>Tengah</option><option value="right" <?= ($sets['hero_align']??'center')==='right'?'selected':'' ?>>Kanan</option></select><span class="text-xs font-normal text-slate-400">Rata kiri/tengah/kanan hero & semua elemen</span></label>
-<label class="grid gap-1">Logo<input type="file" name="logo" accept="image/*" class="border rounded-lg p-2"></label></div>
+<label class="grid gap-1">Logo<?php if(!empty($sets['logo'])): ?><img id="logoPreview" src="<?= Helper::upload($sets['logo']) ?>" alt="Logo" class="h-20 w-20 object-contain rounded-xl border bg-slate-50 p-1.5 shadow-sm"><?php else: ?><img id="logoPreview" class="hidden h-20 w-20 object-contain rounded-xl border bg-slate-50 p-1.5 shadow-sm" alt="Preview"><?php endif; ?><input type="file" name="logo" id="logoInput" accept="image/*" class="border rounded-lg p-2"></label></div>
 <div class="bg-white rounded-2xl border p-4 grid gap-2"><h2 class="font-bold"><i class="fa fa-share-nodes text-emerald-600 mr-1"></i>Media Sosial</h2>
 <?php foreach(['facebook'=>'Facebook','instagram'=>'Instagram','youtube'=>'YouTube','tiktok'=>'TikTok'] as $k=>$l): ?>
 <label class="grid gap-1"><?= $l ?><input name="s[<?= $k ?>]" value="<?= Helper::e($sets[$k]??'') ?>" placeholder="https://..." class="border rounded-lg p-2"></label><?php endforeach; ?></div>
@@ -37,7 +37,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <label class="grid gap-1">Kepala Sekolah<input name="principal_name" value="<?= Helper::e($prof['principal_name']??'') ?>" class="border rounded-lg p-2"></label>
 <label class="grid gap-1">Jabatan<input name="principal_title" value="<?= Helper::e($prof['principal_title']??'') ?>" class="border rounded-lg p-2"></label>
 <label class="grid gap-1">Sambutan<textarea name="principal_greeting" id="principalGreeting" rows="6"><?= Helper::e($prof['principal_greeting']??'') ?></textarea><span id="editorWarn" class="hidden text-xs font-normal text-red-600">Editor gagal dimuat (CDN diblokir). Textarea biasa tetap bisa disimpan.</span></label>
-<label class="grid gap-1">Foto Kepala Sekolah<input type="file" name="principal_photo" accept="image/*" class="border rounded-lg p-2"></label></div>
+<label class="grid gap-1">Foto Kepala Sekolah<?php if(!empty($prof['principal_photo'])): ?><img id="ppPreview" src="<?= Helper::upload($prof['principal_photo']) ?>" alt="Foto Kepala Sekolah" class="h-32 w-28 object-cover rounded-xl border shadow-sm"><?php else: ?><img id="ppPreview" class="hidden h-32 w-28 object-cover rounded-xl border shadow-sm" alt="Preview"><?php endif; ?><input type="file" name="principal_photo" id="ppInput" accept="image/*" class="border rounded-lg p-2"></label></div>
 <div class="bg-white rounded-2xl border p-4 grid gap-2"><h2 class="font-bold"><i class="fa fa-clock text-emerald-600 mr-1"></i>Jam Layanan Kontak</h2>
 <label class="grid gap-1">Hari<input name="s[service_days]" value="<?= Helper::e($sets['service_days']??'Senin - Jumat') ?>" placeholder="Senin - Jumat" class="border rounded-lg p-2"></label>
 <div class="grid grid-cols-2 gap-2">
@@ -55,6 +55,16 @@ let greetEditor=null;
   window.RichEditorCreate(el,{height:400}).then(e=>{greetEditor=e}).catch(()=>warn&&warn.classList.remove('hidden'));
 })();
 document.getElementById('identityForm').addEventListener('submit',()=>{ if(greetEditor){ try{document.getElementById('principalGreeting').value=greetEditor.getData()}catch(_){} } });
+document.getElementById('ppInput')?.addEventListener('change',e=>{
+  const f=e.target.files?.[0],img=document.getElementById('ppPreview');
+  if(!f||!img)return;
+  img.src=URL.createObjectURL(f);img.classList.remove('hidden');
+});
+document.getElementById('logoInput')?.addEventListener('change',e=>{
+  const f=e.target.files?.[0],img=document.getElementById('logoPreview');
+  if(!f||!img)return;
+  img.src=URL.createObjectURL(f);img.classList.remove('hidden');
+});
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
 

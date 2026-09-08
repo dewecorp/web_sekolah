@@ -1,5 +1,6 @@
-<?php $u = Auth::user(); $brandName = Database::setting('school_name','SchoolCMS'); ?>
+<?php $u = Auth::user(); $brandName = Database::setting('school_name','SchoolCMS'); $adminFav = Database::setting('logo',''); ?>
 <!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<?php if($adminFav!==''): ?><link rel="icon" href="<?= Helper::e(Helper::upload($adminFav)) ?>"><?php endif; ?>
 <title><?= Helper::e($title ?? 'Admin') ?> - <?= Helper::e($brandName) ?></title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">

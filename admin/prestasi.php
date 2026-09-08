@@ -19,12 +19,12 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div class="px-4 py-3 font-bold border-b">Daftar Prestasi</div>
 <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 border-b text-sm"><span id="selCountPres" class="text-slate-500">0 dipilih</span><button type="button" id="btnBulkPres" class="ml-auto bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg"><i class="fa fa-trash mr-1"></i>Hapus Terpilih</button></div>
 <div class="overflow-x-auto"><table class="w-full text-sm min-w-[420px]">
-<tr class="text-left text-slate-500 text-xs uppercase bg-slate-50"><th class="p-3 w-8"><input type="checkbox" id="checkAllPres"></th><th class="p-3 w-10">No</th><th class="p-3">Judul</th><th class="p-3">Tahun / Tingkat</th><th class="p-3 text-right">Aksi</th></tr>
-<?php if(!$pres): ?><tr><td colspan="5" class="p-10 text-center text-slate-500"><i class="fa fa-trophy text-3xl block mb-2"></i>Belum ada prestasi. Klik Tambah Prestasi.</td></tr><?php endif; ?>
+<tr class="text-left text-slate-500 text-xs uppercase bg-slate-50"><th class="p-3 w-8"><input type="checkbox" id="checkAllPres"></th><th class="p-3 w-10">No</th><th class="p-3">Judul</th><th class="p-3">Tahun</th><th class="p-3">Tingkat</th><th class="p-3 text-right">Aksi</th></tr>
+<?php if(!$pres): ?><tr><td colspan="6" class="p-10 text-center text-slate-500"><i class="fa fa-trophy text-3xl block mb-2"></i>Belum ada prestasi. Klik Tambah Prestasi.</td></tr><?php endif; ?>
 <?php $noPres=1; foreach($pres as $e): ?>
 <tr class="border-t hover:bg-slate-50">
 <td class="p-3"><input type="checkbox" form="bulkPres" name="ids[]" value="<?= $e['id'] ?>" class="rowcheck rowcheckPres"></td><td class="p-3 text-slate-500"><?= $noPres++ ?></td><td class="p-3 font-semibold"><?= Helper::e($e['title']) ?><span class="block text-[11px] font-normal text-slate-400"><?= Helper::e(Helper::excerpt($e['description']??'',80)) ?></span></td>
-<td class="p-3 text-xs text-slate-500"><?= Helper::e($e['year']??'') ?><span class="block"><?= Helper::e($e['level']??'') ?></span></td>
+<td class="p-3 text-xs text-slate-500"><?= Helper::e($e['year']??'') ?></td><td class="p-3 text-xs text-slate-500"><?= Helper::e($e['level']??'') ?></td>
 <td class="p-3"><span class="flex gap-1 justify-end">
 <button class="btn-edit w-8 h-8 border rounded-lg grid place-items-center bg-white hover:text-emerald-600" title="Edit" data-row='<?= htmlspecialchars(json_encode(['id'=>$e['id'],'title'=>$e['title'],'year'=>$e['year']??'','level'=>$e['level']??'','description'=>$e['description']??'']),ENT_QUOTES) ?>'><i class="fa fa-pen text-xs"></i></button>
 <form method="post" data-confirm><?= Security::csrfField() ?><input type="hidden" name="act" value="delete"><input type="hidden" name="id" value="<?= $e['id'] ?>"><button class="w-8 h-8 border rounded-lg grid place-items-center bg-white text-red-600" title="Hapus"><i class="fa fa-trash text-xs"></i></button></form>
@@ -39,7 +39,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <input type="hidden" name="id" id="p_id" value="0">
 <label class="grid gap-1 font-semibold">Judul<input name="title" id="p_title" required placeholder="Juara 1 OSN" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Tahun<input name="year" id="p_year" placeholder="2024" class="border rounded-lg p-2 font-normal"></label>
-<label class="grid gap-1 font-semibold">Tingkat<input name="level" id="p_level" placeholder="Nasional" class="border rounded-lg p-2 font-normal"></label>
+<label class="grid gap-1 font-semibold">Tingkat<select name="level" id="p_level" class="border rounded-lg p-2 font-normal"><option value="">- Pilih tingkat -</option><?php foreach(['Kecamatan','Kabupaten','Provinsi','Nasional'] as $lv): ?><option value="<?= $lv ?>"><?= $lv ?></option><?php endforeach; ?></select></label>
 <label class="grid gap-1 font-semibold">Deskripsi<textarea name="description" id="p_desc" rows="3" placeholder="Deskripsi prestasi..." class="border rounded-lg p-2 font-normal"></textarea></label>
 <div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
@@ -54,9 +54,16 @@ function openPres(d){
   document.getElementById('p_id').value=d?.id||0;
   document.getElementById('p_title').value=d?.title||'';
   document.getElementById('p_year').value=d?.year||'';
-  document.getElementById('p_level').value=d?.level||'';
   document.getElementById('p_desc').value=d?.description||'';
   presModal.classList.remove('hidden');document.body.style.overflow='hidden';
+  const lvSel=document.getElementById('p_level');
+  if(lvSel){
+    lvSel.value=(d?.level||'').trim();
+    lvSel.dispatchEvent(new Event('change',{bubbles:true}));
+    if(typeof lvSel._csync==='function')lvSel._csync();
+    if(typeof lvSel._cpaint==='function')lvSel._cpaint();
+    if(window.__refreshSelects&&typeof window.__refreshSelects['p_level']==='function')window.__refreshSelects['p_level']();
+  }
 }
 function closeModal(){presModal.classList.add('hidden');document.body.style.overflow=''}
 document.getElementById('btnAddPres').addEventListener('click',()=>openPres(null));

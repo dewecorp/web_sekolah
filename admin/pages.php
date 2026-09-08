@@ -14,8 +14,9 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     $img=$_POST['old_img']??null;
     if(!empty($_POST['clear_img']))$img=null;
     if(!empty($_FILES['img']['name']??'')){ $e=Security::validImage($_FILES['img'],$APP); if($e){ Session::flash('err',$e); header('Location: '.Helper::url('admin/pages')); exit; } $n=Security::safeName($_FILES['img']['name']); move_uploaded_file($_FILES['img']['tmp_name'],ROOT.'/assets/uploads/'.$n); $img=$n; }
-    if(!empty($_POST['id'])){ $db->prepare("UPDATE pages SET title=?,slug=?,content=?,featured_image=?,status=?,seo_title=?,seo_description=? WHERE id=?")->execute([$t,$slug,$_POST['content']??'',$img,$_POST['status']??'draft',$_POST['seo_title']??'',$_POST['seo_description']??'',(int)$_POST['id']]); Auth::log($db,'update','pages',"Ubah $t"); }
-    else{ try{ $db->prepare("INSERT INTO pages(title,slug,content,featured_image,status,seo_title,seo_description,author_id) VALUES(?,?,?,?,?,?,?,?)")->execute([$t,$slug,$_POST['content']??'',$img,$_POST['status']??'draft',$_POST['seo_title']??'',$_POST['seo_description']??'',$_SESSION['user']['id']]); Auth::log($db,'create','pages',"Tambah $t"); }catch(Throwable $e){ Session::flash('err','Slug sudah dipakai.'); header('Location: '.Helper::url('admin/pages')); exit; } }
+    $pgContent=preg_replace('/\s+sandbox(="[^"]*")?/i','',(string)($_POST['content']??''));
+    if(!empty($_POST['id'])){ $db->prepare("UPDATE pages SET title=?,slug=?,content=?,featured_image=?,status=?,seo_title=?,seo_description=? WHERE id=?")->execute([$t,$slug,$pgContent,$img,$_POST['status']??'draft',$_POST['seo_title']??'',$_POST['seo_description']??'',(int)$_POST['id']]); Auth::log($db,'update','pages',"Ubah $t"); }
+    else{ try{ $db->prepare("INSERT INTO pages(title,slug,content,featured_image,status,seo_title,seo_description,author_id) VALUES(?,?,?,?,?,?,?,?)")->execute([$t,$slug,$pgContent,$img,$_POST['status']??'draft',$_POST['seo_title']??'',$_POST['seo_description']??'',$_SESSION['user']['id']]); Auth::log($db,'create','pages',"Tambah $t"); }catch(Throwable $e){ Session::flash('err','Slug sudah dipakai.'); header('Location: '.Helper::url('admin/pages')); exit; } }
     Session::flash('ok','Halaman disimpan.');
   }
   header('Location: '.Helper::url('admin/pages')); exit;

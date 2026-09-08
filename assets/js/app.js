@@ -61,6 +61,8 @@ document.querySelectorAll('[data-count]').forEach(el=>{
 });
 document.querySelectorAll('[data-confirm]').forEach(f=>{f.addEventListener('submit',e=>{e.preventDefault();Swal.fire({title:'Apakah Anda yakin?',text:'Data yang dihapus tidak dapat dikembalikan.',icon:'warning',showCancelButton:true,confirmButtonText:'Ya, Hapus',cancelButtonText:'Batal'}).then(r=>{if(r.isConfirmed)f.submit()})})});
 document.querySelectorAll('[data-lightbox]').forEach(img=>{img.addEventListener('click',()=>{Swal.fire({imageUrl:img.src,imageAlt:img.alt||'',showConfirmButton:false,showCloseButton:true,width:800})})});
+document.querySelectorAll('.map-page iframe[height]').forEach(f=>{const h=parseInt(f.getAttribute('height'),10);if(h>0)f.style.height=h+'px'});
+document.querySelectorAll('article table,.prose table,.map-page table').forEach(t=>{if(t.parentElement&&!t.parentElement.classList.contains('table-wrap')){const w=document.createElement('div');w.className='table-wrap';t.parentElement.insertBefore(w,t);w.appendChild(t)}});
 document.querySelectorAll('[id^="cd-"]').forEach(el=>{
   const target=(el.dataset.target||'').trim().replace('T',' ');if(!target)return;
   const end=new Date(target.replace(' ','T')).getTime();if(isNaN(end))return;

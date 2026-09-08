@@ -40,6 +40,8 @@ img.imgfx-float,.imgfx-float{animation:imgFloat 7s ease-in-out infinite!importan
 .imghov-gray:hover img{filter:grayscale(1);transform:scale(1.05)}
 .imghov-blur:hover img{filter:blur(3px) brightness(.9);transform:scale(1.05)}
 .imghov-slide-up:hover img{transform:translateY(-8px) scale(1.03)}
+article iframe[src*="google.com/maps"],article iframe[src*="maps.google"],article iframe[src*="openstreetmap"]{width:100%!important;min-height:420px;border:0;border-radius:1rem;display:block;background:#e2e8f0}
+.map-page iframe{width:100%!important;border:0!important;border-radius:1rem;display:block;min-height:420px}
 .card-hover{transition:transform .3s ease,box-shadow .3s ease}
 .card-hover:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.12)}
 #mainNav.scrolled{box-shadow:0 4px 20px rgba(0,0,0,.08)}
@@ -52,7 +54,21 @@ main,header,footer{max-width:100%}
 img,video,iframe{max-width:100%;height:auto}
 iframe{width:100%}
 table{max-width:100%}
-.prose table,article table{display:block;overflow-x:auto;max-width:100%}
+.table-wrap{overflow-x:auto;max-width:100%;border-radius:1rem;border:1px solid #e2e8f0;box-shadow:0 4px 16px rgba(15,23,42,.06);margin:1rem 0}
+.prose table,.map-page table,article table{width:100%!important;max-width:100%;border-collapse:separate!important;border-spacing:0;margin:0!important;display:table;font-size:.85rem;line-height:1.55}
+.prose th,.prose td,.map-page th,.map-page td,article th,article td{padding:.7rem .9rem!important;text-align:left;vertical-align:top;border:0!important;border-bottom:1px solid #e2e8f0!important}
+.prose thead th,.map-page thead th,article thead th{background:linear-gradient(180deg,var(--school-primary,#059669),color-mix(in srgb,var(--school-primary,#059669),#071b18 22%))!important;color:#fff!important;font-weight:800!important;font-size:.72rem!important;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.prose thead th:first-child,.map-page thead th:first-child,article thead th:first-child{border-top-left-radius:1rem}
+.prose thead th:last-child,.map-page thead th:last-child,article thead th:last-child{border-top-right-radius:1rem}
+.prose tbody tr,.map-page tbody tr,article tbody tr{transition:background .2s ease}
+.prose tbody tr:nth-child(even),.map-page tbody tr:nth-child(even),article tbody tr:nth-child(even){background:#f8fafc}
+.prose tbody tr:hover,.map-page tbody tr:hover,article tbody tr:hover{background:color-mix(in srgb,var(--school-primary,#059669),white 92%)!important}
+.prose tbody tr:last-child td,.map-page tbody tr:last-child td,article tbody tr:last-child td{border-bottom:0!important}
+.prose td:first-child,.map-page td:first-child,article td:first-child{font-weight:700}
+.dark .table-wrap{border-color:#334155}
+.dark .prose th,.dark .prose td,.dark .map-page th,.dark .map-page td,.dark article th,.dark article td{border-bottom-color:#334155!important}
+.dark .prose tbody tr:nth-child(even),.dark .map-page tbody tr:nth-child(even),.dark article tbody tr:nth-child(even){background:#1e293b}
+.dark .prose tbody tr:hover,.dark .map-page tbody tr:hover,.dark article tbody tr:hover{background:#134e4a!important}
 .prose figure.image,article figure.image,.welcome-message figure.image{display:table;margin:1rem 0;clear:both;max-width:100%}
 .prose figure.image.align-center,article figure.image.align-center,.welcome-message figure.image.align-center{margin-left:auto!important;margin-right:auto!important}
 .prose figure.image.align-left,article figure.image.align-left,.welcome-message figure.image.align-left{margin-left:0!important;margin-right:auto!important}

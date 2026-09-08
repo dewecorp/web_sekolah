@@ -68,9 +68,9 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div class="overflow-x-auto"><table class="w-full text-sm min-w-[800px]">
 <tr class="text-left text-slate-500 text-xs uppercase bg-slate-50"><th class="p-3 w-8"><input type="checkbox" id="checkAllTeacher"></th><th class="p-3 w-10">No</th><th class="p-3">Foto</th><th class="p-3">Nama</th><th class="p-3">NUPTK</th><th class="p-3">Jabatan</th><th class="p-3">Status</th><th class="p-3 text-right">Aksi</th></tr>
 <?php if(!$rows): ?><tr><td colspan="8" class="p-10 text-center text-slate-500"><i class="fa fa-chalkboard-user text-3xl block mb-2"></i>Belum ada data. Klik Tambah Guru/Staff.</td></tr><?php endif; ?>
-<?php $no=1; foreach($rows as $r): ?>
+<?php $no=1; foreach($rows as $r): $inits=implode('',array_map(fn($w)=>mb_strtoupper(mb_substr($w,0,1)),array_slice(preg_split('/\s+/',trim($r['name']??'?')),0,2))); ?>
 <tr class="border-t hover:bg-slate-50">
-<td class="p-3"><input type="checkbox" form="bulkForm" name="ids[]" value="<?= $r['id'] ?>" class="rowcheck"></td><td class="p-3 text-slate-500"><?= $no++ ?></td><td class="p-3"><?php if(!empty($r['photo'])): ?><img src="<?= Helper::upload($r['photo']) ?>" alt="" class="w-10 h-10 rounded-full object-cover border"><?php else: ?><span class="w-10 h-10 rounded-full bg-slate-100 border grid place-items-center text-slate-400"><i class="fa fa-user text-sm"></i></span><?php endif; ?></td>
+<td class="p-3"><input type="checkbox" form="bulkForm" name="ids[]" value="<?= $r['id'] ?>" class="rowcheck"></td><td class="p-3 text-slate-500"><?= $no++ ?></td><td class="p-3"><?php if(!empty($r['photo'])): ?><img src="<?= Helper::upload($r['photo']) ?>" alt="" class="w-10 h-10 rounded-full object-cover border"><?php else: ?><span class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white grid place-items-center font-extrabold text-sm shadow"><?= Helper::e($inits) ?></span><?php endif; ?></td>
 <td class="p-3 font-semibold"><?= Helper::e($r['name']) ?><span class="block text-xs font-normal text-slate-500"><?= Helper::e($r['subject']??'') ?></span></td>
 <td class="p-3 font-mono text-xs"><?= Helper::e($r['nip']??'') ?></td>
 <td class="p-3"><?= Helper::e($r['position']) ?><span class="block text-[11px] text-slate-400"><?= Helper::e($r['type']??'') ?></span></td>

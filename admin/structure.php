@@ -51,10 +51,10 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div class="overflow-x-auto"><table class="w-full text-sm min-w-[640px]">
 <tr class="text-left text-slate-500 text-xs uppercase bg-slate-50"><th class="p-3 w-8"><input type="checkbox" id="checkAll"></th><th class="p-3 w-10">No</th><th class="p-3">Nama Guru</th><th class="p-3">Jabatan</th><th class="p-3 text-right">Aksi</th></tr>
 <?php if(!$rows): ?><tr><td colspan="5" class="p-10 text-center text-slate-500"><i class="fa fa-sitemap text-3xl block mb-2"></i>Belum ada struktur. Klik Tambah Jabatan.</td></tr><?php endif; ?>
-<?php $no=1; foreach($rows as $r): ?>
+<?php $no=1; foreach($rows as $r): $sinits=implode('',array_map(fn($w)=>mb_strtoupper(mb_substr($w,0,1)),array_slice(preg_split('/\s+/',trim($r['tname']??'?')),0,2))); ?>
 <tr class="border-t hover:bg-slate-50">
 <td class="p-3"><input type="checkbox" form="bulkForm" name="ids[]" value="<?= $r['id'] ?>" class="rowcheck"></td><td class="p-3 text-slate-500"><?= $no++ ?></td>
-<td class="p-3 font-semibold"><span class="flex items-center gap-2"><?php if(!empty($r['tphoto'])): ?><img src="<?= Helper::upload($r['tphoto']) ?>" alt="" class="w-8 h-8 rounded-full object-cover border"><?php else: ?><span class="w-8 h-8 rounded-full bg-slate-100 border grid place-items-center text-slate-400"><i class="fa fa-user text-xs"></i></span><?php endif; ?><?= Helper::e($r['tname']??'(guru dihapus)') ?></span></td>
+<td class="p-3 font-semibold"><span class="flex items-center gap-2"><?php if(!empty($r['tphoto'])): ?><img src="<?= Helper::upload($r['tphoto']) ?>" alt="" class="w-8 h-8 rounded-full object-cover border"><?php else: ?><span class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-white grid place-items-center font-extrabold text-xs shadow"><?= Helper::e($sinits) ?></span><?php endif; ?><?= Helper::e($r['tname']??'(guru dihapus)') ?></span></td>
 <td class="p-3"><?= Helper::e($r['position']) ?></td>
 <td class="p-3"><span class="flex gap-1 justify-end">
 <button class="btn-edit w-8 h-8 border rounded-lg grid place-items-center bg-white hover:text-emerald-600" title="Edit" data-row='<?= htmlspecialchars(json_encode(['id'=>$r['id'],'teacher_id'=>$r['teacher_id'],'position'=>$r['position'],'sort_order'=>$r['sort_order']]),ENT_QUOTES) ?>'><i class="fa fa-pen text-xs"></i></button>

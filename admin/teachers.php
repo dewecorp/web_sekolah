@@ -35,7 +35,8 @@ if($act==='import'){
   Auth::log($db,'import','teachers',"Impor $added guru"); Session::flash('ok',"$added guru diimpor.".($skipped?" $skipped baris kosong dilewati.":''));
   header('Location: '.Helper::url('admin/teachers')); exit;
 }
-if($act==='bulk_delete'){ $ids=array_filter(array_map('intval',(array)($_POST['ids']??[]))); if(!$ids){ Session::flash('err','Pilih minimal 1 data.'); } else { $ph=implode(',',array_fill(0,count($ids),'?')); $db->prepare("DELETE FROM teachers WHERE id IN ($ph)")->execute(array_values($ids)); Auth::log($db,'delete','teachers','Hapus bulk guru'); Session::flash('ok',count($ids).' data dihapus.'); } }
+if($act==='meta'){ foreach(['guru_title','guru_desc','guru_show','guru_cols'] as $k){ if(!array_key_exists($k,$_POST['s']??[])) continue; $v=trim((string)$_POST['s'][$k]); if($k==='guru_show') $v=$v==='1'?'1':'0'; $db->prepare("INSERT INTO settings(`key`,`value`) VALUES(?,?) ON DUPLICATE KEY UPDATE `value`=VALUES(`value`)")->execute([$k,$v]); } Session::flash('ok','Pengaturan guru disimpan.'); }
+elseif($act==='bulk_delete'){ $ids=array_filter(array_map('intval',(array)($_POST['ids']??[]))); if(!$ids){ Session::flash('err','Pilih minimal 1 data.'); } else { $ph=implode(',',array_fill(0,count($ids),'?')); $db->prepare("DELETE FROM teachers WHERE id IN ($ph)")->execute(array_values($ids)); Auth::log($db,'delete','teachers','Hapus bulk guru'); Session::flash('ok',count($ids).' data dihapus.'); } }
 elseif($act==='delete'){ $db->prepare("DELETE FROM teachers WHERE id=?")->execute([(int)$_POST['id']]); Auth::log($db,'delete','teachers','Hapus guru'); Session::flash('ok','Data dihapus.'); }
 elseif($nm===''){ Session::flash('err','Nama wajib.'); }
 else{ $ph=$_POST['old_photo']??null; if(!empty($_FILES['photo']['name']??'')){ $e=Security::validImage($_FILES['photo'],$APP); if($e){ Session::flash('err',$e); header('Location: '.Helper::url('admin/teachers')); exit; } $n=Security::safeName($_FILES['photo']['name']); move_uploaded_file($_FILES['photo']['tmp_name'],ROOT.'/assets/uploads/'.$n); $ph=$n; }
@@ -44,13 +45,23 @@ else $db->prepare("INSERT INTO teachers(name,nip,position,type,photo,education,s
 Auth::log($db,'save','teachers',"Simpan $nm"); Session::flash('ok','Data disimpan.'); }
 header('Location: '.Helper::url('admin/teachers')); exit; }
 $rows=$db->query("SELECT * FROM teachers ORDER BY sort_order,id DESC")->fetchAll();
+$sets=[]; foreach($db->query("SELECT `key`,`value` FROM settings WHERE `key` IN ('guru_title','guru_desc','guru_show','guru_cols')") as $r) $sets[$r['key']]=$r['value'];
 require ROOT.'/templates/admin/header.php'; ?>
 <div class="flex flex-wrap items-center gap-2 mb-4">
 <h1 class="text-xl font-extrabold"><i class="fa fa-chalkboard-user text-emerald-600 mr-1"></i>Guru & Staff</h1>
 <span class="text-[11px] bg-slate-800 text-white px-2.5 py-0.5 rounded-full font-bold"><?= count($rows) ?> orang</span>
+<a href="<?= Helper::url('guru') ?>" target="_blank" rel="noopener noreferrer" class="text-sm px-3 py-1.5 border rounded-lg bg-white"><i class="fa fa-eye mr-1"></i>Lihat Public</a>
 <button id="btnAdd" class="ml-auto bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-4 py-2 rounded-xl shadow"><i class="fa fa-plus mr-1"></i>Tambah Guru/Staff</button>
 <button id="btnImport" class="bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold px-4 py-2 rounded-xl shadow"><i class="fa fa-file-excel mr-1"></i>Impor Excel</button>
 </div>
+<form method="post" data-loading class="bg-white rounded-2xl border p-4 grid md:grid-cols-4 gap-2 text-sm mb-3"><?= Security::csrfField() ?>
+<input type="hidden" name="act" value="meta">
+<label class="grid gap-1">Judul public<input name="s[guru_title]" value="<?= Helper::e($sets['guru_title']??'Guru & Staff') ?>" class="border rounded-lg p-2"></label>
+<label class="grid gap-1">Tampil di public<select name="s[guru_show]" class="border rounded-lg p-2"><option value="1" <?= ($sets['guru_show']??'1')==='1'?'selected':'' ?>>Tampilkan</option><option value="0" <?= ($sets['guru_show']??'1')==='0'?'selected':'' ?>>Sembunyikan (404)</option></select></label>
+<label class="grid gap-1">Deskripsi singkat<input name="s[guru_desc]" value="<?= Helper::e($sets['guru_desc']??'') ?>" placeholder="Ringkasan singkat" class="border rounded-lg p-2"></label>
+<label class="grid gap-1">Kolom<select name="s[guru_cols]" class="border rounded-lg p-2"><option value="2" <?= ($sets['guru_cols']??'4')==='2'?'selected':'' ?>>2 kolom</option><option value="3" <?= ($sets['guru_cols']??'4')==='3'?'selected':'' ?>>3 kolom</option><option value="4" <?= ($sets['guru_cols']??'4')==='4'?'selected':'' ?>>4 kolom</option></select></label>
+<button class="md:col-span-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl py-2 font-bold text-sm"><i class="fa fa-floppy-disk mr-1"></i>Simpan Pengaturan</button>
+</form>
 <form method="post" id="bulkForm"><?= Security::csrfField() ?><input type="hidden" name="act" value="bulk_delete"></form>
 <div class="bg-white rounded-2xl border overflow-hidden">
 <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 border-b text-sm"><span id="selCount" class="text-slate-500">0 dipilih</span><button type="button" id="btnBulkTeacher" class="ml-auto bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg"><i class="fa fa-trash mr-1"></i>Hapus Terpilih</button></div>

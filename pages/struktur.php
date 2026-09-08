@@ -22,24 +22,29 @@ $total=count($srows); $foto=count(array_filter($srows,fn($x)=>!empty($x['tphoto'
 </div>
 </div>
 </div>
-<div class="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-2xl overflow-hidden reveal mt-4">
-<div class="p-4 md:p-5 border-b dark:border-slate-700 flex justify-end">
-<div class="relative w-full sm:w-64"><i class="fa fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i><input id="qStr" placeholder="Cari nama / jabatan..." class="w-full border dark:border-slate-700 rounded-xl pl-10 pr-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-violet-500 focus:outline-none"></div>
+<div class="mt-4 flex justify-end"><div class="relative w-full sm:w-72"><i class="fa fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i><input id="qStr" placeholder="Cari nama / jabatan..." class="w-full border dark:border-slate-700 rounded-xl pl-10 pr-3 py-2.5 text-sm bg-white dark:bg-slate-800 shadow-sm focus:ring-2 focus:ring-violet-500 focus:outline-none"></div></div>
+<?php if(!$srows): ?><div class="mt-4 rounded-3xl border border-dashed p-12 text-center text-slate-500"><span class="w-14 h-14 rounded-2xl bg-violet-100 dark:bg-violet-900 grid place-items-center mx-auto text-2xl">🏛️</span><p class="font-bold mt-3">Belum ada data struktur</p><p class="text-xs">Admin dapat menambah via Sekolah &gt; Struktur.</p></div><?php else: ?>
+<?php $strCols=Database::setting('struktur_cols','4'); $strGrid=$strCols==='2'?'sm:grid-cols-2':($strCols==='3'?'sm:grid-cols-2 lg:grid-cols-3':'sm:grid-cols-2 lg:grid-cols-4'); ?>
+<div class="mt-4 grid <?= $strGrid ?> gap-4" id="strGrid">
+<?php foreach($srows as $r): ?>
+<article class="srow group relative rounded-3xl overflow-hidden border bg-white dark:bg-slate-800 dark:border-slate-700 card-hover reveal flex flex-col" data-t="<?= Helper::e(strtolower(($r['tname']??'').' '.($r['position']??'').' '.($r['tsubject']??''))) ?>">
+<div class="bg-gradient-to-r from-violet-600 via-indigo-600 to-sky-500 p-4 flex items-center gap-3">
+<?php if(!empty($r['tphoto'])): ?><img src="<?= Helper::upload($r['tphoto']) ?>" alt="<?= Helper::e($r['tname']??'') ?>" data-lightbox loading="lazy" class="w-14 h-14 rounded-2xl object-cover border-2 border-white/80 shadow cursor-zoom-in shrink-0"><?php else: ?><span class="w-14 h-14 rounded-2xl bg-white/20 grid place-items-center text-white text-xl shrink-0"><i class="fa fa-user-tie"></i></span><?php endif; ?>
+<div class="min-w-0 flex-1"><h2 class="font-extrabold text-white leading-tight truncate"><?= Helper::e($r['tname']??'-') ?></h2><span class="inline-flex items-center gap-1.5 text-xs font-extrabold tracking-wide px-3 py-1 rounded-full bg-white text-violet-700 shadow mt-2 ring-2 ring-white/60"><i class="fa fa-id-badge"></i><?= Helper::e($r['position']) ?></span></div>
+<span class="hidden sm:grid w-8 h-8 rounded-full bg-white/15 place-items-center text-white/80 group-hover:bg-white group-hover:text-violet-600 transition"><i class="fa fa-arrow-right text-xs"></i></span>
 </div>
-<div class="overflow-x-auto"><table class="w-full text-sm min-w-[560px]">
-<tr class="text-left text-slate-500 text-xs uppercase bg-slate-50 dark:bg-slate-700/50"><th class="p-3 w-12">No</th><th class="p-3">Nama</th><th class="p-3">Jabatan</th><th class="p-3 hidden md:table-cell">Mapel</th></tr>
-<?php if(!$srows): ?><tr><td colspan="4" class="p-12 text-center text-slate-500"><span class="w-14 h-14 rounded-2xl bg-violet-100 dark:bg-violet-900 grid place-items-center mx-auto text-2xl">🏛️</span><p class="font-bold mt-3">Belum ada data struktur</p><p class="text-xs">Admin dapat menambah via Sekolah &gt; Struktur.</p></td></tr><?php endif; ?>
-<?php $no=1; foreach($srows as $r): ?>
-<tr class="srow border-t dark:border-slate-700 hover:bg-violet-50/60 dark:hover:bg-slate-700/40 transition" data-t="<?= Helper::e(strtolower(($r['tname']??'').' '.($r['position']??'').' '.($r['tsubject']??''))) ?>">
-<td class="p-3 text-slate-400 font-bold"><?= $no++ ?></td>
-<td class="p-3 font-semibold"><span class="flex items-center gap-2.5"><?php if(!empty($r['tphoto'])): ?><img src="<?= Helper::upload($r['tphoto']) ?>" alt="<?= Helper::e($r['tname']??'') ?>" data-lightbox loading="lazy" class="w-9 h-9 rounded-full object-cover border cursor-zoom-in"><?php else: ?><span class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-700 border dark:border-slate-600 grid place-items-center text-slate-400"><i class="fa fa-user text-xs"></i></span><?php endif; ?><span class="min-w-0"><span class="block truncate"><?= Helper::e($r['tname']??'-') ?></span><?php if(!empty($r['tedu'])): ?><span class="block text-[11px] font-normal text-slate-400 truncate"><?= Helper::e($r['tedu']) ?></span><?php endif; ?></span></span></td>
-<td class="p-3"><span class="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-200"><i class="fa fa-id-badge"></i><?= Helper::e($r['position']) ?></span></td>
-<td class="p-3 text-xs text-slate-500 hidden md:table-cell"><?= Helper::e($r['tsubject']??'-') ?></td></tr><?php endforeach; ?></table></div>
+<div class="p-4 flex-1 grid gap-1.5 text-sm">
+<?php if(!empty($r['tedu'])): ?><p class="text-xs text-slate-500"><i class="fa fa-graduation-cap mr-1.5 text-violet-500"></i><?= Helper::e($r['tedu']) ?></p><?php endif; ?>
+<?php if(!empty($r['tsubject'])): ?><p class="text-xs text-slate-500"><i class="fa fa-book mr-1.5 text-sky-500"></i><?= Helper::e($r['tsubject']) ?></p><?php endif; ?>
+</div>
+</article>
+<?php endforeach; ?>
+</div>
 <p id="strEmpty" class="hidden text-center text-sm text-slate-500 py-8">Tidak cocok. Ubah kata kunci.</p>
-</div>
+<?php endif; ?>
 <?php if(!empty($prof['org_chart'])): ?><img id="bagan" src="<?= Helper::upload($prof['org_chart']) ?>" alt="Bagan struktur organisasi" data-lightbox loading="lazy" class="reveal scroll-mt-28 mt-4 rounded-2xl cursor-zoom-in w-full object-contain"><?php endif; ?>
 </div>
 <script>
-(function(){var q=document.getElementById('qStr'),rows=[...document.querySelectorAll('.srow')],em=document.getElementById('strEmpty');q?.addEventListener('input',()=>{var s=(q.value||'').toLowerCase(),n=0;rows.forEach(r=>{var ok=!s||r.dataset.t.includes(s);r.style.display=ok?'':'none';if(ok)n++});if(em)em.classList.toggle('hidden',n>0)})})();
+(function(){var q=document.getElementById('qStr'),rows=[...document.querySelectorAll('#strGrid .srow')],em=document.getElementById('strEmpty');q?.addEventListener('input',()=>{var s=(q.value||'').toLowerCase(),n=0;rows.forEach(r=>{var ok=!s||r.dataset.t.includes(s);r.style.display=ok?'':'none';if(ok)n++});if(em)em.classList.toggle('hidden',n>0)})})();
 </script>
 <?php require ROOT.'/templates/frontend/footer.php'; ?>

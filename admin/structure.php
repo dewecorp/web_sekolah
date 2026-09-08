@@ -3,20 +3,12 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
   if(!Security::verifyCsrf($_POST['csrf']??null)){ Session::flash('err','CSRF tidak valid.'); header('Location: '.Helper::url('admin/structure')); exit; }
   $act=$_POST['act']??'save';
   if($act==='meta'){
-    foreach(['struktur_title','struktur_desc','struktur_show'] as $k){
+    foreach(['struktur_title','struktur_desc','struktur_show','struktur_cols'] as $k){
       if(!array_key_exists($k,$_POST['s']??[])) continue;
       $v=trim((string)$_POST['s'][$k]);
       if($k==='struktur_show') $v=$v==='1'?'1':'0';
       $db->prepare("INSERT INTO settings(`key`,`value`) VALUES(?,?) ON DUPLICATE KEY UPDATE `value`=VALUES(`value`)")->execute([$k,$v]);
     }
-    if(!empty($_FILES['org_chart']['name']??'')){
-      $e=Security::validImage($_FILES['org_chart'],$APP);
-      if($e){ Session::flash('err',$e); header('Location: '.Helper::url('admin/structure')); exit; }
-      $n=Security::safeName($_FILES['org_chart']['name']);
-      move_uploaded_file($_FILES['org_chart']['tmp_name'],ROOT.'/assets/uploads/'.$n);
-      $db->prepare("UPDATE school_profile SET org_chart=?")->execute([$n]);
-    }
-    if(!empty($_POST['clear_chart'])){ try{ $db->prepare("UPDATE school_profile SET org_chart=NULL")->execute(); }catch(Throwable){} }
     Auth::log($db,'update','structure','Ubah meta struktur'); Session::flash('ok','Pengaturan struktur disimpan.');
   } else {
     $tid=(int)($_POST['teacher_id']??0); $pos=trim($_POST['position']??''); $ord=(int)($_POST['sort_order']??0);
@@ -47,15 +39,10 @@ require ROOT.'/templates/admin/header.php'; ?>
 </div>
 <form method="post" data-loading enctype="multipart/form-data" class="bg-white rounded-2xl border p-4 grid md:grid-cols-4 gap-2 text-sm mb-3"><?= Security::csrfField() ?>
 <input type="hidden" name="act" value="meta">
-<label class="grid gap-1 md:col-span-2">Judul public<input name="s[struktur_title]" value="<?= Helper::e($sets['struktur_title']??'Struktur Organisasi') ?>" class="border rounded-lg p-2"></label>
+<label class="grid gap-1">Judul public<input name="s[struktur_title]" value="<?= Helper::e($sets['struktur_title']??'Struktur Organisasi') ?>" class="border rounded-lg p-2"></label>
 <label class="grid gap-1">Tampil di public<select name="s[struktur_show]" class="border rounded-lg p-2"><option value="1" <?= ($sets['struktur_show']??'1')==='1'?'selected':'' ?>>Tampilkan</option><option value="0" <?= ($sets['struktur_show']??'1')==='0'?'selected':'' ?>>Sembunyikan (404)</option></select></label>
-<label class="grid gap-1">Deskripsi singkat<textarea name="s[struktur_desc]" rows="1" class="border rounded-lg p-2"><?= Helper::e($sets['struktur_desc']??'') ?></textarea></label>
-<div class="grid gap-1 border rounded-xl p-2.5 bg-slate-50 md:col-span-2">
-<span class="text-xs font-bold"><i class="fa fa-image mr-1 text-emerald-600"></i>Bagan Struktur (gambar)</span>
-<?php if(!empty($chart)): ?><img src="<?= Helper::upload($chart) ?>" alt="Bagan" class="h-24 w-full object-contain rounded-lg border bg-white"><?php endif; ?>
-<input type="file" name="org_chart" accept="image/*" class="border rounded-lg p-1.5 w-full bg-white text-xs">
-<?php if(!empty($chart)): ?><label class="text-xs flex gap-1.5 items-center"><input type="checkbox" name="clear_chart" value="1"> Hapus bagan</label><?php endif; ?>
-</div>
+<label class="grid gap-1">Deskripsi singkat<input name="s[struktur_desc]" value="<?= Helper::e($sets['struktur_desc']??'') ?>" placeholder="Ringkasan singkat" class="border rounded-lg p-2"></label>
+<label class="grid gap-1">Kolom<select name="s[struktur_cols]" class="border rounded-lg p-2"><option value="2" <?= ($sets['struktur_cols']??'4')==='2'?'selected':'' ?>>2 kolom</option><option value="3" <?= ($sets['struktur_cols']??'4')==='3'?'selected':'' ?>>3 kolom</option><option value="4" <?= ($sets['struktur_cols']??'4')==='4'?'selected':'' ?>>4 kolom</option></select></label>
 <button class="md:col-span-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl py-2 font-bold text-sm"><i class="fa fa-floppy-disk mr-1"></i>Simpan Pengaturan</button>
 </form>
 <form method="post" id="bulkForm"><?= Security::csrfField() ?><input type="hidden" name="act" value="bulk_delete"></form>

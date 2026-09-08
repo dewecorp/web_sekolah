@@ -25,7 +25,8 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     elseif($tid<=0){ Session::flash('err','Nama guru wajib dipilih.'); }
     else{
       $nm=$db->prepare("SELECT name FROM teachers WHERE id=?"); $nm->execute([$tid]); $tname=$nm->fetchColumn()?:'guru#'.$tid;
-      if($pos===''){ $pp=$db->prepare("SELECT position FROM teachers WHERE id=?"); $pp->execute([$tid]); $pos=(string)($pp->fetchColumn()?:''); }
+      $pp=$db->prepare("SELECT position FROM teachers WHERE id=?"); $pp->execute([$tid]); $gpos=(string)($pp->fetchColumn()?:'');
+      if($gpos!=='')$pos=$gpos;
       if(!empty($_POST['id'])) $db->prepare("UPDATE structures SET teacher_id=?,position=?,sort_order=? WHERE id=?")->execute([$tid,$pos,$ord,(int)$_POST['id']]);
       else $db->prepare("INSERT INTO structures(teacher_id,position,sort_order) VALUES(?,?,?)")->execute([$tid,$pos,$ord]);
       Auth::log($db,'save','structure',"Simpan $tname - $pos"); Session::flash('ok','Disimpan.');
@@ -75,12 +76,12 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div id="strModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
 <div class="fixed inset-0 bg-slate-900/60" data-close></div>
 <div class="relative min-h-full flex items-start justify-center p-3 sm:p-6">
-<div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl my-4">
+<div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl my-4">
 <div class="flex items-center gap-2 px-5 py-3.5 border-b bg-white"><h2 class="font-extrabold" id="modalTitle"><i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Jabatan</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
 <form method="post" data-loading class="p-5 grid gap-3 text-sm bg-white"><?= Security::csrfField() ?>
 <input type="hidden" name="id" id="f_id" value="0">
 <label class="grid gap-1 font-semibold">Nama Guru (dari Guru & Staff)<select name="teacher_id" id="f_teacher" required class="border rounded-lg p-2 font-normal"><option value="">-- Pilih guru --</option><?php foreach($teachers as $t): ?><option value="<?= $t['id'] ?>" data-pos="<?= Helper::e($t['position']??'') ?>"><?= Helper::e($t['name']) ?> — <?= Helper::e($t['position']??'') ?></option><?php endforeach; ?></select><?php if(!$teachers): ?><span class="text-xs font-normal text-amber-600">Belum ada guru. Tambah dulu di Guru & Staff.</span><?php endif; ?></label>
-<label class="grid gap-1 font-semibold">Jabatan<input name="position" id="f_pos" placeholder="Otomatis dari data guru bila kosong" class="border rounded-lg p-2 font-normal"></label>
+<label class="grid gap-1 font-semibold">Jabatan<input name="position" id="f_pos" placeholder="Otomatis dari data guru" readonly class="border rounded-lg p-2 font-normal bg-slate-50"><span class="text-xs font-normal text-slate-400">Otomatis ikut jabatan guru terpilih.</span></label>
 <label class="grid gap-1 font-semibold">Urutan<input type="number" name="sort_order" id="f_sort" value="0" class="border rounded-lg p-2 font-normal"></label>
 <div class="flex justify-center md:col-span-2"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
@@ -89,6 +90,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 </script>
 <script>
 const modal=document.getElementById('strModal');
+function syncPos(){const t=document.getElementById('f_teacher'),p=document.getElementById('f_pos');const o=t.selectedOptions[0];if(o&&o.dataset.pos)p.value=o.dataset.pos}
 function openModal(d){
   document.getElementById('modalTitle').innerHTML=(d?'<i class="fa fa-pen text-emerald-600 mr-1"></i>Edit Jabatan':'<i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Jabatan');
   document.getElementById('f_id').value=d?.id||0;
@@ -96,13 +98,19 @@ function openModal(d){
   document.getElementById('f_pos').value=d?.position||'';
   document.getElementById('f_sort').value=d?.sort_order??0;
   modal.classList.remove('hidden');document.body.style.overflow='hidden';
+  syncPos();
+  const tsel=document.getElementById('f_teacher');
+  tsel.dispatchEvent(new Event('change',{bubbles:true}));
+  if(typeof tsel._csync==='function')tsel._csync();
+  if(typeof tsel._cpaint==='function')tsel._cpaint();
+  if(window.__refreshSelects&&typeof window.__refreshSelects['f_teacher']==='function')window.__refreshSelects['f_teacher']();
 }
 function closeModal(){modal.classList.add('hidden');document.body.style.overflow=''}
 document.getElementById('btnAdd').addEventListener('click',()=>openModal(null));
 document.querySelectorAll('.btn-edit').forEach(b=>b.addEventListener('click',()=>openModal(JSON.parse(b.dataset.row))));
 modal.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeModal));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
-document.getElementById('f_teacher').addEventListener('change',e=>{const o=e.target.selectedOptions[0];const p=document.getElementById('f_pos');if(o&&o.dataset.pos&&!p.value)p.value=o.dataset.pos});
+document.getElementById('f_teacher').addEventListener('change',syncPos);
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
 

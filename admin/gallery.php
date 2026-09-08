@@ -49,7 +49,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div class="flex items-center gap-2 px-5 py-3.5 border-b"><h2 class="font-extrabold"><i class="fa fa-image text-emerald-600 mr-1"></i>Upload Foto</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
 <form method="post" enctype="multipart/form-data" data-loading class="p-5 grid gap-2.5 text-sm"><?= Security::csrfField() ?>
 <input type="hidden" name="act" value="photo"><input type="hidden" name="gallery_id" value="<?= $sel ?>">
-<label class="grid gap-1 font-semibold">Foto<input type="file" name="f" accept="image/*" required class="border rounded-lg p-2 font-normal"></label>
+<label class="grid gap-1 font-semibold">Foto<img id="galPrev" class="hidden h-24 w-full object-cover rounded-lg border mb-1.5" alt="Preview"><input type="file" name="f" id="galInp" accept="image/*" required class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Caption<input name="caption" placeholder="Keterangan foto" class="border rounded-lg p-2 font-normal"></label>
 <div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-upload mr-1"></i>Upload</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
@@ -68,6 +68,7 @@ function closeAll(){modal.classList.add('hidden');pmodal.classList.add('hidden')
 document.getElementById('btnAdd').addEventListener('click',()=>openModal(null));
 document.querySelectorAll('.btn-edit').forEach(b=>b.addEventListener('click',()=>openModal(JSON.parse(b.dataset.row))));
 document.getElementById('btnPhoto')?.addEventListener('click',()=>{pmodal.classList.remove('hidden');document.body.style.overflow='hidden'});
+document.getElementById('galInp')?.addEventListener('change',e=>{const f=e.target.files?.[0];const p=document.getElementById('galPrev');if(f&&p){p.src=URL.createObjectURL(f);p.classList.remove('hidden')}});
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeAll));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAll()});
 </script>

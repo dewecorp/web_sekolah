@@ -334,13 +334,13 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'galer
 <label class="grid gap-1" data-f="subtitle"<?= $showSubtitle ? '' : ' style="display:none"' ?>>Subjudul<input name="subtitle" value="<?= Helper::e($edit['subtitle'] ?? '') ?>" class="border rounded-lg p-2"></label>
 <label class="grid gap-1" data-f="content"<?= $showContent ? '' : ' style="display:none"' ?>>Konten / HTML<textarea name="content" rows="3" class="border rounded-lg p-2 font-mono text-xs"><?= Helper::e($edit['content'] ?? '') ?></textarea></label>
 <div class="border rounded-xl p-2.5 bg-slate-50" data-f="image"<?= $showImage ? '' : ' style="display:none"' ?>><p class="text-xs font-bold mb-1.5"><i class="fa fa-image mr-1 text-emerald-600"></i>Gambar <span class="font-normal text-slate-400">(1 gambar)</span></p>
-<?php if(!empty($edit['image'])): ?><img src="<?= Helper::upload($edit['image']) ?>" alt="" class="h-24 w-full object-cover rounded-lg border mb-1.5"><label class="text-xs flex gap-1.5 items-center"><input type="checkbox" name="clear_image" value="1"> Hapus gambar</label><?php endif; ?>
-<input type="file" name="image" accept="image/*" class="border rounded-lg p-2 w-full bg-white text-xs"></div>
+<?php $secPrev=Helper::cover($edit['image'] ?? '', ($edit['type'] ?? 'section').'-'.($edit['section_key'] ?? ($edit['id'] ?? '')), 1200, 630); $secHas=!empty($edit['image']); ?><img id="secImgPrev" src="<?= Helper::e($secPrev) ?>" alt="" class="h-36 w-full object-cover rounded-lg border mb-1.5"><?php if($secHas): ?><label class="text-xs flex gap-1.5 items-center"><input type="checkbox" name="clear_image" value="1"> Hapus gambar (kembali ke bawaan)</label><?php else: ?><p class="text-[11px] text-slate-400 mb-1.5"><i class="fa fa-circle-info mr-1"></i>Gambar bawaan otomatis — upload untuk ganti.</p><?php endif; ?>
+<input type="file" name="image" id="secImgInp" accept="image/*" class="border rounded-lg p-2 w-full bg-white text-xs"></div>
 <?php $cdOldBg=''; if(($edit['type']??'')==='countdown'){ $bjBg=json_decode((string)($edit['buttons_json']??''),true); if(is_array($bjBg)&&!empty($bjBg['cd_bg'])) $cdOldBg=$bjBg['cd_bg']; } ?>
 <div class="border rounded-xl p-2.5 bg-violet-50" data-f="cd_bg"<?= ($curType==='countdown')?'':' style="display:none"' ?>><p class="text-xs font-bold mb-1.5"><i class="fa fa-image mr-1 text-violet-600"></i>Background Timer</p>
-<?php if($cdOldBg!==''): ?><img src="<?= Helper::upload($cdOldBg) ?>" alt="" class="h-24 w-full object-cover rounded-lg border mb-1.5"><label class="text-xs flex gap-1.5 items-center"><input type="checkbox" name="cd_bg_clear" value="1"> Hapus background</label><?php endif; ?>
+<?php if($cdOldBg!==''): ?><img id="cdBgPrev" src="<?= Helper::upload($cdOldBg) ?>" alt="" class="h-24 w-full object-cover rounded-lg border mb-1.5"><label class="text-xs flex gap-1.5 items-center"><input type="checkbox" name="cd_bg_clear" value="1"> Hapus background</label><?php else: ?><img id="cdBgPrev" class="hidden h-24 w-full object-cover rounded-lg border mb-1.5" alt="Preview"><?php endif; ?>
 <input type="hidden" name="old_cd_bg" value="<?= Helper::e($cdOldBg) ?>">
-<input type="file" name="cd_bg" accept="image/*" class="border rounded-lg p-2 w-full bg-white text-xs"></div>
+<input type="file" name="cd_bg" id="cdBgInp" accept="image/*" class="border rounded-lg p-2 w-full bg-white text-xs"></div>
 <?php if($showVideo): $vids=$editSlides; ?>
 <div class="border rounded-xl p-2.5 bg-slate-50 grid gap-1.5">
 <p class="text-xs font-bold"><i class="fa fa-video mr-1 text-emerald-600"></i>Daftar Video (<?= count($vids) ?>) <span class="font-normal text-slate-400">— upload / tautan, edit judul, hapus per baris</span></p>
@@ -474,6 +474,7 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'galer
 <label class="grid gap-0.5 text-xs">Subjudul<input name="slide_sub" id="sl_s" class="border rounded-lg p-1.5 bg-white"></label>
 <label class="grid gap-0.5 text-xs">Gambar <span class="text-slate-400">(bisa multi-upload sekaligus)</span><input type="file" name="slide_img[]" id="sl_img" accept="image/*" multiple class="border rounded-lg p-1.5 bg-white"></label>
 <img id="sl_prev" class="hidden h-20 w-full object-cover rounded-lg border">
+<div id="sl_prev_multi" class="hidden grid-cols-4 gap-1.5"></div>
 <div class="grid grid-cols-2 gap-1.5"><input name="slide_cta" id="sl_c1" placeholder="Tombol 1" class="border rounded-lg p-1.5 bg-white text-xs"><input name="slide_cta_url" id="sl_u1" placeholder="/profil" class="border rounded-lg p-1.5 bg-white text-xs"></div>
 <div class="grid grid-cols-2 gap-1.5"><input name="slide_cta2" id="sl_c2" placeholder="Tombol 2" class="border rounded-lg p-1.5 bg-white text-xs"><input name="slide_cta2_url" id="sl_u2" placeholder="/berita" class="border rounded-lg p-1.5 bg-white text-xs"></div>
 <div class="grid grid-cols-2 gap-1.5">
@@ -580,6 +581,15 @@ document.querySelectorAll('.imgsizepick').forEach(b=>b.addEventListener('click',
   const hid=document.querySelector('input[name="img_size"]'); if(hid)hid.value=b.dataset.imgsize;
   const box=document.getElementById('imgCustomBox'); if(box)box.style.display=b.dataset.imgsize==='custom'?'':'none';
 }));
+document.getElementById('secImgInp')?.addEventListener('change',e=>{const f=e.target.files?.[0];const p=document.getElementById('secImgPrev');if(f&&p){p.src=URL.createObjectURL(f);p.classList.remove('hidden')}});
+document.getElementById('cdBgInp')?.addEventListener('change',e=>{const f=e.target.files?.[0];const p=document.getElementById('cdBgPrev');if(f&&p){p.src=URL.createObjectURL(f);p.classList.remove('hidden')}});
+document.getElementById('sl_img')?.addEventListener('change',e=>{
+  const files=[...e.target.files||[]];const single=document.getElementById('sl_prev'),multi=document.getElementById('sl_prev_multi');
+  if(single)single.classList.add('hidden');
+  if(multi){multi.innerHTML='';multi.classList.add('hidden')}
+  if(files.length===1){single.src=URL.createObjectURL(files[0]);single.classList.remove('hidden')}
+  else if(files.length>1){multi.classList.remove('hidden');multi.classList.add('grid');files.forEach(f=>{const im=document.createElement('img');im.src=URL.createObjectURL(f);im.className='h-16 w-full object-cover rounded-lg border';multi.appendChild(im)})}
+});
 document.querySelectorAll('.imghoverpick').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.imghoverpick').forEach(x=>x.classList.remove('ring-2','ring-emerald-500','border-emerald-500'));
   b.classList.add('ring-2','ring-emerald-500','border-emerald-500');

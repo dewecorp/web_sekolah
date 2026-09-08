@@ -19,9 +19,7 @@
 <?= $link('admin/students', 'fa-user-graduate', 'Data Siswa') ?>
 <?= $link('admin/sarana', 'fa-building-columns', 'Sarana') ?>
 <?= $link('admin/sarana-pembelajaran', 'fa-chalkboard', 'Sarana Belajar') ?>
-<?= $link('admin/sarana-pembelajaran', 'fa-chalkboard', 'Sarana Belajar') ?>
-<?= $link('admin/sarana-pembelajaran', 'fa-chalkboard', 'Sarana Belajar') ?>
-<?= $link('admin/ekskul', 'fa-futbol', 'Ekstrakurikuler') ?>
+ <?= $link('admin/ekskul', 'fa-futbol', 'Ekstrakurikuler') ?>
 <?= $link('admin/prestasi', 'fa-trophy', 'Prestasi') ?>
 <?= $link('admin/structure', 'fa-sitemap', 'Struktur') ?>
 <?= $link('admin/curriculum', 'fa-book-open', 'Kurikulum') ?>

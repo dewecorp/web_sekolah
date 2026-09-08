@@ -59,7 +59,7 @@ const modal=document.getElementById('annModal');
 let annEditor=null,pendingAnn='';
 function ensureAnnEditor(){
   if(annEditor||!window.tinymce||!window.RichEditorCreate){const w=document.getElementById('editorWarn');if(!annEditor&&w)w.classList.remove('hidden');return}
-  try{window.RichEditorCreate(document.getElementById('f_content'),{height:340,min_height:260,menubar:false,toolbar_mode:'sliding',toolbar:['undo redo | blocks | bold italic underline | bullist numlist | link image media table | removeformat code fullscreen']}).then(e=>{annEditor=e;if(pendingAnn){try{e.setData(pendingAnn)}catch(_){}pendingAnn=''}}).catch(()=>document.getElementById('editorWarn')?.classList.remove('hidden'))}catch(_){}
+  try{window.RichEditorCreate(document.getElementById('f_content'),{height:460}).then(e=>{annEditor=e;if(pendingAnn){try{e.setData(pendingAnn)}catch(_){}pendingAnn=''}}).catch(()=>document.getElementById('editorWarn')?.classList.remove('hidden'))}catch(_){}
 }
 function openModal(d){
   document.getElementById('modalTitle').innerHTML=(d?'<i class="fa fa-pen text-emerald-600 mr-1"></i>Edit Pengumuman':'<i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Pengumuman');

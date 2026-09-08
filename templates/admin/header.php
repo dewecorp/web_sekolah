@@ -14,10 +14,6 @@ h1,h2,h3{font-family:var(--font-body)!important;letter-spacing:-.02em}
 .font-mono,code,kbd,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace!important}
 .swal2-popup{font-family:var(--font-body)!important}
 .tox-tinymce,.tox .tox-edit-area__iframe{font-family:var(--font-body)!important}
-.tox .tox-edit-area__iframe{scrollbar-width:thin}
-.tox-tinymce{max-height:720px;display:flex!important;flex-direction:column}
-.tox-tinymce .tox-edit-area{flex:1 1 auto;overflow:auto!important;min-height:180px}
-.tox-tinymce .tox-editor-container{max-height:inherit}
 #sideNav{scrollbar-width:thin;scrollbar-color:#10b981 #f1f5f9;overscroll-behavior:contain}
 #sideNav::-webkit-scrollbar{width:6px}
 #sideNav::-webkit-scrollbar-track{background:#f1f5f9}
@@ -84,8 +80,8 @@ window.RichEditorCreate=function(el,options){
   const uploadUrl=<?= json_encode(Helper::url('admin/media'),JSON_UNESCAPED_SLASHES) ?>;
   const csrf=<?= json_encode(Security::csrfToken()) ?>;
   return window.tinymce.init(Object.assign({
-    target:el,base_url:'https://cdn.jsdelivr.net/npm/tinymce@7.6.1',suffix:'.min',license_key:'gpl',height:460,min_height:220,max_height:640,autoresize_bottom_margin:16,menubar:'file edit view insert format tools table help',toolbar_mode:'wrap',toolbar_sticky:true,
-    plugins:'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount codesample directionality emoticons autoresize',
+    target:el,base_url:'https://cdn.jsdelivr.net/npm/tinymce@7.6.1',suffix:'.min',license_key:'gpl',height:460,menubar:'file edit view insert format tools table help',toolbar_mode:'wrap',
+    plugins:'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount codesample directionality emoticons',
     toolbar:['undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor removeformat','alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image imageleft imagecenter imageright media table | blockquote hr charmap emoticons codesample | searchreplace visualblocks code preview fullscreen help'],
      branding:false,promotion:false,convert_urls:false,automatic_uploads:true,file_picker_types:'image',media_live_embeds:true,extended_valid_elements:'iframe[src|width|height|style|frameborder|allowfullscreen|loading|referrerpolicy|title|allow|scrolling],table[class|style|border|cellpadding|cellspacing|width],tr[class|style],td[class|style|colspan|rowspan|width|align|valign],th[class|style|colspan|rowspan|width|scope]',invalid_elements:'',sandbox_iframes:false,table_default_styles:{},table_default_attributes:{},table_class_list:[{title:'Default',value:''},{title:'Garis',value:'tbl-line'}],
     image_advtab:true,

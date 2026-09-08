@@ -52,7 +52,7 @@ let greetEditor=null;
   const el=document.getElementById('principalGreeting'),warn=document.getElementById('editorWarn');
   if(!el)return;
   if(!window.tinymce||!window.RichEditorCreate){ warn&&warn.classList.remove('hidden'); return; }
-  window.RichEditorCreate(el,{height:400}).then(e=>{greetEditor=e}).catch(()=>warn&&warn.classList.remove('hidden'));
+  window.RichEditorCreate(el,{height:460}).then(e=>{greetEditor=e}).catch(()=>warn&&warn.classList.remove('hidden'));
 })();
 document.getElementById('identityForm').addEventListener('submit',()=>{ if(greetEditor){ try{document.getElementById('principalGreeting').value=greetEditor.getData()}catch(_){} } });
 document.getElementById('ppInput')?.addEventListener('change',e=>{

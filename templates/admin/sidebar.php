@@ -17,6 +17,10 @@
 <p class="px-3 mt-3 text-[11px] font-bold uppercase tracking-wide text-emerald-200/70">Sekolah</p>
 <?= $link('admin/teachers', 'fa-chalkboard-user', 'Guru & Staff') ?>
 <?= $link('admin/students', 'fa-user-graduate', 'Data Siswa') ?>
+<?= $link('admin/sarana', 'fa-building-columns', 'Sarana') ?>
+<?= $link('admin/sarana-pembelajaran', 'fa-chalkboard', 'Sarana Belajar') ?>
+<?= $link('admin/sarana-pembelajaran', 'fa-chalkboard', 'Sarana Belajar') ?>
+<?= $link('admin/sarana-pembelajaran', 'fa-chalkboard', 'Sarana Belajar') ?>
 <?= $link('admin/ekskul', 'fa-futbol', 'Ekstrakurikuler') ?>
 <?= $link('admin/prestasi', 'fa-trophy', 'Prestasi') ?>
 <?= $link('admin/structure', 'fa-sitemap', 'Struktur') ?>

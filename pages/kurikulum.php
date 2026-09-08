@@ -38,16 +38,18 @@ require ROOT.'/templates/frontend/page-hero.php'; ?>
 <div class="kur-content mt-3 text-sm md:text-[15px] leading-relaxed text-slate-700 dark:text-slate-200"><?= $content ?></div>
 </div>
 <div class="rounded-[1.7rem] border dark:border-slate-700 bg-white dark:bg-slate-800 p-5 md:p-6 reveal">
-<h2 class="font-extrabold flex items-center gap-2"><span class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 text-white grid place-items-center shadow"><i class="fa fa-layer-group text-sm"></i></span>Komponen utama <span class="ml-auto text-[11px] font-bold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700"><?= count($comps ?? []) + ($compsHtml?substr_count(strtolower($compsHtml),'<li'):0) ?> poin</span></h2>
-<?php if($compsHtml!==''): ?><div class="kur-steps mt-4 text-sm leading-relaxed"><?= $compsHtml ?></div><?php elseif(!empty($comps)): ?><ol class="kur-steps mt-4"><?php foreach($comps as $cp): $parts=preg_split('/^(.+?)\s+[—–-]\s+(.+)$/u', trim($cp), -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY); if(count($parts)>=2){$t0=trim($parts[0]);$t1=trim($parts[1]);}else{$t0=trim($cp);$t1='';} ?><li><b><?= Helper::e($t0) ?></b><?php if($t1!==''): ?><span><?= Helper::e($t1) ?></span><?php endif; ?></li><?php endforeach; ?></ol><?php else: ?><p class="text-xs text-slate-400 mt-2">Belum diisi. Kelola via Sekolah &gt; Kurikulum.</p><?php endif; ?>
+<h2 class="font-extrabold flex items-center gap-2 pb-3 mb-2 border-b border-slate-100 dark:border-slate-700"><span class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 text-white grid place-items-center shadow"><i class="fa fa-layer-group text-sm"></i></span>Komponen utama <span class="ml-auto text-[11px] font-bold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700"><?= count($comps ?? []) + ($compsHtml?substr_count(strtolower($compsHtml),'<li'):0) ?> poin</span></h2>
+<?php if($compsHtml!==''): ?><div class="vm-list mt-4 text-sm leading-relaxed"><?= $compsHtml ?></div><?php elseif(!empty($comps)): ?><div class="vm-list mt-4"><ol><?php foreach($comps as $cp): $parts=preg_split('/^(.+?)\s+[—–-]\s+(.+)$/u', trim($cp), -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY); if(count($parts)>=2){$t0=trim($parts[0]);$t1=trim($parts[1]);}else{$t0=trim($cp);$t1='';} ?><li><span><b><?= Helper::e($t0) ?></b><?php if($t1!==''): ?><span class="block text-slate-500 mt-0.5"><?= Helper::e($t1) ?></span><?php endif; ?></span></li><?php endforeach; ?></ol></div><?php else: ?><p class="text-xs text-slate-400 mt-2">Belum diisi. Kelola via Sekolah &gt; Kurikulum.</p><?php endif; ?>
 
 </div>
 </div>
 </div>
 <style>
-.kur-steps{counter-reset:kp;display:grid;gap:.6rem;margin:0!important;padding:0!important;list-style:none!important}
-.kur-steps li{counter-increment:kp;position:relative;background:#f8fafc;border:1px solid #e2e8f0;border-radius:1rem;padding:.85rem .9rem .85rem 3.4rem}
-.kur-steps li::before{content:counter(kp,decimal-leading-zero);position:absolute;left:.8rem;top:.85rem;width:1.8rem;height:1.8rem;border-radius:.7rem;display:grid;place-items:center;font-size:.7rem;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--school-primary,#059669),#0ea5e9)}
+.kur-steps{counter-reset:kp;display:grid;gap:.85rem;margin:.2rem 0!important;padding:0!important;list-style:none!important}
+.kur-steps li{counter-increment:kp;position:relative;background:#f8fafc;border:1px solid #e2e8f0;border-radius:1rem;padding:.9rem .95rem .9rem 3.4rem;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+.kur-steps li:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(15,23,42,.12);border-color:color-mix(in srgb,var(--school-primary,#059669),white 55%)}
+.kur-steps li:hover::before{transform:scale(1.12) rotate(4deg)}
+.kur-steps li::before{content:counter(kp,decimal-leading-zero);position:absolute;left:.8rem;top:.85rem;width:1.8rem;height:1.8rem;border-radius:.7rem;display:grid;place-items:center;font-size:.7rem;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--school-primary,#059669),#0ea5e9);transition:transform .25s ease}
 .kur-steps li b{display:block;font-size:.85rem}
 .kur-steps li span{display:block;font-size:.75rem;color:#64748b;margin-top:.15rem}
 .dark .kur-steps li{background:#1e293b;border-color:#334155}

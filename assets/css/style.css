@@ -42,6 +42,14 @@ img.imgfx-float,.imgfx-float{animation:imgFloat 7s ease-in-out infinite!importan
 .imghov-slide-up:hover img{transform:translateY(-8px) scale(1.03)}
 article iframe[src*="google.com/maps"],article iframe[src*="maps.google"],article iframe[src*="openstreetmap"]{width:100%!important;min-height:420px;border:0;border-radius:1rem;display:block;background:#e2e8f0}
 .map-page iframe{width:100%!important;border:0!important;border-radius:1rem;display:block;min-height:420px}
+.gal-marquee{overflow:hidden;mask-image:linear-gradient(to right,transparent,#000 6%,#000 94%,transparent)}
+.gal-track{display:flex;gap:.75rem;width:max-content;animation:galSlide var(--dur,26s) linear infinite}
+.gal-marquee.alt .gal-track{animation-direction:reverse}
+.gal-marquee:hover .gal-track{animation-play-state:paused}
+@keyframes galSlide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.gal-bubble{transition:transform .35s ease,box-shadow .35s ease}
+.gal-bubble.gal-glow{transform:scale(1.22);box-shadow:0 22px 52px rgba(16,185,129,.55),0 0 0 4px rgba(16,185,129,.65);z-index:5}
+@media (prefers-reduced-motion:reduce){.gal-track{animation:none}.gal-bubble{animation:none}}
 .card-hover{transition:transform .3s ease,box-shadow .3s ease}
 .card-hover:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.12)}
 #mainNav.scrolled{box-shadow:0 4px 20px rgba(0,0,0,.08)}

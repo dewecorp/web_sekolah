@@ -62,6 +62,19 @@ document.querySelectorAll('[data-count]').forEach(el=>{
 document.querySelectorAll('[data-confirm]').forEach(f=>{f.addEventListener('submit',e=>{e.preventDefault();Swal.fire({title:'Apakah Anda yakin?',text:'Data yang dihapus tidak dapat dikembalikan.',icon:'warning',showCancelButton:true,confirmButtonText:'Ya, Hapus',cancelButtonText:'Batal'}).then(r=>{if(r.isConfirmed)f.submit()})})});
 document.querySelectorAll('[data-lightbox]').forEach(img=>{img.addEventListener('click',()=>{Swal.fire({imageUrl:img.src,imageAlt:img.alt||'',showConfirmButton:false,showCloseButton:true,width:800})})});
 document.querySelectorAll('.map-page iframe[height]').forEach(f=>{const h=parseInt(f.getAttribute('height'),10);if(h>0)f.style.height=h+'px'});
+document.querySelectorAll('[data-galwrap]').forEach(w=>{
+  if(w.dataset.glow!=='1')return;
+  const glow=()=>{const wr=w.getBoundingClientRect();let best=null,bd=1e9;w.querySelectorAll('img').forEach(im=>{const r=im.getBoundingClientRect();const d=Math.abs((r.left+r.width/2)-(wr.left+wr.width/2));if(d<bd){bd=d;best=im}});w.querySelectorAll('img.gal-glow').forEach(im=>im.classList.remove('gal-glow'));if(best)best.classList.add('gal-glow')};
+  setInterval(glow,300);glow();
+  const track=w.querySelector('[data-galtrack]');if(!track)return;
+  setTimeout(()=>{
+    if(getComputedStyle(track).animationName!=='none'&&getComputedStyle(track).animationName!=='')return;
+    const dur=Math.max(8,parseInt(w.dataset.dur||'26',10)||26)*1000;const rev=w.dataset.dir==='rev';let x=0,last=performance.now(),half=track.scrollWidth/2,run=true;
+    w.addEventListener('mouseenter',()=>run=false);w.addEventListener('mouseleave',()=>{run=true;last=performance.now()});
+    const step=t=>{const dt=t-last;last=t;if(run&&half>0){x+=dt/half*100/dur*1000*(rev?-1:1);if(x>=half)x-=half;if(x<0)x+=half;track.style.transform='translateX('+(-x)+'px)'}requestAnimationFrame(step)};
+    requestAnimationFrame(step);
+  },400);
+});
 document.querySelectorAll('article table,.prose table,.map-page table').forEach(t=>{if(t.parentElement&&!t.parentElement.classList.contains('table-wrap')){const w=document.createElement('div');w.className='table-wrap';t.parentElement.insertBefore(w,t);w.appendChild(t)}});
 document.querySelectorAll('[id^="cd-"]').forEach(el=>{
   const target=(el.dataset.target||'').trim().replace('T',' ');if(!target)return;

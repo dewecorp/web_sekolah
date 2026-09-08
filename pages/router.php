@@ -11,6 +11,7 @@ if ($uri === '/indeks-berita' || $uri === '/berita/indeks') { require ROOT.'/pag
 if (str_starts_with($uri, '/berita/')) { $slug = basename($uri); require ROOT.'/pages/news-detail.php'; exit; }
 if ($uri === '/galeri') { require ROOT.'/pages/gallery.php'; exit; }
 if ($uri === '/guru') { require ROOT.'/pages/teachers.php'; exit; }
+if ($uri === '/siswa') { require ROOT.'/pages/students.php'; exit; }
 if ($uri === '/prestasi') { require ROOT.'/pages/prestasi.php'; exit; }
 if ($uri === '/ekstrakurikuler') { require ROOT.'/pages/ekskul.php'; exit; }
 if ($uri === '/struktur-organisasi') { require ROOT.'/pages/struktur.php'; exit; }

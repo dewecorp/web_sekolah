@@ -279,6 +279,29 @@ CREATE TABLE IF NOT EXISTS widgets (
   INDEX idx_area (area, is_active, sort_order)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS student_classes (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(60) NOT NULL UNIQUE,
+  sort_order INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS students (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  nis VARCHAR(30) DEFAULT NULL,
+  nisn VARCHAR(30) DEFAULT NULL,
+  class_id INT UNSIGNED DEFAULT NULL,
+  gender ENUM('L','P') DEFAULT NULL,
+  photo VARCHAR(255) DEFAULT NULL,
+  is_active TINYINT(1) DEFAULT 1,
+  sort_order INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_active (is_active, sort_order),
+  INDEX idx_class (class_id),
+  CONSTRAINT fk_stu_class FOREIGN KEY (class_id) REFERENCES student_classes(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS extracurriculars (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(150) NOT NULL,

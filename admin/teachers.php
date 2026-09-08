@@ -133,17 +133,26 @@ function openModal(d){
   document.getElementById('f_name').value=d?.name||'';
   document.getElementById('f_nip').value=d?.nip||'';
   document.getElementById('f_position').value=d?.position||'Guru';
-  document.getElementById('f_type').value=d?.type||'guru';
   document.getElementById('f_sort').value=d?.sort_order??0;
   document.getElementById('f_subject').value=d?.subject||'';
   document.getElementById('f_edu').value=d?.education||'';
   document.getElementById('f_desc').value=d?.description||'';
-  document.getElementById('f_active').value=String(d?.is_active??1);
   document.getElementById('f_old').value=d?.photo||'';
   document.getElementById('f_photo').value='';
   const pv=document.getElementById('f_prev');
   if(d?.photo){pv.src=upBase+d.photo;pv.classList.remove('hidden')}else{pv.src='';pv.classList.add('hidden')}
   modal.classList.remove('hidden');document.body.style.overflow='hidden';
+  const syncSel=(id,val)=>{
+    const sel=document.getElementById(id);
+    if(!sel)return;
+    sel.value=val;
+    sel.dispatchEvent(new Event('change',{bubbles:true}));
+    if(typeof sel._csync==='function')sel._csync();
+    if(typeof sel._cpaint==='function')sel._cpaint();
+    if(window.__refreshSelects&&typeof window.__refreshSelects[id]==='function')window.__refreshSelects[id]();
+  };
+  syncSel('f_type',d?.type||'guru');
+  syncSel('f_active',String(d?.is_active??1));
 }
 function closeModal(){modal.classList.add('hidden');document.body.style.overflow=''}
 document.getElementById('btnAdd').addEventListener('click',()=>openModal(null));

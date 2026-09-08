@@ -177,7 +177,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $imgSizeOpts=array_keys(['thumb'=>1,'sm'=>1,'md'=>1,'lg'=>1,'full'=>1,'orig'=>1,'lead'=>1,'wide'=>1,'banner'=>1,'ads'=>1,'sq'=>1,'port'=>1,'story'=>1,'custom'=>1]);
     $imgSize=in_array($_POST['img_size']??'full',$imgSizeOpts,true)?$_POST['img_size']:'full';
     $imgCw=max(0,min(2400,(int)($_POST['img_cw']??0))); $imgCh=max(0,min(1600,(int)($_POST['img_ch']??0)));
+    if(($_POST['type']??'')==='galeri'){
+      $imgFx=in_array($_POST['gal_anim']??'none',['marquee','marquee-alt'],true)?$_POST['gal_anim']:'none';
+    }
     $imgHover=$_POST['img_hover'] ?? 'none';
+    if(($_POST['type']??'')==='galeri'){
+      $imgHover=!empty($_POST['gal_bubble'])?'bubble':'none';
+      $gSp=in_array($_POST['gal_speed']??'normal',['slow','normal','fast'],true)?$_POST['gal_speed']:'normal';
+      $gPh=in_array($_POST['gal_photo']??'md',['sm','md','lg'],true)?$_POST['gal_photo']:'md';
+      $imgSize=$gSp.'|'.$gPh;
+    }
     $d = [$_POST['type'] ?? 'custom', $_POST['title'] ?? '', $_POST['subtitle'] ?? '', $_POST['content'] ?? '', $img, $b1['text'], $b1['url'], $b1['target'], $b2['text'], $b2['url'], $b2['target'], $buttonsJson, $_POST['style'] ?? 'default', $_POST['bg'] ?? 'white', $_POST['padding'] ?? 'lg', $_POST['align'] ?? 'left', (int)($_POST['items_limit'] ?? 3), (int)($_POST['sort_order'] ?? 0), !empty($_POST['is_active']) ? 1 : 0, $_POST['effect'] ?? 'fade-up', $_POST['grid'] ?? 'cards-3', $imgFx, $imgSize, $imgCw?:null, $imgCh?:null, $imgHover];
     try {
       if (!empty($_POST['id'])) { $db->prepare("UPDATE homepage_sections SET type=?,title=?,subtitle=?,content=?,image=?,btn_text=?,btn_url=?,btn_target=?,btn2_text=?,btn2_url=?,btn2_target=?,buttons_json=?,style=?,bg=?,padding=?,align=?,items_limit=?,sort_order=?,is_active=?,effect=?,grid=?,img_fx=?,img_size=?,img_cw=?,img_ch=?,img_hover=? WHERE id=?")->execute([...$d, (int)$_POST['id']]); Auth::log($db,'update','sections',"Ubah $key"); $secId=(int)$_POST['id']; }
@@ -389,6 +398,20 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'galer
 <?php $gridPrev=['cards-2'=>'▦▦','cards-3'=>'▦▦▦','cards-4'=>'▦▦▦▦','featured'=>'▦▤','list'=>'☰','overlay'=>'▣','minimal'=>'―']; $gridOpts=in_array($curType,['ekskul','prestasi','guru','galeri'],true)?array_intersect_key($grids,array_flip(['cards-2','cards-3','cards-4'])):$grids; foreach($gridOpts as $k=>$l): ?><button type="button" data-grid="<?= $k ?>" class="gridpick border rounded-lg p-1.5 text-center <?= ($edit['grid'] ?? 'cards-3') === $k ? 'ring-2 ring-emerald-500 border-emerald-500' : '' ?>"><span class="block text-xl leading-none"><?= $gridPrev[$k] ?? '▦' ?></span><span class="text-[10px] leading-tight block mt-1"><?= $l ?></span></button><?php endforeach; ?>
 </div><input type="hidden" name="grid" value="<?= Helper::e($edit['grid'] ?? 'cards-3') ?>">
 </div>
+ <?php $showGal=in_array($curType,['galeri'],true); $galAnim=in_array($edit['img_fx']??'none',['marquee','marquee-alt'],true)?$edit['img_fx']:'none'; $galBubble=($edit['img_hover']??'none')==='bubble'; $galSpRaw=$edit['img_size']??'normal'; $galSpeed=strtok($galSpRaw,'|')?:'normal'; if(!in_array($galSpeed,['slow','normal','fast'],true))$galSpeed='normal'; $galPh=explode('|',$galSpRaw)[1]??'md'; if(!in_array($galPh,['sm','md','lg'],true))$galPh='md'; ?>
+<div data-f="galanim"<?= $showGal?'':' style="display:none"' ?>>
+<p class="text-xs font-bold uppercase text-slate-400">Animasi Galeri <span class="font-normal normal-case text-slate-400">(Berjalan & Gelembung)</span></p>
+<div class="grid grid-cols-3 gap-1.5">
+<?php foreach(['none'=>'Statis','marquee'=>'Melingkar','marquee-alt'=>'Bolak-balik'] as $k=>$l): ?><button type="button" data-galanim="<?= $k ?>" class="galanimpick border rounded-lg p-1.5 text-center <?= $galAnim===$k?'ring-2 ring-emerald-500 border-emerald-500':'' ?>"><span class="text-[10px] leading-tight block"><?= $l ?></span></button><?php endforeach; ?>
+</div><input type="hidden" name="gal_anim" value="<?= Helper::e($galAnim) ?>">
+<div class="grid grid-cols-2 gap-1.5 mt-1.5">
+<label class="flex gap-1.5 items-center text-xs mt-5"><input type="checkbox" name="gal_bubble" value="1" <?= $galBubble?'checked':'' ?>> Glow foto tengah</label>
+<label class="grid gap-0.5 text-xs">Kecepatan<select name="gal_speed" class="border rounded-lg p-1.5 bg-white"><option value="slow" <?= $galSpeed==='slow'?'selected':'' ?>>Lambat</option><option value="normal" <?= $galSpeed==='normal'?'selected':'' ?>>Normal</option><option value="fast" <?= $galSpeed==='fast'?'selected':'' ?>>Cepat</option></select></label>
+</div>
+<div class="grid grid-cols-3 gap-1.5 mt-1.5">
+<?php foreach(['sm'=>'Kecil (h-32)','md'=>'Sedang (h-40)','lg'=>'Besar (h-56)'] as $k=>$l): ?><button type="button" data-galphoto="<?= $k ?>" class="galphotopick border rounded-lg p-1.5 text-center <?= $galPh===$k?'ring-2 ring-emerald-500 border-emerald-500':'' ?>"><span class="text-[10px] leading-tight block"><?= $l ?></span></button><?php endforeach; ?>
+</div><input type="hidden" name="gal_photo" value="<?= Helper::e($galPh) ?>">
+</div>
 <?php $showImgFx=in_array($curType,['hero','image'],true); $showImgSize=($curType==='image'); ?>
 <div data-f="imgfx"<?= $showImgFx?'':' style="display:none"' ?>>
 <p class="text-xs font-bold uppercase text-slate-400">Style Gambar <span class="font-normal normal-case text-slate-400">(Hero & Image)</span></p>
@@ -590,6 +613,16 @@ document.getElementById('sl_img')?.addEventListener('change',e=>{
   if(files.length===1){single.src=URL.createObjectURL(files[0]);single.classList.remove('hidden')}
   else if(files.length>1){multi.classList.remove('hidden');multi.classList.add('grid');files.forEach(f=>{const im=document.createElement('img');im.src=URL.createObjectURL(f);im.className='h-16 w-full object-cover rounded-lg border';multi.appendChild(im)})}
 });
+document.querySelectorAll('.galanimpick').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.galanimpick').forEach(x=>x.classList.remove('ring-2','ring-emerald-500','border-emerald-500'));
+  b.classList.add('ring-2','ring-emerald-500','border-emerald-500');
+  const hid=document.querySelector('input[name="gal_anim"]'); if(hid)hid.value=b.dataset.galanim;
+}));
+document.querySelectorAll('.galphotopick').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.galphotopick').forEach(x=>x.classList.remove('ring-2','ring-emerald-500','border-emerald-500'));
+  b.classList.add('ring-2','ring-emerald-500','border-emerald-500');
+  const hid=document.querySelector('input[name="gal_photo"]'); if(hid)hid.value=b.dataset.galphoto;
+}));
 document.querySelectorAll('.imghoverpick').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.imghoverpick').forEach(x=>x.classList.remove('ring-2','ring-emerald-500','border-emerald-500'));
   b.classList.add('ring-2','ring-emerald-500','border-emerald-500');

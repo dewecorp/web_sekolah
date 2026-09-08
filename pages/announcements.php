@@ -51,7 +51,7 @@ require ROOT . '/templates/frontend/header.php'; ?>
 <?php if ($hasFile): ?><span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-900 text-sky-700 dark:text-sky-200"><i class="fa fa-paperclip mr-0.5"></i>Lampiran</span><?php endif; ?>
 </div>
 <p class="text-[11px] text-slate-400 mt-1.5 flex flex-wrap gap-x-3"><span><i class="fa fa-clock mr-1"></i><?= Helper::e(Helper::ago($dt)) ?></span><span><i class="fa fa-calendar-day mr-1"></i><?= Helper::e(Helper::tgl($dt)) ?></span></p>
-<p class="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed text-justify"><?= nl2br(Helper::e($x['content'])) ?></p>
+<div class="ann-content text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed text-justify"><?= $x['content'] ?></div>
 <?php if ($hasFile): $href = str_starts_with($x['attachment'], 'http') ? $x['attachment'] : Helper::url(ltrim($x['attachment'], '/')); ?>
 <a href="<?= Helper::e($href) ?>" target="_blank" rel="noopener noreferrer" class="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-white bg-sky-600 hover:bg-sky-500 px-3.5 py-2 rounded-xl shadow"><i class="fa fa-download"></i>Unduh Lampiran</a>
 <?php endif; ?>

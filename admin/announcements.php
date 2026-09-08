@@ -36,12 +36,12 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div id="annModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
 <div class="fixed inset-0 bg-slate-900/60" data-close></div>
 <div class="relative min-h-full flex items-start justify-center p-3 sm:p-6">
-<div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl my-4">
+<div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl my-4">
 <div class="flex items-center gap-2 px-4 py-3 border-b bg-white"><h2 class="font-extrabold text-sm" id="modalTitle"><i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Pengumuman</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
 <form method="post" enctype="multipart/form-data" data-loading class="p-4 grid gap-2.5 text-sm bg-white"><?= Security::csrfField() ?>
 <input type="hidden" name="id" id="f_id" value="0"><input type="hidden" name="old_att" id="f_old" value="">
 <label class="grid gap-1 font-semibold">Judul<input name="title" id="f_title" required placeholder="Judul pengumuman" class="border rounded-lg p-2 font-normal"></label>
-<label class="grid gap-1 font-semibold">Isi<textarea name="content" id="f_content" rows="4" placeholder="Isi pengumuman..." class="border rounded-lg p-2 font-normal"></textarea></label>
+<label class="grid gap-1 font-semibold">Isi<textarea name="content" id="f_content" rows="6" placeholder="Isi pengumuman..." class="border rounded-lg p-2 font-normal"></textarea><span id="editorWarn" class="hidden text-xs font-normal text-red-600">Editor gagal dimuat (CDN diblokir). Textarea biasa tetap bisa disimpan.</span></label>
 <div class="border rounded-xl p-3 bg-slate-50"><p class="text-xs font-bold mb-1.5"><i class="fa fa-paperclip mr-1 text-emerald-600"></i>Lampiran</p>
 <a id="f_att_link" href="#" target="_blank" rel="noopener noreferrer" class="hidden text-xs text-sky-600 underline break-all mb-1.5 block">Lihat file lama</a>
 <input type="file" name="att" id="f_att" class="border rounded-lg p-2 w-full bg-white text-xs"></div>
@@ -53,19 +53,26 @@ require ROOT.'/templates/admin/header.php'; ?>
 <script>
 (function(){const ca=document.getElementById('checkAllAnn'),sc=document.getElementById('selCount'),bb=document.getElementById('btnBulkAnn'),bf=document.getElementById('bulkForm');if(!ca||!bb||!bf)return;const up=()=>{sc.textContent=document.querySelectorAll('.rowcheck:checked').length+' dipilih'};ca.addEventListener('change',()=>{document.querySelectorAll('.rowcheck').forEach(c=>c.checked=ca.checked);up()});document.addEventListener('change',e=>{if(e.target.classList&&e.target.classList.contains('rowcheck'))up()});bb.addEventListener('click',()=>{const n=document.querySelectorAll('.rowcheck:checked').length;if(!n){Swal.fire('Pilih dulu','Centang minimal 1 data.','warning');return}Swal.fire({title:'Hapus '+n+' data?',text:'Tidak dapat dikembalikan.',icon:'warning',showCancelButton:true,confirmButtonText:'Ya Hapus',cancelButtonText:'Batal',confirmButtonColor:'#dc2626'}).then(r=>{if(r.isConfirmed)bf.submit()})});})();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/tinymce@7.6.1/tinymce.min.js"></script>
 <script>
 const modal=document.getElementById('annModal');
+let annEditor=null,pendingAnn='';
+function ensureAnnEditor(){
+  if(annEditor||!window.tinymce||!window.RichEditorCreate){const w=document.getElementById('editorWarn');if(!annEditor&&w)w.classList.remove('hidden');return}
+  try{window.RichEditorCreate(document.getElementById('f_content'),{height:340,min_height:260,menubar:false,toolbar_mode:'sliding',toolbar:['undo redo | blocks | bold italic underline | bullist numlist | link image media table | removeformat code fullscreen']}).then(e=>{annEditor=e;if(pendingAnn){try{e.setData(pendingAnn)}catch(_){}pendingAnn=''}}).catch(()=>document.getElementById('editorWarn')?.classList.remove('hidden'))}catch(_){}
+}
 function openModal(d){
   document.getElementById('modalTitle').innerHTML=(d?'<i class="fa fa-pen text-emerald-600 mr-1"></i>Edit Pengumuman':'<i class="fa fa-plus text-emerald-600 mr-1"></i>Tambah Pengumuman');
   document.getElementById('f_id').value=d?.id||0;
   document.getElementById('f_title').value=d?.title||'';
-  document.getElementById('f_content').value=d?.content||'';
+  if(annEditor)annEditor.setData(d?.content||'');else{document.getElementById('f_content').value=d?.content||'';pendingAnn=d?.content||''}
   document.getElementById('f_old').value=d?.attachment||'';
   document.getElementById('f_status').value=d?.status||'published';
   document.getElementById('f_date').value=(d?.published_at||'').replace(' ','T').slice(0,16);
   const lk=document.getElementById('f_att_link');
   if(d?.attachment){lk.href='<?= Helper::url('') ?>/'+d.attachment.replace(/^\//,'');lk.textContent=d.attachment;lk.classList.remove('hidden')}else{lk.classList.add('hidden')}
   modal.classList.remove('hidden');document.body.style.overflow='hidden';
+  ensureAnnEditor();
 }
 function closeModal(){modal.classList.add('hidden');document.body.style.overflow=''}
 document.getElementById('btnAdd').addEventListener('click',()=>openModal(null));
@@ -73,6 +80,7 @@ document.querySelectorAll('.btn-edit').forEach(b=>b.addEventListener('click',()=
 modal.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeModal));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 <?php if($edit): ?>openModal(<?= json_encode(['id'=>$edit['id'],'title'=>$edit['title'],'content'=>$edit['content']??'','attachment'=>$edit['attachment']??'','status'=>$edit['status'],'published_at'=>$edit['published_at']??'']) ?>);<?php endif; ?>
+document.querySelector('#annModal form').addEventListener('submit',()=>{if(annEditor){try{document.getElementById('f_content').value=annEditor.getData()}catch(_){}}});
 </script>
 <?php require ROOT.'/templates/admin/footer.php'; ?>
 

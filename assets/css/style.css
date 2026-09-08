@@ -75,6 +75,11 @@ table{max-width:100%}
 .prose figure.image.align-right,article figure.image.align-right,.welcome-message figure.image.align-right{margin-left:auto!important;margin-right:0!important}
 .prose figure.image img,article figure.image img,.welcome-message figure.image img{display:block;max-width:100%;height:auto}
 .prose,.prose p,.prose li,article p,article li,.text-justify{overflow-wrap:anywhere;word-break:break-word}
+.ann-content ul{list-style:disc!important;padding-left:1.4rem!important;margin:.5rem 0!important;display:grid;gap:.3rem}
+.ann-content ol{list-style:decimal!important;padding-left:1.4rem!important;margin:.5rem 0!important;display:grid;gap:.3rem}
+.ann-content li{display:list-item!important}
+.ann-content table{width:100%!important;border-collapse:separate!important;border-spacing:0;margin:.6rem 0!important}
+.ann-content iframe{width:100%!important;min-height:300px;border:0;border-radius:.8rem}
 pre,code{white-space:pre-wrap;word-break:break-word;overflow-x:auto;max-width:100%}
 main .grid>*,main .flex>*{min-width:0;max-width:100%}
 main>div{max-width:100%;min-width:0}

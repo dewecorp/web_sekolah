@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="relative w-full max-w-sm">
 <div class="bg-white rounded-[2rem] shadow-2xl overflow-hidden border">
 <div class="bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 p-7 text-white text-center">
-<div class="w-14 h-14 rounded-2xl bg-white grid place-items-center mx-auto shadow overflow-hidden"><?php if($logo): ?><img src="<?= Helper::upload($logo) ?>" alt="" class="w-full h-full object-contain p-1.5"><?php else: ?><span class="font-extrabold text-emerald-700 text-xl"><?= Helper::e(mb_substr($school,0,1)) ?></span><?php endif; ?></div>
+<?php if($logo): ?><img src="<?= Helper::upload($logo) ?>" alt="" class="h-16 w-auto object-contain mx-auto" style="filter:drop-shadow(0 0 1px #fff) drop-shadow(0 0 10px rgba(255,255,255,.95)) drop-shadow(0 4px 16px rgba(255,255,255,.5))"><?php else: ?><span class="w-14 h-14 rounded-2xl bg-white grid place-items-center mx-auto shadow font-extrabold text-emerald-700 text-xl"><?= Helper::e(mb_substr($school,0,1)) ?></span><?php endif; ?>
 <h1 class="font-extrabold text-2xl mt-3">Masuk Admin</h1><p class="text-white/80 text-xs mt-1"><?= Helper::e($school) ?></p>
 </div>
 <form method="post" data-loading class="p-6 grid gap-3 bg-white">

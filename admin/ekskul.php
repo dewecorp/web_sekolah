@@ -2,6 +2,7 @@
 $days = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
 if($_SERVER['REQUEST_METHOD']==='POST'){ if(!Security::verifyCsrf($_POST['csrf']??null)){ Session::flash('err','CSRF tidak valid.'); header('Location: '.Helper::url('admin/ekskul')); exit; }
 $act=$_POST['act']??'';
+if($act==='meta'){ foreach(['ekskul_title','ekskul_desc','ekskul_show','ekskul_cols'] as $k){ if(!array_key_exists($k,$_POST['s']??[])) continue; $v=trim((string)$_POST['s'][$k]); if($k==='ekskul_show') $v=$v==='1'?'1':'0'; $db->prepare("INSERT INTO settings(`key`,`value`) VALUES(?,?) ON DUPLICATE KEY UPDATE `value`=VALUES(`value`)")->execute([$k,$v]); } Session::flash('ok','Pengaturan ekskul disimpan.'); header('Location: '.Helper::url('admin/ekskul')); exit; }
 if($act==='bulk_delete'){ $ids=array_filter(array_map('intval',(array)($_POST['ids']??[]))); if(!$ids){ Session::flash('err','Pilih minimal 1 data.'); } else { $ph=implode(',',array_fill(0,count($ids),'?')); $db->prepare("DELETE FROM extracurriculars WHERE id IN ($ph)")->execute(array_values($ids)); Auth::log($db,'delete','ekskul','Hapus bulk ekskul'); Session::flash('ok',count($ids).' data dihapus.'); } }
 elseif($act==='delete'){ $db->prepare("DELETE FROM extracurriculars WHERE id=?")->execute([(int)$_POST['id']]); Session::flash('ok','Dihapus.'); }
 else{ $nm=trim($_POST['name']??''); if($nm===''){ Session::flash('err','Nama wajib.'); } else {
@@ -13,12 +14,22 @@ header('Location: '.Helper::url('admin/ekskul')); exit; }
 $eks=$db->query("SELECT * FROM extracurriculars ORDER BY id DESC")->fetchAll();
 $guruList=$db->query("SELECT name FROM teachers WHERE is_active=1 ORDER BY name")->fetchAll(PDO::FETCH_COLUMN) ?: [];
 $guruList=array_values(array_unique(array_filter(array_map('trim',$guruList))));
+$ekSets=[]; foreach($db->query("SELECT `key`,`value` FROM settings WHERE `key` IN ('ekskul_title','ekskul_desc','ekskul_show','ekskul_cols')") as $r) $ekSets[$r['key']]=$r['value'];
 require ROOT.'/templates/admin/header.php'; ?>
 <div class="flex flex-wrap items-center gap-2 mb-4">
 <h1 class="text-xl font-extrabold"><i class="fa fa-futbol text-emerald-600 mr-1"></i>Ekstrakurikuler</h1>
 <span class="text-[11px] bg-slate-800 text-white px-2.5 py-0.5 rounded-full font-bold"><?= count($eks) ?> ekskul</span>
+<a href="<?= Helper::url('ekstrakurikuler') ?>" target="_blank" rel="noopener noreferrer" class="text-sm px-3 py-1.5 border rounded-lg bg-white"><i class="fa fa-eye mr-1"></i>Lihat Public</a>
 <button id="btnAddEks" class="ml-auto bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-4 py-2 rounded-xl shadow"><i class="fa fa-plus mr-1"></i>Tambah Ekskul</button>
 </div>
+<form method="post" data-loading class="bg-white rounded-2xl border p-4 grid md:grid-cols-4 gap-2 text-sm mb-3"><?= Security::csrfField() ?>
+<input type="hidden" name="act" value="meta">
+<label class="grid gap-1">Judul public<input name="s[ekskul_title]" value="<?= Helper::e($ekSets['ekskul_title']??'Ekstrakurikuler') ?>" class="border rounded-lg p-2"></label>
+<label class="grid gap-1">Tampil di public<select name="s[ekskul_show]" class="border rounded-lg p-2"><option value="1" <?= ($ekSets['ekskul_show']??'1')==='1'?'selected':'' ?>>Tampilkan</option><option value="0" <?= ($ekSets['ekskul_show']??'1')==='0'?'selected':'' ?>>Sembunyikan (404)</option></select></label>
+<label class="grid gap-1">Deskripsi singkat<input name="s[ekskul_desc]" value="<?= Helper::e($ekSets['ekskul_desc']??'') ?>" placeholder="Ringkasan singkat" class="border rounded-lg p-2"></label>
+<label class="grid gap-1">Kolom<select name="s[ekskul_cols]" class="border rounded-lg p-2"><option value="2" <?= ($ekSets['ekskul_cols']??'3')==='2'?'selected':'' ?>>2 kolom</option><option value="3" <?= ($ekSets['ekskul_cols']??'3')==='3'?'selected':'' ?>>3 kolom</option><option value="4" <?= ($ekSets['ekskul_cols']??'3')==='4'?'selected':'' ?>>4 kolom</option></select></label>
+<button class="md:col-span-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl py-2 font-bold text-sm"><i class="fa fa-floppy-disk mr-1"></i>Simpan Pengaturan</button>
+</form>
 <form method="post" id="bulkEks"><?= Security::csrfField() ?><input type="hidden" name="act" value="bulk_delete"></form>
 <div class="bg-white rounded-2xl border overflow-hidden">
 <div class="px-4 py-3 font-bold border-b">Daftar Ekstrakurikuler</div>

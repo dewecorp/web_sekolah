@@ -163,12 +163,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       if (count($buttons) >= 5) break;
     }
     $buttonsJson = $buttons ? json_encode($buttons) : null;
-    $b1 = $buttons[0] ?? ['text' => '', 'url' => '', 'target' => '_self'];
+     $b1 = $buttons[0] ?? ['text' => '', 'url' => '', 'target' => '_self'];
     $b2 = $buttons[1] ?? ['text' => '', 'url' => '', 'target' => '_self'];
-    $d = [$_POST['type'] ?? 'custom', $_POST['title'] ?? '', $_POST['subtitle'] ?? '', $_POST['content'] ?? '', $img, $b1['text'], $b1['url'], $b1['target'], $b2['text'], $b2['url'], $b2['target'], $buttonsJson, $_POST['style'] ?? 'default', $_POST['bg'] ?? 'white', $_POST['padding'] ?? 'lg', $_POST['align'] ?? 'left', (int)($_POST['items_limit'] ?? 3), (int)($_POST['sort_order'] ?? 0), !empty($_POST['is_active']) ? 1 : 0, $_POST['effect'] ?? 'fade-up', $_POST['grid'] ?? 'cards-3'];
+     if(($_POST['type']??'')==='countdown'){
+      $cdT=trim((string)($_POST['cd_target']??'')); if($cdT!=='')$_POST['content']=str_replace('T',' ',$cdT);
+      $cdBg=trim((string)($_POST['old_cd_bg']??''));
+      if(!empty($_FILES['cd_bg']['name']??'')){ $e=Security::validImage($_FILES['cd_bg'],$APP); if($e){ Session::flash('err',$e); header('Location: '.Helper::url('admin/sections')); exit; } $n=Security::safeName($_FILES['cd_bg']['name']); move_uploaded_file($_FILES['cd_bg']['tmp_name'],ROOT.'/assets/uploads/'.$n); if($cdBg!==''&&$cdBg!==$n)@unlink(ROOT.'/assets/uploads/'.basename($cdBg)); $cdBg=$n; }
+      if(!empty($_POST['cd_bg_clear'])){ if($cdBg!=='')@unlink(ROOT.'/assets/uploads/'.basename($cdBg)); $cdBg=''; }
+      $bjC=['cd_msg'=>trim((string)($_POST['cd_msg']??'Acara telah dimulai!')),'cd_hide'=>!empty($_POST['cd_hide_zero']),'cd_info'=>trim((string)($_POST['cd_info']??'')),'cd_bg'=>$cdBg]; if(!empty($buttonsJson)){ $jb2=json_decode($buttonsJson,true); if(is_array($jb2)) $bjC=array_merge($jb2,$bjC); } $buttonsJson=json_encode($bjC);
+      $img=$_POST['cd_style']??'glass';
+    }
+    $imgFx=$_POST['img_fx'] ?? 'none';
+    $imgSizeOpts=array_keys(['thumb'=>1,'sm'=>1,'md'=>1,'lg'=>1,'full'=>1,'orig'=>1,'lead'=>1,'wide'=>1,'banner'=>1,'ads'=>1,'sq'=>1,'port'=>1,'story'=>1,'custom'=>1]);
+    $imgSize=in_array($_POST['img_size']??'full',$imgSizeOpts,true)?$_POST['img_size']:'full';
+    $imgCw=max(0,min(2400,(int)($_POST['img_cw']??0))); $imgCh=max(0,min(1600,(int)($_POST['img_ch']??0)));
+    $imgHover=$_POST['img_hover'] ?? 'none';
+    $d = [$_POST['type'] ?? 'custom', $_POST['title'] ?? '', $_POST['subtitle'] ?? '', $_POST['content'] ?? '', $img, $b1['text'], $b1['url'], $b1['target'], $b2['text'], $b2['url'], $b2['target'], $buttonsJson, $_POST['style'] ?? 'default', $_POST['bg'] ?? 'white', $_POST['padding'] ?? 'lg', $_POST['align'] ?? 'left', (int)($_POST['items_limit'] ?? 3), (int)($_POST['sort_order'] ?? 0), !empty($_POST['is_active']) ? 1 : 0, $_POST['effect'] ?? 'fade-up', $_POST['grid'] ?? 'cards-3', $imgFx, $imgSize, $imgCw?:null, $imgCh?:null, $imgHover];
     try {
-      if (!empty($_POST['id'])) { $db->prepare("UPDATE homepage_sections SET type=?,title=?,subtitle=?,content=?,image=?,btn_text=?,btn_url=?,btn_target=?,btn2_text=?,btn2_url=?,btn2_target=?,buttons_json=?,style=?,bg=?,padding=?,align=?,items_limit=?,sort_order=?,is_active=?,effect=?,grid=? WHERE id=?")->execute([...$d, (int)$_POST['id']]); Auth::log($db,'update','sections',"Ubah $key"); $secId=(int)$_POST['id']; }
-      else { $db->prepare("INSERT INTO homepage_sections(section_key,type,title,subtitle,content,image,btn_text,btn_url,btn_target,btn2_text,btn2_url,btn2_target,buttons_json,style,bg,padding,align,items_limit,sort_order,is_active,effect,grid) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")->execute([$key, ...$d]); $secId=(int)$db->lastInsertId(); Auth::log($db,'create','sections',"Tambah $key"); }
+      if (!empty($_POST['id'])) { $db->prepare("UPDATE homepage_sections SET type=?,title=?,subtitle=?,content=?,image=?,btn_text=?,btn_url=?,btn_target=?,btn2_text=?,btn2_url=?,btn2_target=?,buttons_json=?,style=?,bg=?,padding=?,align=?,items_limit=?,sort_order=?,is_active=?,effect=?,grid=?,img_fx=?,img_size=?,img_cw=?,img_ch=?,img_hover=? WHERE id=?")->execute([...$d, (int)$_POST['id']]); Auth::log($db,'update','sections',"Ubah $key"); $secId=(int)$_POST['id']; }
+      else { $db->prepare("INSERT INTO homepage_sections(section_key,type,title,subtitle,content,image,btn_text,btn_url,btn_target,btn2_text,btn2_url,btn2_target,buttons_json,style,bg,padding,align,items_limit,sort_order,is_active,effect,grid,img_fx,img_size,img_cw,img_ch,img_hover) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")->execute([$key, ...$d]); $secId=(int)$db->lastInsertId(); Auth::log($db,'create','sections',"Tambah $key"); }
       if ($stype === 'video' && $secId > 0) {
         $normUrl = function(string $u): string {
           $u = trim($u);
@@ -323,6 +336,11 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'galer
 <div class="border rounded-xl p-2.5 bg-slate-50" data-f="image"<?= $showImage ? '' : ' style="display:none"' ?>><p class="text-xs font-bold mb-1.5"><i class="fa fa-image mr-1 text-emerald-600"></i>Gambar <span class="font-normal text-slate-400">(1 gambar)</span></p>
 <?php if(!empty($edit['image'])): ?><img src="<?= Helper::upload($edit['image']) ?>" alt="" class="h-24 w-full object-cover rounded-lg border mb-1.5"><label class="text-xs flex gap-1.5 items-center"><input type="checkbox" name="clear_image" value="1"> Hapus gambar</label><?php endif; ?>
 <input type="file" name="image" accept="image/*" class="border rounded-lg p-2 w-full bg-white text-xs"></div>
+<?php $cdOldBg=''; if(($edit['type']??'')==='countdown'){ $bjBg=json_decode((string)($edit['buttons_json']??''),true); if(is_array($bjBg)&&!empty($bjBg['cd_bg'])) $cdOldBg=$bjBg['cd_bg']; } ?>
+<div class="border rounded-xl p-2.5 bg-violet-50" data-f="cd_bg"<?= ($curType==='countdown')?'':' style="display:none"' ?>><p class="text-xs font-bold mb-1.5"><i class="fa fa-image mr-1 text-violet-600"></i>Background Timer</p>
+<?php if($cdOldBg!==''): ?><img src="<?= Helper::upload($cdOldBg) ?>" alt="" class="h-24 w-full object-cover rounded-lg border mb-1.5"><label class="text-xs flex gap-1.5 items-center"><input type="checkbox" name="cd_bg_clear" value="1"> Hapus background</label><?php endif; ?>
+<input type="hidden" name="old_cd_bg" value="<?= Helper::e($cdOldBg) ?>">
+<input type="file" name="cd_bg" accept="image/*" class="border rounded-lg p-2 w-full bg-white text-xs"></div>
 <?php if($showVideo): $vids=$editSlides; ?>
 <div class="border rounded-xl p-2.5 bg-slate-50 grid gap-1.5">
 <p class="text-xs font-bold"><i class="fa fa-video mr-1 text-emerald-600"></i>Daftar Video (<?= count($vids) ?>) <span class="font-normal text-slate-400">— upload / tautan, edit judul, hapus per baris</span></p>
@@ -371,6 +389,29 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'galer
 <?php $gridPrev=['cards-2'=>'▦▦','cards-3'=>'▦▦▦','cards-4'=>'▦▦▦▦','featured'=>'▦▤','list'=>'☰','overlay'=>'▣','minimal'=>'―']; $gridOpts=in_array($curType,['ekskul','prestasi','guru','galeri'],true)?array_intersect_key($grids,array_flip(['cards-2','cards-3','cards-4'])):$grids; foreach($gridOpts as $k=>$l): ?><button type="button" data-grid="<?= $k ?>" class="gridpick border rounded-lg p-1.5 text-center <?= ($edit['grid'] ?? 'cards-3') === $k ? 'ring-2 ring-emerald-500 border-emerald-500' : '' ?>"><span class="block text-xl leading-none"><?= $gridPrev[$k] ?? '▦' ?></span><span class="text-[10px] leading-tight block mt-1"><?= $l ?></span></button><?php endforeach; ?>
 </div><input type="hidden" name="grid" value="<?= Helper::e($edit['grid'] ?? 'cards-3') ?>">
 </div>
+<?php $showImgFx=in_array($curType,['hero','image'],true); $showImgSize=($curType==='image'); ?>
+<div data-f="imgfx"<?= $showImgFx?'':' style="display:none"' ?>>
+<p class="text-xs font-bold uppercase text-slate-400">Style Gambar <span class="font-normal normal-case text-slate-400">(Hero & Image)</span></p>
+<div class="grid grid-cols-3 gap-1.5" data-imgfxpick>
+<?php $imgFxOpts=['none'=>'Statis','kenburns'=>'Ken Burns','kenburns-rev'=>'Ken Burns Balik','zoom-slow'=>'Zoom Lambat','pan-left'=>'Geser Kiri','pan-right'=>'Geser Kanan','fade-zoom'=>'Fade Zoom','float'=>'Melayang']; $imgFxIcon=['none'=>'—','kenburns'=>'◎','kenburns-rev'=>'◉','zoom-slow'=>'⊕','pan-left'=>'←','pan-right'=>'→','fade-zoom'=>'◍','float'=>'〜']; foreach($imgFxOpts as $k=>$l): ?><button type="button" data-imgfx="<?= $k ?>" class="imgfxpick border rounded-lg p-1.5 text-center <?= ($edit['img_fx'] ?? 'none') === $k ? 'ring-2 ring-emerald-500 border-emerald-500' : '' ?>"><span class="block text-lg leading-none"><?= $imgFxIcon[$k] ?></span><span class="text-[10px] leading-tight block mt-1"><?= $l ?></span></button><?php endforeach; ?>
+</div><input type="hidden" name="img_fx" value="<?= Helper::e($edit['img_fx'] ?? 'none') ?>">
+</div>
+<div data-f="imgsize"<?= $showImgSize?'':' style="display:none"' ?>>
+<p class="text-xs font-bold uppercase text-slate-400">Ukuran Gambar <span class="font-normal normal-case text-slate-400">(Image)</span></p>
+<div class="grid grid-cols-3 gap-1.5" data-imgsizepick>
+<?php $imgSizeOpts=['thumb'=>'Thumbnail 320×200','sm'=>'Kecil 640×360','md'=>'Sedang 960×540','lg'=>'Besar 1280×720','full'=>'Penuh 1600×900','lead'=>'Leaderboard 728×90','wide'=>'Wide 1200×300','banner'=>'Banner 1400×400','ads'=>'Iklan 720×90','sq'=>'Kotak 800×800','port'=>'Potrait 800×1200','story'=>'Story 1080×1920','orig'=>'Asli','custom'=>'Custom']; foreach($imgSizeOpts as $k=>$l): ?><button type="button" data-imgsize="<?= $k ?>" class="imgsizepick border rounded-lg p-1.5 text-center <?= ($edit['img_size'] ?? 'full') === $k ? 'ring-2 ring-emerald-500 border-emerald-500' : '' ?>"><span class="text-[10px] leading-tight block"><?= $l ?></span></button><?php endforeach; ?>
+</div><input type="hidden" name="img_size" value="<?= Helper::e($edit['img_size'] ?? 'full') ?>">
+<div class="grid grid-cols-2 gap-1.5 mt-1.5" id="imgCustomBox"<?= ($edit['img_size'] ?? 'full')==='custom'?'':' style="display:none"' ?>>
+<label class="grid gap-0.5 text-xs">Lebar px<input type="number" name="img_cw" value="<?= (int)($edit['img_cw'] ?? 0) ?>" min="0" max="2400" placeholder="cth 1200" class="border rounded-lg p-1.5 bg-white"></label>
+<label class="grid gap-0.5 text-xs">Tinggi px<input type="number" name="img_ch" value="<?= (int)($edit['img_ch'] ?? 0) ?>" min="0" max="1600" placeholder="cth 600" class="border rounded-lg p-1.5 bg-white"></label>
+</div>
+</div>
+<div data-f="imghover"<?= $showImgSize?'':' style="display:none"' ?>>
+<p class="text-xs font-bold uppercase text-slate-400">Efek Hover <span class="font-normal normal-case text-slate-400">(Image)</span></p>
+<div class="grid grid-cols-3 gap-1.5" data-imghoverpick>
+<?php $imgHovOpts=['none'=>'Tanpa','zoom'=>'Zoom','zoom-rotate'=>'Zoom Putar','bright'=>'Cerah','dark'=>'Gelap','gray'=>'Hitam-Putih','blur'=>'Blur','slide-up'=>'Geser Naik']; foreach($imgHovOpts as $k=>$l): ?><button type="button" data-imghover="<?= $k ?>" class="imghoverpick border rounded-lg p-1.5 text-center <?= ($edit['img_hover'] ?? 'none') === $k ? 'ring-2 ring-emerald-500 border-emerald-500' : '' ?>"><span class="text-[10px] leading-tight block"><?= $l ?></span></button><?php endforeach; ?>
+</div><input type="hidden" name="img_hover" value="<?= Helper::e($edit['img_hover'] ?? 'none') ?>">
+</div>
 <p class="text-xs font-bold uppercase text-slate-400">Animasi Masuk (saat scroll)</p>
 <div class="grid grid-cols-3 gap-1.5">
 <?php foreach($effects as $k=>$l): ?><button type="button" data-fx="<?= $k ?>" class="fxpick border rounded-lg p-1.5 text-center <?= ($edit['effect'] ?? 'fade-up') === $k ? 'ring-2 ring-emerald-500 border-emerald-500' : '' ?>"><span class="block text-lg leading-none"><?= $effectPrev[$k] ?></span><span class="text-[10px] leading-tight block mt-1"><?= $l ?></span></button><?php endforeach; ?>
@@ -387,7 +428,16 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'galer
 <label class="grid gap-1 text-xs">Padding<select name="padding" class="border rounded-lg p-2"><?php foreach(['sm'=>'Kecil','md'=>'Sedang','lg'=>'Besar','xl'=>'Ekstra'] as $k=>$l): ?><option value="<?= $k ?>" <?= ($edit['padding'] ?? 'lg') === $k ? 'selected' : '' ?>><?= $l ?></option><?php endforeach; ?></select></label>
 <label class="grid gap-1 text-xs">Align<select name="align" class="border rounded-lg p-2"><?php foreach(['left'=>'Kiri','center'=>'Tengah','right'=>'Kanan'] as $k=>$l): ?><option value="<?= $k ?>" <?= ($edit['align'] ?? 'left') === $k ? 'selected' : '' ?>><?= $l ?></option><?php endforeach; ?></select></label>
 </div></div>
+<?php $cdTarget='';$cdEndMsg='Acara telah dimulai!';$cdHideZero=0;$cdStyle='glass';$cdInfo='';if(($edit['type']??'')==='countdown'){ $rawC=trim((string)($edit['content']??'')); $bj=json_decode((string)($edit['buttons_json']??''),true); if(is_array($bj)&&!empty($bj['cd_msg'])) $cdEndMsg=$bj['cd_msg']; if(is_array($bj)&&isset($bj['cd_hide'])) $cdHideZero=$bj['cd_hide']?'1':'0'; if(is_array($bj)&&!empty($bj['cd_info'])) $cdInfo=$bj['cd_info']; if(!empty($edit['image'])&&in_array($edit['image'],['glass','dark','light','pill'],true)) $cdStyle=$edit['image']; if($rawC!==''&&preg_match('/^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?)?$/',$rawC)) $cdTarget=str_replace(' ','T',substr($rawC,0,16)); } ?>
 <div data-pane="lanjut" class="hidden grid gap-2">
+<div data-f="cd"<?= ($curType==='countdown')?'':' style="display:none"' ?> class="grid gap-2 border rounded-xl p-2.5 bg-violet-50">
+<p class="text-xs font-bold"><i class="fa fa-clock mr-1 text-violet-600"></i>Countdown</p>
+<label class="grid gap-1 text-xs">Waktu target<input type="datetime-local" name="cd_target" value="<?= Helper::e($cdTarget) ?>" class="border rounded-lg p-2 bg-white"></label>
+<label class="grid gap-1 text-xs">Teks info (badge)<input name="cd_info" value="<?= Helper::e($cdInfo) ?>" placeholder="cth: PPDB 2026" class="border rounded-lg p-2 bg-white"></label>
+<label class="grid gap-1 text-xs">Pesan saat selesai<input name="cd_msg" value="<?= Helper::e($cdEndMsg) ?>" placeholder="Acara telah dimulai!" class="border rounded-lg p-2 bg-white"></label>
+<label class="flex gap-2 items-center text-xs"><input type="checkbox" name="cd_hide_zero" value="1" <?= $cdHideZero==='1'||$cdHideZero===1?'checked':'' ?>> Sembunyikan angka nol</label>
+<label class="grid gap-1 text-xs">Gaya countdown<select name="cd_style" class="border rounded-lg p-2 bg-white"><option value="glass" <?= $cdStyle==='glass'?'selected':'' ?>>Kaca — blur + progress</option><option value="dark" <?= $cdStyle==='dark'?'selected':'' ?>>Gelap</option><option value="light" <?= $cdStyle==='light'?'selected':'' ?>>Terang</option><option value="pill" <?= $cdStyle==='pill'?'selected':'' ?>>Pill — kapsul besar</option></select></label>
+</div>
 <div class="grid grid-cols-2 gap-2">
 <label class="grid gap-1 text-xs">Key<input name="section_key" value="<?= Helper::e($edit['section_key'] ?? '') ?>" placeholder="hero-2" class="border rounded-lg p-2 font-mono"></label>
 <label class="grid gap-1 text-xs">Urutan<input type="number" name="sort_order" value="<?= (int)($edit['sort_order'] ?? (count($rows)+1)) ?>" class="border rounded-lg p-2"></label>
@@ -518,6 +568,22 @@ document.querySelectorAll('.gridpick').forEach(b=>b.addEventListener('click',()=
   document.querySelectorAll('.gridpick').forEach(x=>x.classList.remove('ring-2','ring-emerald-500','border-emerald-500'));
   b.classList.add('ring-2','ring-emerald-500','border-emerald-500');
   const hid=document.querySelector('input[name="grid"]'); if(hid)hid.value=b.dataset.grid;
+}));
+document.querySelectorAll('.imgfxpick').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.imgfxpick').forEach(x=>x.classList.remove('ring-2','ring-emerald-500','border-emerald-500'));
+  b.classList.add('ring-2','ring-emerald-500','border-emerald-500');
+  const hid=document.querySelector('input[name="img_fx"]'); if(hid)hid.value=b.dataset.imgfx;
+}));
+document.querySelectorAll('.imgsizepick').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.imgsizepick').forEach(x=>x.classList.remove('ring-2','ring-emerald-500','border-emerald-500'));
+  b.classList.add('ring-2','ring-emerald-500','border-emerald-500');
+  const hid=document.querySelector('input[name="img_size"]'); if(hid)hid.value=b.dataset.imgsize;
+  const box=document.getElementById('imgCustomBox'); if(box)box.style.display=b.dataset.imgsize==='custom'?'':'none';
+}));
+document.querySelectorAll('.imghoverpick').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.imghoverpick').forEach(x=>x.classList.remove('ring-2','ring-emerald-500','border-emerald-500'));
+  b.classList.add('ring-2','ring-emerald-500','border-emerald-500');
+  const hid=document.querySelector('input[name="img_hover"]'); if(hid)hid.value=b.dataset.imghover;
 }));
 document.getElementById('vidAdd')?.addEventListener('click',()=>{
   const list=document.getElementById('vidList');

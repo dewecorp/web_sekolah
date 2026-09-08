@@ -15,6 +15,31 @@ h1,h2,h3,h4{font-family:var(--font-body)!important;letter-spacing:-.02em;font-we
 [data-fx-stagger].fx-stagger-show{opacity:1;filter:none;transform:none}
 .fx-hero .fx-zoomimg{animation:heroCinema 14s ease-out both}
 @keyframes heroCinema{from{transform:scale(1.08)}to{transform:scale(1)}}
+img.imgfx,.imgfx{will-change:transform,opacity;display:block}
+img.imgfx-kenburns,.imgfx-kenburns{animation:imgKenburns 18s ease-in-out infinite alternate!important}
+@keyframes imgKenburns{from{transform:scale(1) translate(0,0)}to{transform:scale(1.15) translate(-1.5%,-1.5%)}}
+img.imgfx-kenburns-rev,.imgfx-kenburns-rev{animation:imgKenburnsRev 18s ease-in-out infinite alternate!important}
+@keyframes imgKenburnsRev{from{transform:scale(1.15) translate(1.5%,1.5%)}to{transform:scale(1) translate(0,0)}}
+img.imgfx-zoom-slow,.imgfx-zoom-slow{animation:imgZoomSlow 24s linear infinite alternate!important}
+@keyframes imgZoomSlow{from{transform:scale(1)}to{transform:scale(1.2)}}
+img.imgfx-pan-left,.imgfx-pan-left{animation:imgPanLeft 20s linear infinite alternate!important}
+@keyframes imgPanLeft{from{transform:scale(1.12) translateX(2%)}to{transform:scale(1.12) translateX(-2%)}}
+img.imgfx-pan-right,.imgfx-pan-right{animation:imgPanRight 20s linear infinite alternate!important}
+@keyframes imgPanRight{from{transform:scale(1.12) translateX(-2%)}to{transform:scale(1.12) translateX(2%)}}
+img.imgfx-fade-zoom,.imgfx-fade-zoom{animation:imgFadeZoom 3s ease-out both!important}
+@keyframes imgFadeZoom{from{opacity:0;transform:scale(1.12)}to{opacity:1;transform:scale(1)}}
+img.imgfx-float,.imgfx-float{animation:imgFloat 7s ease-in-out infinite!important}
+@keyframes imgFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@media (prefers-reduced-motion:reduce){.imgfx{animation:none!important}}
+.imghov img{transition:transform .6s cubic-bezier(.16,1,.3,1),filter .4s ease}
+.imghov-zoom:hover img{transform:scale(1.08)}
+.imghov-zoom-rotate:hover img{transform:scale(1.1) rotate(2deg)}
+.imghov-bright:hover img{filter:brightness(1.15)}
+.imghov-dark:hover img{filter:brightness(.75)}
+.imghov-gray img{transition:filter .5s ease,transform .6s cubic-bezier(.16,1,.3,1)}
+.imghov-gray:hover img{filter:grayscale(1);transform:scale(1.05)}
+.imghov-blur:hover img{filter:blur(3px) brightness(.9);transform:scale(1.05)}
+.imghov-slide-up:hover img{transform:translateY(-8px) scale(1.03)}
 .card-hover{transition:transform .3s ease,box-shadow .3s ease}
 .card-hover:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.12)}
 #mainNav.scrolled{box-shadow:0 4px 20px rgba(0,0,0,.08)}
@@ -62,3 +87,26 @@ body.site-shell{min-height:100vh;display:flex;flex-direction:column}
 body.site-shell>main{flex:1 0 auto;width:100%}
 body.site-shell>footer{margin-top:auto;flex-shrink:0;width:100%}
 .cta-panel a{border-color:rgba(255,255,255,.55)!important}.cta-panel a:not([class*="border"]){background:#fff!important;color:var(--school-primary)!important}.cta-panel a:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(0,0,0,.16)}
+.cd-wrap{color:#fff;background:linear-gradient(135deg,#4c1d95,#4338ca 45%,#0ea5e9);border:1px solid rgba(255,255,255,.14)}
+.cd-wrap.cd-dark{background:linear-gradient(135deg,#020617,#0f172a 60%,#1e1b4b)}
+.cd-wrap.cd-light{background:linear-gradient(135deg,#f8fafc,#e2e8f0);color:#0f172a}
+.cd-wrap.cd-pill{background:linear-gradient(135deg,#065f46,#059669 50%,#34d399)}
+.cd-orb{position:absolute;border-radius:9999px;filter:blur(60px);opacity:.5;pointer-events:none}
+.cd-orb-a{width:320px;height:320px;right:-90px;top:-110px;background:radial-gradient(circle,#fbbf24,transparent 70%)}
+.cd-orb-b{width:280px;height:280px;left:-80px;bottom:-100px;background:radial-gradient(circle,#22d3ee,transparent 70%)}
+.cd-grid{position:absolute;inset:0;pointer-events:none;opacity:.25;background-image:linear-gradient(rgba(255,255,255,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.14) 1px,transparent 1px);background-size:36px 36px;mask-image:radial-gradient(ellipse at center,black 30%,transparent 75%)}
+.cd-badge{display:inline-flex;align-items:center;gap:.5rem;border-radius:9999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:.35rem .9rem;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.cd-wrap.cd-light .cd-badge{background:rgba(15,23,42,.06);border-color:rgba(15,23,42,.12)}
+.cd-timer{display:flex;flex-wrap:wrap;justify-content:center;gap:.8rem}
+.cd-cell{min-width:92px}
+.cd-num{font-size:2.4rem;font-weight:800;line-height:1;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(12px);border-radius:1.1rem;padding:.9rem .5rem;box-shadow:0 10px 30px rgba(0,0,0,.25);font-variant-numeric:tabular-nums}
+.cd-wrap.cd-light .cd-num{background:#fff;border-color:#e2e8f0;box-shadow:0 10px 24px rgba(15,23,42,.1)}
+.cd-lab{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;opacity:.75;margin-top:.45rem}
+.cd-done{display:inline-flex;align-items:center;gap:.6rem;font-weight:800;font-size:1.25rem;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:9999px;padding:.8rem 1.6rem}
+.cd-progress{position:relative;height:22px;border-radius:9999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);margin:1.4rem auto 0;max-width:26rem;overflow:hidden;box-shadow:inset 0 2px 6px rgba(0,0,0,.25)}
+.cd-wrap.cd-light .cd-progress{background:rgba(15,23,42,.08);border-color:rgba(15,23,42,.12)}
+.cd-progress span{display:block;height:100%;width:0;border-radius:9999px;background:linear-gradient(90deg,#34d399,#fbbf24,#f59e0b);background-size:200% 100%;animation:cdShift 3s linear infinite;transition:width 1s linear;box-shadow:0 0 12px rgba(251,191,36,.7)}
+@keyframes cdShift{from{background-position:0 0}to{background-position:200% 0}}
+.cd-progress span::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%);animation:cdShine 2.2s ease-in-out infinite}
+@keyframes cdShine{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.cd-progress b{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:800;letter-spacing:.1em}

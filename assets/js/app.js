@@ -62,12 +62,23 @@ document.querySelectorAll('[data-count]').forEach(el=>{
 document.querySelectorAll('[data-confirm]').forEach(f=>{f.addEventListener('submit',e=>{e.preventDefault();Swal.fire({title:'Apakah Anda yakin?',text:'Data yang dihapus tidak dapat dikembalikan.',icon:'warning',showCancelButton:true,confirmButtonText:'Ya, Hapus',cancelButtonText:'Batal'}).then(r=>{if(r.isConfirmed)f.submit()})})});
 document.querySelectorAll('[data-lightbox]').forEach(img=>{img.addEventListener('click',()=>{Swal.fire({imageUrl:img.src,imageAlt:img.alt||'',showConfirmButton:false,showCloseButton:true,width:800})})});
 document.querySelectorAll('[id^="cd-"]').forEach(el=>{
-  const target=(el.dataset.target||'').trim();if(!target)return;
-  const end=new Date(target).getTime();if(isNaN(end))return;
+  const target=(el.dataset.target||'').trim().replace('T',' ');if(!target)return;
+  const end=new Date(target.replace(' ','T')).getTime();if(isNaN(end))return;
+  const msg=el.dataset.msg||'Acara telah dimulai!';const hideZero=el.dataset.hide==='1';
+  const start=Date.now();const total=Math.max(1,end-start);
   const pad=n=>String(n).padStart(2,'0');
-  const box=(v,l)=>'<div class="text-center"><div class="text-3xl font-extrabold bg-white/20 px-4 py-2 rounded-xl tabular-nums">'+v+'</div><div class="text-xs text-white/75 mt-1">'+l+'</div></div>';
-  const tick=()=>{let t=end-Date.now();if(t<0)t=0;const d=Math.floor(t/864e5),h=Math.floor(t/36e5)%24,m=Math.floor(t/6e4)%60,s=Math.floor(t/1e3)%60;el.innerHTML=box(d,'Hari')+box(pad(h),'Jam')+box(pad(m),'Menit')+box(pad(s),'Detik')};
-  tick();setInterval(tick,1000);
+  const box=(v,l)=>'<div class="cd-cell"><div class="cd-num tabular-nums">'+v+'</div><div class="cd-lab">'+l+'</div></div>';
+  const wrap=el.closest('.cd-wrap');const prog=wrap?wrap.querySelector('.cd-progress'):null;const bar=prog?prog.querySelector('span'):null;const pct=prog?prog.querySelector('b'):null;
+  const tick=()=>{
+    let t=end-Date.now();
+    if(t<=0){el.innerHTML='<div class="cd-done"><i class="fa fa-circle-check"></i>'+msg.replace(/</g,'&lt;')+'</div>';if(bar)bar.style.width='100%';if(pct)pct.textContent='100%';if(prog)prog.setAttribute('aria-valuenow','100');return true}
+    const d=Math.floor(t/864e5),h=Math.floor(t/36e5)%24,m=Math.floor(t/6e4)%60,s=Math.floor(t/1e3)%60;
+    const cells=[[d,'Hari'],[pad(h),'Jam'],[pad(m),'Menit'],[pad(s),'Detik']].filter(c=>!hideZero||c[0]!=='00'&&c[0]!==0||c[1]==='Detik');
+    el.innerHTML=cells.map(c=>box(c[0],c[1])).join('');
+    const p=Math.round(Math.min(100,Math.max(0,(1-t/total)*100)));if(bar)bar.style.width=p+'%';if(pct)pct.textContent=p+'%';if(prog)prog.setAttribute('aria-valuenow',String(p));
+    return false;
+  };
+  if(!tick()){const iv=setInterval(()=>{if(tick())clearInterval(iv)},1000)}
 });
 document.querySelectorAll('[data-vid-play]').forEach(b=>b.addEventListener('click',()=>{const f=document.getElementById(b.dataset.vidTarget),t=document.getElementById(b.dataset.vidLabel);const vert=b.dataset.vidVert==='1';let src=b.dataset.vidPlay;src+=(src.includes('?')?'&':'?')+'autoplay=1&rel=0';if(f){f.src=src;const w=document.getElementById('vid-wrap-'+b.dataset.vidTarget.replace('vid-main-',''));if(w){w.className=vert?'aspect-[9/16] max-h-[520px] mx-auto':'aspect-video w-full max-h-[420px]'}}if(t)t.textContent=b.dataset.vidTitle||'Video';if(f)f.scrollIntoView({behavior:'smooth',block:'center'})}));
 document.querySelectorAll('[data-carousel]').forEach(box=>{

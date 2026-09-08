@@ -24,7 +24,7 @@ $alignClass = match($heroAlign) {
 $justifyClass = match($heroAlign) {
   'left' => 'justify-start',
   'right' => 'justify-end',
-  default => 'center'
+  default => 'justify-center'
 };
 ?>
 <div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br <?= $g ?> text-white p-7 md:p-12 shadow-xl reveal">
@@ -35,6 +35,6 @@ $justifyClass = match($heroAlign) {
 <?php if($heroBadge): ?><span class="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-[.16em]"><?= $heroBadge ?></span><?php endif; ?>
 <h1 class="text-3xl md:text-5xl font-extrabold leading-tight mt-4 <?= $alignClass ?>"><?= Helper::e($heroTitle) ?></h1>
 <?php if($heroDesc): ?><p class="text-white/80 text-sm md:text-base max-w-2xl mt-4 leading-relaxed <?= $alignClass ?>"><?= $heroDesc ?></p><?php endif; ?>
-<?php if($heroStats||$heroActions): ?><div class="mt-5 flex flex-wrap gap-2 text-sm <?= $justifyClass ?>"><?= $heroActions ?><?php foreach($heroStats as $st): ?><span class="inline-flex items-center gap-2 <?= ($st['solid']??false)?'bg-white text-slate-900':'border border-white/40' ?> px-4 py-2 rounded-xl font-bold"><i class="fa <?= Helper::e($st['icon']??'fa-circle') ?> <?= ($st['solid']??false)?'text-emerald-600':'' ?>"></i><?= Helper::e($st['label']??'') ?></span><?php endforeach; ?></div><?php endif; ?>
+<?php if($heroStats||$heroActions): ?><div class="mt-5 flex flex-wrap items-center gap-2 text-sm <?= $justifyClass ?> <?= $alignClass ?>"><?= $heroActions ?><?php foreach($heroStats as $st): ?><span class="inline-flex items-center gap-2 <?= ($st['solid']??false)?'bg-white text-slate-900':'border border-white/40' ?> px-4 py-2 rounded-xl font-bold"><i class="fa <?= Helper::e($st['icon']??'fa-circle') ?> <?= ($st['solid']??false)?'text-emerald-600':'' ?>"></i><?= Helper::e($st['label']??'') ?></span><?php endforeach; ?></div><?php endif; ?>
 </div>
 </div>

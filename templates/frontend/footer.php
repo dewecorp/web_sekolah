@@ -47,5 +47,23 @@ function renderFw($fw,$db){
 </div></div>
 </footer>
 <button id="toTop" aria-label="Kembali ke atas" class="fixed bottom-5 right-5 z-50 w-11 h-11 rounded-full bg-emerald-600 text-white shadow-lg grid place-items-center opacity-0 invisible translate-y-3 transition-all duration-300 hover:bg-emerald-500"><i class="fa fa-arrow-up"></i></button>
+<div id="annModal" class="hidden fixed inset-0 z-[70] overflow-y-auto"><div class="fixed inset-0 bg-slate-950/60" data-ann-close></div><div class="relative min-h-full flex items-start justify-center p-4"><div class="relative w-full bg-white dark:bg-slate-800 rounded-3xl shadow-2xl my-6 overflow-hidden" style="max-width:380px!important"><div class="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 flex items-center gap-3"><span class="w-9 h-9 rounded-xl bg-white/20 grid place-items-center text-white shrink-0"><i class="fa fa-bullhorn text-sm"></i></span><div class="min-w-0 flex-1"><h3 id="annMTitle" class="font-extrabold text-white text-sm leading-snug break-words"></h3><p id="annMDate" class="text-[11px] text-white/80 mt-0.5"></p></div><button data-ann-close class="w-8 h-8 rounded-lg bg-white/20 grid place-items-center text-white hover:bg-white/30 shrink-0"><i class="fa fa-xmark text-sm"></i></button></div><div class="p-5"><div id="annMBody" class="ann-content text-[15px] leading-[1.8] font-medium text-slate-700 dark:text-slate-200"></div><div id="annMFile" class="mt-4 hidden"><a id="annMLink" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-xl shadow"><i class="fa fa-download"></i>Unduh Lampiran</a></div></div></div></div></div>
+<script>
+document.querySelectorAll('[data-ann]').forEach(b=>b.addEventListener('click',()=>{
+  let d={}; try{d=JSON.parse(atob(b.dataset.ann))}catch(e){try{d=JSON.parse(b.dataset.ann)}catch(e2){}}
+  document.getElementById('annMTitle').textContent=d.title||'Pengumuman';
+  document.getElementById('annMDate').textContent=d.date||'';
+  const body=document.getElementById('annMBody');
+  const c=(d.content||'').trim();
+  body.innerHTML=(c.startsWith('<')||c.includes('</'))?c:c.replace(/\n/g,'<br>');
+  const fw=document.getElementById('annMFile');
+  if(d.file){fw.classList.remove('hidden');document.getElementById('annMLink').href=d.file}else{fw.classList.add('hidden')}
+  const m=document.getElementById('annModal');m.classList.remove('hidden');document.body.style.overflow='hidden';
+}));
+const annClose=()=>{document.getElementById('annModal').classList.add('hidden');document.body.style.overflow=''};
+document.querySelectorAll('[data-ann-close]').forEach(b=>b.addEventListener('click',annClose));
+document.getElementById('annModal').addEventListener('mousedown',e=>{if(!e.target.closest('.relative.w-full'))annClose()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.getElementById('annModal')?.classList.add('hidden');document.body.style.overflow=''}});
+</script>
 <script src="<?= Helper::asset('js/app.js') ?>"></script>
 </body></html>

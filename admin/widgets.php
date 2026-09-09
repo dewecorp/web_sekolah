@@ -9,7 +9,8 @@ elseif($act==='move'){
   header('Location: '.Helper::url($redirectAdmin));exit;
 }
 else{ $tt=trim((string)($_POST['title']??'')); $type=$_POST['type']??'html'; $content=(string)($_POST['content']??'');
-  if($type==='image')$content=trim(strip_tags(html_entity_decode($content,ENT_QUOTES|ENT_HTML5,'UTF-8')));
+  if($type==='image'&&trim((string)($_POST['image_content']??''))!=='')$content=(string)$_POST['image_content'];
+  if($type==='image'){ $pj=json_decode($content,true); if(is_array($pj)&&!empty($pj['src']))$content=trim(strip_tags(html_entity_decode($pj['src'],ENT_QUOTES|ENT_HTML5,'UTF-8'))); else $content=trim(strip_tags(html_entity_decode($content,ENT_QUOTES|ENT_HTML5,'UTF-8'))); }
   if($type==='image'&&!empty($_FILES['widget_image']['name']??'')){ $e=Security::validImage($_FILES['widget_image'],$APP); if($e){Session::flash('err',$e);header('Location: '.Helper::url($redirectAdmin));exit;} $n=Security::safeName($_FILES['widget_image']['name']); move_uploaded_file($_FILES['widget_image']['tmp_name'],ROOT.'/assets/uploads/'.$n); $fi=new finfo(FILEINFO_MIME_TYPE); $mime=$fi->file(ROOT.'/assets/uploads/'.$n); $db->prepare("INSERT INTO media(filename,filepath,mime,extension,size_bytes,uploaded_by) VALUES(?,?,?,?,?,?)")->execute([$n,'assets/uploads/'.$n,$mime,strtolower(pathinfo($n,PATHINFO_EXTENSION)),filesize(ROOT.'/assets/uploads/'.$n),$_SESSION['user']['id']]); $content=$n; }
   if($type==='image'&&trim($content)===''){Session::flash('err','Pilih foto untuk widget gambar.');header('Location: '.Helper::url($redirectAdmin));exit;}
   $animation=in_array($_POST['animation']??'zoom',['none','zoom','lift','grayscale','blur'],true)?$_POST['animation']:'zoom';
@@ -55,8 +56,9 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div id="linksField" class="hidden grid gap-1.5 font-semibold"><span class="text-xs">Tautan <span class="font-normal text-slate-400">Nama | URL | tab baru</span></span>
 <div id="linksList" class="grid gap-1.5"></div>
 <button type="button" id="linksAdd" class="text-[11px] font-bold border rounded-lg px-2 py-1 hover:border-emerald-400"><i class="fa fa-plus mr-1"></i>Tambah Tautan</button></div>
-<input type="hidden" name="content" id="f_links_data">
-<label id="imageField" class="hidden grid gap-1 font-semibold"><span>Upload Foto</span><img id="f_image_preview" alt="Pratinjau widget" class="hidden w-full max-h-52 object-contain rounded-xl border bg-slate-50 p-1"><input type="file" name="widget_image" id="f_image" accept="image/*" class="border rounded-lg p-2 font-normal"><span class="text-xs font-normal text-slate-500">Foto akan disimpan ke Media dan ditampilkan di widget.</span></label>
+<input type="hidden" name="content" id="f_links_data" disabled>
+<input type="hidden" name="image_content" id="f_image_data" disabled>
+<label id="imageField" class="hidden grid gap-1 font-semibold"><span>Upload Foto</span><img id="f_image_preview" alt="Pratinjau widget" class="w-full max-h-52 object-contain rounded-xl border bg-slate-50 p-1"><input type="hidden" name="old_image_src" id="f_old_src" value=""><input type="file" name="widget_image" id="f_image" accept="image/*" class="border rounded-lg p-2 font-normal"><span class="text-xs font-normal text-slate-500">Biarkan file kosong untuk pakai foto lama. Foto baru timpa lama.</span></label>
 <div id="imageLinkField" class="hidden grid gap-1.5 font-semibold"><span class="text-xs">Tautan gambar <span class="font-normal text-slate-400">opsional — klik gambar</span></span><div class="grid gap-1.5 border rounded-xl p-2 bg-slate-50"><input name="image_link" id="f_image_link" placeholder="/halaman atau https://..." class="border rounded-lg p-1.5 bg-white font-mono text-xs"><label class="flex gap-1.5 items-center text-[11px] font-normal text-slate-500"><input type="checkbox" name="image_blank" id="f_image_blank" value="1"> Buka di tab baru</label></div></div>
 <label id="animationField" class="hidden grid gap-1 font-semibold">Animasi saat hover<select name="animation" id="f_animation" class="border rounded-lg p-2 font-normal"><option value="zoom">Zoom halus</option><option value="lift">Naik sedikit</option><option value="grayscale">Warna muncul</option><option value="blur">Fokus gambar</option><option value="none">Tanpa animasi</option></select></label>
 <label class="grid gap-1 font-semibold">Urutan<input type="number" name="sort_order" id="f_sort" value="0" class="border rounded-lg p-2 font-normal"></label>
@@ -68,7 +70,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <script>
 const modal=document.getElementById('widgetModal');
 let widgetEditor=null,pendingWidgetContent='';
-const editorTypes=['html','text','announcements'];
+const editorTypes=['html','text'];
 function syncWidgetSelect(id){const sel=document.getElementById(id);if(!sel)return;sel.dispatchEvent(new Event('change',{bubbles:true}));if(sel._cpaint)sel._cpaint();else if(sel._csync)sel._csync();else if(window.__refreshSelects&&window.__refreshSelects[id])window.__refreshSelects[id]()}
 function ensureWidgetEditor(){if(widgetEditor||!editorTypes.includes(document.getElementById('f_type').value)||!window.RichEditorCreate)return;window.RichEditorCreate(document.getElementById('f_content'),{height:260,menubar:false,toolbar:['undo redo | blocks | bold italic underline | bullist numlist | link | alignleft aligncenter alignright | code']}).then(e=>{widgetEditor=e;e.setData(pendingWidgetContent);pendingWidgetContent=''}).catch(()=>{})}
 function openModal(d){
@@ -82,7 +84,8 @@ function openModal(d){
   const preview=document.getElementById('f_image_preview');let imgSrc=d?.content||'',imgLink='',imgBlank=false;
   try{const pj=JSON.parse(d?.content||'');if(pj&&typeof pj==='object'&&pj.src){imgSrc=pj.src;imgLink=pj.link||'';imgBlank=!!pj.blank}}catch(_){}
   document.getElementById('f_image_link').value=imgLink;document.getElementById('f_image_blank').checked=imgBlank;
-  if((d?.type==='image')&&imgSrc){preview.src=/^(https?:)?\/\//i.test(imgSrc)||imgSrc.startsWith('/')?imgSrc:'<?= Helper::url('assets/uploads/') ?>/'+imgSrc;preview.classList.remove('hidden')}else{preview.removeAttribute('src');preview.classList.add('hidden')}
+  document.getElementById('f_old_src').value=imgSrc;
+  if((d?.type==='image')&&imgSrc){preview.src=/^(https?:)?\/\//i.test(imgSrc)||imgSrc.startsWith('/')?imgSrc:'<?= Helper::url('assets/uploads/') ?>/'+imgSrc}else{preview.src='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="160"><rect width="400" height="160" fill="#f1f5f9"/><text x="200" y="88" font-size="14" text-anchor="middle" fill="#94a3b8">Belum ada foto</text></svg>')}
   if(d?.type==='links')loadLinks(d?.content||'');
   toggleImageField();
   document.getElementById('f_sort').value=d?.sort_order??0;
@@ -96,11 +99,15 @@ document.getElementById('btnAdd').addEventListener('click',()=>openModal(null));
 document.querySelectorAll('.btn-edit').forEach(b=>b.addEventListener('click',()=>openModal(JSON.parse(b.dataset.row))));
 modal.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeModal));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
-function toggleImageField(){const type=document.getElementById('f_type').value,image=type==='image',links=type==='links',hasContent=editorTypes.includes(type);document.getElementById('imageField').classList.toggle('hidden',!image);document.getElementById('imageLinkField').classList.toggle('hidden',!image);document.getElementById('animationField').classList.toggle('hidden',!image);document.getElementById('contentField').classList.toggle('hidden',!hasContent);document.getElementById('linksField').classList.toggle('hidden',!links);document.getElementById('contentLabel').textContent=type==='announcements'?'Pengantar Pengumuman':'Konten';document.getElementById('contentHelp').textContent=type==='announcements'?'Teks ini tampil di atas daftar otomatis pada widget.':'Bisa berisi teks terformat, tautan, atau HTML.';if(hasContent&&!modal.classList.contains('hidden'))ensureWidgetEditor()}
+function toggleImageField(){const type=document.getElementById('f_type').value,image=type==='image',links=type==='links',ann=type==='announcements',hasContent=editorTypes.includes(type);document.getElementById('imageField').classList.toggle('hidden',!image);document.getElementById('imageLinkField').classList.toggle('hidden',!image);document.getElementById('animationField').classList.toggle('hidden',!image);document.getElementById('contentField').classList.toggle('hidden',!(hasContent||ann));document.getElementById('linksField').classList.toggle('hidden',!links);document.getElementById('f_content').disabled=links;document.getElementById('f_links_data').disabled=!links;document.getElementById('f_image_data').disabled=!image;document.getElementById('contentLabel').textContent=ann?'Pengantar Pengumuman (teks biasa)':'Konten';document.getElementById('contentHelp').textContent=ann?'Teks polos tampil di atas daftar otomatis.':'Bisa berisi teks terformat, tautan, atau HTML.';if(hasContent&&!modal.classList.contains('hidden'))ensureWidgetEditor()}
 document.getElementById('f_type').addEventListener('change',toggleImageField);toggleImageField();
 document.getElementById('f_image').addEventListener('change',e=>{const file=e.target.files[0],preview=document.getElementById('f_image_preview');if(!file)return;preview.src=URL.createObjectURL(file);preview.classList.remove('hidden')});
-document.getElementById('widgetForm').addEventListener('submit',()=>{if(widgetEditor&&editorTypes.includes(document.getElementById('f_type').value)){try{document.getElementById('f_content').value=widgetEditor.getData()}catch(_){} }
-  if(document.getElementById('f_type').value==='links'){document.getElementById('f_links_data').value=serializeLinks();}
+document.getElementById('widgetForm').addEventListener('submit',()=>{
+  const t=document.getElementById('f_type').value;
+  if(widgetEditor&&editorTypes.includes(t)){try{document.getElementById('f_content').value=widgetEditor.getData()}catch(_){} }
+  const hd=document.getElementById('f_links_data'),im=document.getElementById('f_image_data');
+  if(t==='links'){hd.disabled=false;hd.value=serializeLinks();}else hd.disabled=true;
+  if(t==='image'){im.disabled=false;im.value=document.getElementById('f_old_src').value||'';}else im.disabled=true;
 });
 function buildLinkRow(label='',url='',blank=false){const list=document.getElementById('linksList');const div=document.createElement('div');div.className='grid gap-1.5 border rounded-xl p-2 bg-slate-50';div.innerHTML='<div class="flex gap-1.5 items-center"><input name="link_label[]" placeholder="Nama" value="'+label.replace(/"/g,'&quot;')+'" class="border rounded-lg p-1.5 flex-1 min-w-0 bg-white"><input name="link_url[]" value="'+url.replace(/"/g,'&quot;')+'" placeholder="/halaman atau https://..." class="border rounded-lg p-1.5 flex-1 min-w-0 font-mono text-xs bg-white"><button type="button" class="linkDel w-7 h-7 border rounded-lg grid place-items-center bg-white text-red-600 shrink-0" title="Hapus"><i class="fa fa-trash text-[10px]"></i></button></div><label class="flex gap-1.5 items-center text-[11px] font-normal text-slate-500"><input type="checkbox" name="link_blank[]" '+(blank?'checked':'')+'> Buka di tab baru</label>';list.appendChild(div);div.querySelector('.linkDel').addEventListener('click',()=>div.remove());}
 function loadLinks(json){const list=document.getElementById('linksList');list.innerHTML='';let parsed=[];try{parsed=JSON.parse(json||'[]');}catch(_){if(json&&json.trim())parsed=json.split('\n').map(l=>{const p=l.split('|');return{label:p[0]||'',url:p[1]||'',target:p[2]||''};});}

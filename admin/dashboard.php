@@ -14,7 +14,7 @@ try { $nDraft = 0; } catch (Throwable) { $nDraft = 0; }
 try { $anns = $db->query("SELECT id,title,content,attachment,published_at,created_at FROM announcements WHERE status='published' ORDER BY published_at DESC, id DESC LIMIT 5")->fetchAll(); } catch (Throwable) { $anns = []; }
 try { $nAnn = (int)$db->query("SELECT COUNT(*) FROM announcements WHERE status='published'")->fetchColumn(); } catch (Throwable) { $nAnn = count($anns); }
 try { $nAnnFile = (int)$db->query("SELECT COUNT(*) FROM announcements WHERE status='published' AND attachment IS NOT NULL AND attachment<>''")->fetchColumn(); } catch (Throwable) { $nAnnFile = 0; }
-try { $upcoming = $db->query("SELECT id,title,event_date,start_time,end_time,location,description FROM agenda WHERE event_date>=CURDATE() ORDER BY event_date LIMIT 5")->fetchAll(); } catch (Throwable) { $upcoming = []; }
+try { $upcoming = $db->query("SELECT id,title,event_date,end_date,start_time,end_time,location,description FROM agenda WHERE COALESCE(end_date,event_date)>=CURDATE() ORDER BY event_date LIMIT 5")->fetchAll(); } catch (Throwable) { $upcoming = []; }
 try { $nAgenda = (int)$db->query("SELECT COUNT(*) FROM agenda WHERE event_date>=CURDATE()")->fetchColumn(); } catch (Throwable) { $nAgenda = count($upcoming); }
 // Grafik berita 6 bulan terakhir
 $labels = []; $dataPub = []; $dataDraft = [];
@@ -76,7 +76,7 @@ require ROOT.'/templates/admin/header.php';
 <div class="flex gap-2.5 items-start border border-slate-100 bg-slate-50 rounded-xl px-3 py-2.5 mb-2">
 <span class="w-11 shrink-0 text-center bg-white border rounded-lg py-1"><b class="block text-base leading-none text-violet-600"><?= date('d',strtotime($a['event_date'])) ?></b><span class="text-[10px] text-slate-500 uppercase"><?= $blnId[(int)date('n',strtotime($a['event_date']))] ?></span></span>
 <span class="min-w-0 flex-1"><b class="text-sm block truncate"><?= Helper::e($a['title']) ?></b>
-<span class="text-[11px] text-slate-500 block mt-0.5"><i class="fa fa-calendar-day mr-1"></i><?= date('d-m-Y',strtotime($a['event_date'])) ?><?= ($edEnd!==$a['event_date'])?' – '.date('d-m-Y',strtotime($edEnd)):'' ?> • <i class="fa fa-location-dot mr-1"></i><?= Helper::e($a['location']?:'Lokasi TBD') ?><?php if(!empty($a['start_time'])): ?> • <i class="fa fa-clock mr-1"></i><?= Helper::e($a['start_time']) ?><?php endif; ?></span>
+<span class="text-[11px] text-slate-500 block mt-0.5"><i class="fa fa-calendar-day mr-1"></i><?= date('d-m-Y',strtotime($a['event_date'])) ?><?= ($edEnd!==$a['event_date'])?' s/d '.date('d-m-Y',strtotime($edEnd)):'' ?> • <i class="fa fa-location-dot mr-1"></i><?= Helper::e($a['location']?:'Lokasi TBD') ?><?php if(!empty($a['start_time'])): ?> • <i class="fa fa-clock mr-1"></i><?= Helper::e(substr($a['start_time'],0,5)) ?><?= !empty($a['end_time'])?'–'.Helper::e(substr($a['end_time'],0,5)):'' ?><?php endif; ?></span>
 <?php if(!empty($a['description'])): ?><span class="text-xs text-slate-500 block truncate mt-0.5"><?= Helper::e($a['description']) ?></span><?php endif; ?></span>
 <span class="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 <?= $dd===0?'bg-red-100 text-red-700':'bg-violet-100 text-violet-700' ?>"><?= $when ?></span></div>
 <?php endforeach; endif; ?></div>

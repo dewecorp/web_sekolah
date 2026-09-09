@@ -12,16 +12,16 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     Auth::log($db,'update','structure','Ubah meta struktur'); Session::flash('ok','Pengaturan struktur disimpan.');
   } else {
     $tid=(int)($_POST['teacher_id']??0); $pos=trim($_POST['position']??''); $ord=(int)($_POST['sort_order']??0);
-    if($act==='bulk_delete'){ $ids=array_filter(array_map('intval',(array)($_POST['ids']??[]))); if(!$ids){ Session::flash('err','Pilih minimal 1 data.'); } else { $ph=implode(',',array_fill(0,count($ids),'?')); $db->prepare("DELETE FROM structures WHERE id IN ($ph)")->execute(array_values($ids)); Auth::log($db,'delete','structure','Hapus bulk struktur'); Session::flash('ok',count($ids).' data dihapus.'); } }
-    elseif($act==='delete'){ $db->prepare("DELETE FROM structures WHERE id=?")->execute([(int)$_POST['id']]); Session::flash('ok','Dihapus.'); }
+    if($act==='bulk_delete'){ $ids=array_filter(array_map('intval',(array)($_POST['ids']??[]))); if(!$ids){ Session::flash('err','Pilih minimal 1 data.'); } else { $ph=implode(',',array_fill(0,count($ids),'?')); $st=$db->prepare("SELECT s.position,t.name FROM structures s LEFT JOIN teachers t ON t.id=s.teacher_id WHERE s.id IN ($ph)"); $st->execute(array_values($ids)); $names=array_map(fn($x)=>trim(($x['name']??'').' - '.($x['position']??'')),$st->fetchAll()); $db->prepare("DELETE FROM structures WHERE id IN ($ph)")->execute(array_values($ids)); Auth::log($db,'delete','structure','Hapus jabatan: '.implode(', ',array_slice($names,0,3)).(count($names)>3?' (+'.(count($names)-3).' lain)':'')); Session::flash('ok',count($ids).' data dihapus.'); } }
+    elseif($act==='delete'){ $eid=(int)$_POST['id']; $en=$db->prepare("SELECT s.position,t.name FROM structures s LEFT JOIN teachers t ON t.id=s.teacher_id WHERE s.id=?"); $en->execute([$eid]); $er=$en->fetch(); $ename=trim(($er['name']??'').' - '.($er['position']??''))?:'jabatan#'.$eid; $db->prepare("DELETE FROM structures WHERE id=?")->execute([$eid]); Auth::log($db,'delete','structure',"Hapus jabatan $ename"); Session::flash('ok','Dihapus.'); }
     elseif($tid<=0){ Session::flash('err','Nama guru wajib dipilih.'); }
     else{
       $nm=$db->prepare("SELECT name FROM teachers WHERE id=?"); $nm->execute([$tid]); $tname=$nm->fetchColumn()?:'guru#'.$tid;
       $pp=$db->prepare("SELECT position FROM teachers WHERE id=?"); $pp->execute([$tid]); $gpos=(string)($pp->fetchColumn()?:'');
       if($gpos!=='')$pos=$gpos;
-      if(!empty($_POST['id'])) $db->prepare("UPDATE structures SET teacher_id=?,position=?,sort_order=? WHERE id=?")->execute([$tid,$pos,$ord,(int)$_POST['id']]);
-      else $db->prepare("INSERT INTO structures(teacher_id,position,sort_order) VALUES(?,?,?)")->execute([$tid,$pos,$ord]);
-      Auth::log($db,'save','structure',"Simpan $tname - $pos"); Session::flash('ok','Disimpan.');
+      if(!empty($_POST['id'])){ $db->prepare("UPDATE structures SET teacher_id=?,position=?,sort_order=? WHERE id=?")->execute([$tid,$pos,$ord,(int)$_POST['id']]); Auth::log($db,'update','structure',"Ubah jabatan $tname - $pos"); }
+      else { $db->prepare("INSERT INTO structures(teacher_id,position,sort_order) VALUES(?,?,?)")->execute([$tid,$pos,$ord]); Auth::log($db,'create','structure',"Tambah jabatan $tname - $pos"); }
+      Session::flash('ok','Disimpan.');
     }
   }
   header('Location: '.Helper::url('admin/structure')); exit;

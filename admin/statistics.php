@@ -2,8 +2,8 @@
 if($_SERVER['REQUEST_METHOD']==='POST'){
   if(!Security::verifyCsrf($_POST['csrf']??null)){ Session::flash('err','CSRF tidak valid.'); header('Location: '.Helper::url('admin/statistics')); exit; }
   $act=$_POST['act']??'save';
-  if($act==='bulk_delete'){ $ids=array_filter(array_map('intval',(array)($_POST['ids']??[]))); if(!$ids){ Session::flash('err','Pilih minimal 1 data.'); } else { $ph=implode(',',array_fill(0,count($ids),'?')); $db->prepare("DELETE FROM statistics WHERE id IN ($ph)")->execute(array_values($ids)); Auth::log($db,'delete','statistics','Hapus bulk statistik'); Session::flash('ok',count($ids).' data dihapus.'); } }
-  elseif($act==='delete'){ $db->prepare("DELETE FROM statistics WHERE id=?")->execute([(int)$_POST['id']]); Session::flash('ok','Dihapus.'); }
+  if($act==='bulk_delete'){ $ids=array_filter(array_map('intval',(array)($_POST['ids']??[]))); if(!$ids){ Session::flash('err','Pilih minimal 1 data.'); } else { $ph=implode(',',array_fill(0,count($ids),'?')); $st=$db->prepare("SELECT name FROM statistics WHERE id IN ($ph)"); $st->execute(array_values($ids)); $names=$st->fetchAll(PDO::FETCH_COLUMN); $db->prepare("DELETE FROM statistics WHERE id IN ($ph)")->execute(array_values($ids)); Auth::log($db,'delete','statistics','Hapus statistik: '.implode(', ',array_slice($names,0,3)).(count($names)>3?' (+'.(count($names)-3).' lain)':'')); Session::flash('ok',count($ids).' data dihapus.'); } }
+  elseif($act==='delete'){ $eid=(int)$_POST['id']; $en=$db->prepare("SELECT name FROM statistics WHERE id=?"); $en->execute([$eid]); $ename=$en->fetchColumn()?:'statistik#'.$eid; $db->prepare("DELETE FROM statistics WHERE id=?")->execute([$eid]); Auth::log($db,'delete','statistics',"Hapus statistik $ename"); Session::flash('ok','Dihapus.'); }
   elseif($act==='toggle'){ $db->prepare("UPDATE statistics SET is_active=1-is_active WHERE id=?")->execute([(int)$_POST['id']]); Session::flash('ok','Status diubah.'); }
   else{
     $nm=trim($_POST['name']??'');
@@ -12,9 +12,9 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
       $val=(int)($_POST['value']??0); $suf=trim((string)($_POST['suffix']??'')); $icon=trim((string)($_POST['icon']??'fa-chart-simple'))?:'fa-chart-simple';
       $desc=trim((string)($_POST['description']??'')); $grad=trim((string)($_POST['gradient']??'from-emerald-500 to-teal-600'))?:'from-emerald-500 to-teal-600';
       $ord=(int)($_POST['sort_order']??0); $act2=(int)($_POST['is_active']??1);
-      if(!empty($_POST['id'])) $db->prepare("UPDATE statistics SET name=?,value=?,suffix=?,icon=?,description=?,gradient=?,sort_order=?,is_active=? WHERE id=?")->execute([$nm,$val,$suf,$icon,$desc,$grad,$ord,$act2,(int)$_POST['id']]);
-      else $db->prepare("INSERT INTO statistics(name,value,suffix,icon,description,gradient,sort_order,is_active) VALUES(?,?,?,?,?,?,?,?)")->execute([$nm,$val,$suf,$icon,$desc,$grad,$ord,$act2]);
-      Auth::log($db,'save','statistics',"Simpan $nm"); Session::flash('ok','Disimpan.');
+      if(!empty($_POST['id'])){ $db->prepare("UPDATE statistics SET name=?,value=?,suffix=?,icon=?,description=?,gradient=?,sort_order=?,is_active=? WHERE id=?")->execute([$nm,$val,$suf,$icon,$desc,$grad,$ord,$act2,(int)$_POST['id']]); Auth::log($db,'update','statistics',"Ubah statistik $nm: $val$suf"); }
+      else { $db->prepare("INSERT INTO statistics(name,value,suffix,icon,description,gradient,sort_order,is_active) VALUES(?,?,?,?,?,?,?,?)")->execute([$nm,$val,$suf,$icon,$desc,$grad,$ord,$act2]); Auth::log($db,'create','statistics',"Tambah statistik $nm: $val$suf"); }
+      Session::flash('ok','Disimpan.');
     }
   }
   header('Location: '.Helper::url('admin/statistics')); exit;

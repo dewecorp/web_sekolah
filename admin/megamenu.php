@@ -1,12 +1,11 @@
 <?php declare(strict_types=1); $title='Mega Menu';
 if($_SERVER['REQUEST_METHOD']==='POST'){ if(!Security::verifyCsrf($_POST['csrf']??null)){ Session::flash('err','CSRF tidak valid.'); header('Location: '.Helper::url('admin/megamenu')); exit; }
 $act=$_POST['act']??'';
-if($act==='delete'){ $db->prepare("DELETE FROM mega_menus WHERE id=?")->execute([(int)$_POST['id']]); Auth::log($db,'delete','megamenu','Hapus mega menu'); Session::flash('ok','Dihapus.'); }
+if($act==='delete'){ $eid=(int)$_POST['id']; $en=$db->prepare("SELECT title FROM mega_menus WHERE id=?"); $en->execute([$eid]); $ename=$en->fetchColumn()?:'mega#'.$eid; $db->prepare("DELETE FROM mega_menus WHERE id=?")->execute([$eid]); Auth::log($db,'delete','megamenu',"Hapus mega menu $ename"); Session::flash('ok','Dihapus.'); }
 else{ $tt=trim($_POST['title']??''); if($tt===''){ Session::flash('err','Judul wajib.'); } else {
 $cols=[]; foreach(($_POST['col_title']??[]) as $i=>$ct){ if(trim($ct)==='') continue; $links=[]; foreach(explode("\n",$_POST['col_links'][$i]??'') as $ln){ $ln=trim($ln); if($ln===''||!str_contains($ln,'|')) continue; [$l,$u]=explode('|',$ln,2); $links[]= ['label'=>trim($l),'url'=>trim($u)]; } $cols[]=['title'=>$ct,'links'=>$links]; }
-if(!empty($_POST['id'])) $db->prepare("UPDATE mega_menus SET title=?,menu_item_id=?,columns_json=?,is_active=? WHERE id=?")->execute([$tt,$_POST['menu_item_id']?:null,json_encode($cols),1,(int)$_POST['id']]);
-else $db->prepare("INSERT INTO mega_menus(title,menu_item_id,columns_json,is_active) VALUES(?,?,?,1)")->execute([$tt,$_POST['menu_item_id']?:null,json_encode($cols)]);
-Auth::log($db,'save','megamenu',"Simpan $tt"); Session::flash('ok','Mega menu disimpan.'); } }
+if(!empty($_POST['id'])){ $db->prepare("UPDATE mega_menus SET title=?,menu_item_id=?,columns_json=?,is_active=? WHERE id=?")->execute([$tt,$_POST['menu_item_id']?:null,json_encode($cols),1,(int)$_POST['id']]); Auth::log($db,'update','megamenu',"Ubah mega menu $tt (".count($cols)." kolom)"); } else { $db->prepare("INSERT INTO mega_menus(title,menu_item_id,columns_json,is_active) VALUES(?,?,?,1)")->execute([$tt,$_POST['menu_item_id']?:null,json_encode($cols)]); Auth::log($db,'create','megamenu',"Tambah mega menu $tt (".count($cols)." kolom)"); }
+Session::flash('ok','Mega menu disimpan.'); } }
 header('Location: '.Helper::url('admin/megamenu')); exit; }
 $rows=$db->query("SELECT m.*, mi.label FROM mega_menus m LEFT JOIN menu_items mi ON mi.id=m.menu_item_id ORDER BY sort_order")->fetchAll();
 $items=$db->query("SELECT id,label FROM menu_items WHERE parent_id IS NULL ORDER BY label")->fetchAll();

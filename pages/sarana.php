@@ -30,6 +30,5 @@ require ROOT."/templates/frontend/page-hero.php"; ?>
 <div class="rounded-2xl border bg-white p-4 flex items-center gap-3"><span class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 grid place-items-center"><i class="fa fa-building-columns"></i></span><span><b class="block text-xl font-extrabold"><?= count($rows) ?></b><span class="text-xs text-slate-500">Total Sarana</span></span></div>
 </div>
 <?php endif; ?>
-<div class="bg-slate-50 border rounded-2xl px-4 py-2.5 mt-4 text-xs text-slate-500">Slug public: <code class="font-mono bg-white px-1.5 py-0.5 rounded border font-bold text-emerald-700">/sarana</code></div>
 </div>
 <?php require ROOT."/templates/frontend/footer.php"; ?>

@@ -32,6 +32,5 @@ require ROOT."/templates/frontend/page-hero.php"; ?>
 <?php endforeach; ?>
 </table></div></div>
 <?php endif; ?>
-<div class="bg-slate-50 border rounded-2xl px-4 py-2.5 mt-3 text-xs text-slate-500">Slug public: <code class="font-mono bg-white px-1.5 py-0.5 rounded border font-bold text-emerald-700">/sarana-pembelajaran</code></div>
 </div>
 <?php require ROOT."/templates/frontend/footer.php"; ?>

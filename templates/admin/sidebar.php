@@ -1,6 +1,6 @@
 <aside id="sidebar" class="hidden md:flex w-60 shrink-0 bg-gradient-to-b from-emerald-800 via-emerald-700 to-emerald-800 text-emerald-50 text-sm flex-col shadow-lg" style="margin-top:0!important">
 <?php $role = $_SESSION['user']['role'] ?? 'author'; $u = Auth::user(); $cur = Router::uri(); ?>
-<?php $link = function($p, $ic, $lb) use ($cur) { $t = trim($p, '/'); $a = $t === 'admin' ? $cur === '/admin' : str_starts_with($cur, '/' . $t); return '<a href="' . Helper::url($p) . '" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition ' . ($a ? 'bg-white text-emerald-800 font-bold shadow' : 'text-emerald-50/90 hover:bg-white/15 hover:text-white') . '"><i class="fa ' . $ic . ' w-4 text-center"></i>' . $lb . '</a>'; }; ?>
+<?php $link = function($p, $ic, $lb) use ($cur) { $t = trim($p, '/'); $a = $t === 'admin' ? $cur === '/admin' : ($cur === '/' . $t || str_starts_with($cur, '/' . $t . '/')); return '<a href="' . Helper::url($p) . '" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition ' . ($a ? 'bg-white text-emerald-800 font-bold shadow' : 'text-emerald-50/90 hover:bg-white/15 hover:text-white') . '"><i class="fa ' . $ic . ' w-4 text-center"></i>' . $lb . '</a>'; }; ?>
 <nav id="sideNav" class="grid gap-1 p-3 flex-1 overflow-y-auto overscroll-contain content-start">
 <?= $link('admin', 'fa-gauge', 'Dashboard') ?>
 <p class="px-3 mt-3 text-[11px] font-bold uppercase tracking-wide text-emerald-200/70">Konten</p>

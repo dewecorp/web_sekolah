@@ -412,9 +412,9 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'galer
 <?php foreach(['sm'=>'Kecil (h-32)','md'=>'Sedang (h-40)','lg'=>'Besar (h-56)'] as $k=>$l): ?><button type="button" data-galphoto="<?= $k ?>" class="galphotopick border rounded-lg p-1.5 text-center <?= $galPh===$k?'ring-2 ring-emerald-500 border-emerald-500':'' ?>"><span class="text-[10px] leading-tight block"><?= $l ?></span></button><?php endforeach; ?>
 </div><input type="hidden" name="gal_photo" value="<?= Helper::e($galPh) ?>">
 </div>
-<?php $showImgFx=in_array($curType,['hero','image'],true); $showImgSize=($curType==='image'); ?>
+<?php $showImgFx=in_array($curType,['hero','image','sambutan'],true); $showImgSize=($curType==='image'); ?>
 <div data-f="imgfx"<?= $showImgFx?'':' style="display:none"' ?>>
-<p class="text-xs font-bold uppercase text-slate-400">Style Gambar <span class="font-normal normal-case text-slate-400">(Hero & Image)</span></p>
+<p class="text-xs font-bold uppercase text-slate-400">Style Gambar <span class="font-normal normal-case text-slate-400">(Hero, Image & Sambutan)</span></p>
 <div class="grid grid-cols-3 gap-1.5" data-imgfxpick>
 <?php $imgFxOpts=['none'=>'Statis','kenburns'=>'Ken Burns','kenburns-rev'=>'Ken Burns Balik','zoom-slow'=>'Zoom Lambat','pan-left'=>'Geser Kiri','pan-right'=>'Geser Kanan','fade-zoom'=>'Fade Zoom','float'=>'Melayang']; $imgFxIcon=['none'=>'—','kenburns'=>'◎','kenburns-rev'=>'◉','zoom-slow'=>'⊕','pan-left'=>'←','pan-right'=>'→','fade-zoom'=>'◍','float'=>'〜']; foreach($imgFxOpts as $k=>$l): ?><button type="button" data-imgfx="<?= $k ?>" class="imgfxpick border rounded-lg p-1.5 text-center <?= ($edit['img_fx'] ?? 'none') === $k ? 'ring-2 ring-emerald-500 border-emerald-500' : '' ?>"><span class="block text-lg leading-none"><?= $imgFxIcon[$k] ?></span><span class="text-[10px] leading-tight block mt-1"><?= $l ?></span></button><?php endforeach; ?>
 </div><input type="hidden" name="img_fx" value="<?= Helper::e($edit['img_fx'] ?? 'none') ?>">
@@ -429,8 +429,9 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'galer
 <label class="grid gap-0.5 text-xs">Tinggi px<input type="number" name="img_ch" value="<?= (int)($edit['img_ch'] ?? 0) ?>" min="0" max="1600" placeholder="cth 600" class="border rounded-lg p-1.5 bg-white"></label>
 </div>
 </div>
-<div data-f="imghover"<?= $showImgSize?'':' style="display:none"' ?>>
-<p class="text-xs font-bold uppercase text-slate-400">Efek Hover <span class="font-normal normal-case text-slate-400">(Image)</span></p>
+<?php $showSamHov=($curType==='sambutan'); ?>
+<div data-f="imghover"<?= ($showImgSize||$showSamHov)?'':' style="display:none"' ?>>
+<p class="text-xs font-bold uppercase text-slate-400">Efek Hover <span class="font-normal normal-case text-slate-400">(<?= $showSamHov?'Sambutan':'Image' ?>)</span></p>
 <div class="grid grid-cols-3 gap-1.5" data-imghoverpick>
 <?php $imgHovOpts=['none'=>'Tanpa','zoom'=>'Zoom','zoom-rotate'=>'Zoom Putar','bright'=>'Cerah','dark'=>'Gelap','gray'=>'Hitam-Putih','blur'=>'Blur','slide-up'=>'Geser Naik']; foreach($imgHovOpts as $k=>$l): ?><button type="button" data-imghover="<?= $k ?>" class="imghoverpick border rounded-lg p-1.5 text-center <?= ($edit['img_hover'] ?? 'none') === $k ? 'ring-2 ring-emerald-500 border-emerald-500' : '' ?>"><span class="text-[10px] leading-tight block"><?= $l ?></span></button><?php endforeach; ?>
 </div><input type="hidden" name="img_hover" value="<?= Helper::e($edit['img_hover'] ?? 'none') ?>">

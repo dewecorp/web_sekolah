@@ -96,9 +96,9 @@ $fx=$s['effect']??'fade-up'; $fxCls=$fx==='none'?'fx-none':'fx fx-'.$fx;
 ?>
 <section class="mobile-center-section <?= $pad ?> <?= $bg ?>"><div class="max-w-7xl mx-auto px-4"><div class="<?= $box ?> <?= $fxCls ?>">
 <?= $type==='cta' ? '' : $head($s) ?>
-<?php if($type==='sambutan'): ?>
+<?php if($type==='sambutan'): $wFx=$s['img_fx']??'none'; $wCls=in_array($wFx,['kenburns','kenburns-rev','zoom-slow','pan-left','pan-right','fade-zoom','float'],true)?'imgfx imgfx-'.$wFx:''; $wHov=$s['img_hover']??'none'; $wHovCls=in_array($wHov,['zoom','zoom-rotate','bright','dark','gray','blur','slide-up'],true)?'imghov imghov-'.$wHov:''; ?>
 <div class="welcome-content grid md:grid-cols-[300px_1fr] gap-5 md:gap-6 items-center">
-<div class="welcome-photo flex justify-center"><?php $pp=!empty($profile['principal_photo'])?Helper::upload($profile['principal_photo']):Helper::dummy('kepala-sekolah',600,700); ?><img src="<?= Helper::e($pp) ?>" alt="Kepala Sekolah" class="rounded-2xl shadow w-full max-w-[300px] aspect-[4/5] object-cover" loading="lazy"></div>
+<div class="welcome-photo flex justify-center overflow-hidden rounded-2xl <?= $wHovCls ?>"><?php $pp=!empty($profile['principal_photo'])?Helper::upload($profile['principal_photo']):Helper::dummy('kepala-sekolah',600,700); ?><img src="<?= Helper::e($pp) ?>" alt="Kepala Sekolah" class="<?= $wCls ?> rounded-2xl shadow w-full max-w-[300px] aspect-[4/5] object-cover imghov-welcome" loading="lazy"></div>
 <div class="welcome-copy"><p class="font-bold text-sm uppercase text-emerald-600">Sambutan</p><h3 class="text-2xl font-bold"><?= Helper::e($profile['principal_name']??'-') ?></h3><p class="text-sm opacity-70"><?= Helper::e($profile['principal_title']??'Kepala Sekolah') ?></p><div class="welcome-message mt-2 opacity-90 text-justify text-sm leading-relaxed"><?= $profile['principal_greeting']??'Selamat datang.' ?></div></div>
 </div>
 <?php elseif($type==='statistik'): try{ $stats=$db->query("SELECT * FROM statistics WHERE is_active=1 ORDER BY sort_order,id")->fetchAll(); }catch(Throwable){ $stats=[]; } ?>

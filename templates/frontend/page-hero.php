@@ -27,7 +27,7 @@ $justifyClass = match($heroAlign) {
   default => 'justify-center'
 };
 ?>
-<div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br <?= $g ?> text-white p-7 md:p-12 shadow-xl reveal">
+<div class="w-full max-w-7xl mx-auto px-4"><div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br <?= $g ?> text-white p-7 md:p-12 shadow-xl reveal">
 <span class="absolute -right-16 -top-20 w-64 h-64 rounded-full border-[28px] border-white/10"></span>
 <span class="absolute -left-20 -bottom-24 w-72 h-72 rounded-full border-[36px] border-white/10"></span>
 <div class="relative max-w-3xl mx-auto <?= $alignClass ?>">
@@ -38,3 +38,5 @@ $justifyClass = match($heroAlign) {
 <?php if($heroStats||$heroActions): ?><div class="mt-5 flex flex-wrap items-center gap-2 text-sm <?= $justifyClass ?> <?= $alignClass ?>"><?= $heroActions ?><?php foreach($heroStats as $st): ?><span class="inline-flex items-center gap-2 <?= ($st['solid']??false)?'bg-white text-slate-900':'border border-white/40' ?> px-4 py-2 rounded-xl font-bold"><i class="fa <?= Helper::e($st['icon']??'fa-circle') ?> <?= ($st['solid']??false)?'text-emerald-600':'' ?>"></i><?= Helper::e($st['label']??'') ?></span><?php endforeach; ?></div><?php endif; ?>
 </div>
 </div>
+</div>
+<!-- POLA HERO AMAN: require page-hero.php langsung setelah header, di luar .px-4. Jangan bungkus manual. -->

@@ -37,6 +37,7 @@ $roleMap = [
   'author' => ['posts','pages','media','gallery'],
 ];
 $allow = $roleMap[$role] ?? $roleMap['author'];
+if ($uri === '/admin/system-update' || $uri === '/admin/system-update/') { require ROOT.'/admin/system-update.php'; exit; }
 $path = trim(substr($uri, 6), '/'); // hapus /admin
 if ($path === '') { require ROOT.'/admin/dashboard.php'; exit; }
 $seg = explode('/', $path)[0];

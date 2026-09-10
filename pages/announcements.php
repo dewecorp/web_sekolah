@@ -13,6 +13,7 @@ require ROOT . '/templates/frontend/header.php'; ?>
 <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mt-3">Pengu<span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-indigo-200">muman</span></h1>
 <p class="text-slate-300 mt-2 max-w-2xl">Informasi resmi sekolah. Terbaru di atas, lengkap dengan tanggal dan lampiran.</p>
 <div class="grid grid-cols-3 max-w-lg gap-2.5 mt-6">
+<div class="rounded-2xl bg-white text-slate-900 border border-white/15 backdrop-blur p-3 text-center"><p class="text-sm font-extrabold"><i class="fa fa-calendar-day mr-1"></i><?= Helper::pageDate('announcements','published_at') ?></p><p class="text-[11px] opacity-70">Diperbarui</p></div>
 <div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= count($all) ?></p><p class="text-[11px] text-sky-200">Total</p></div>
 <div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= $withFile ?></p><p class="text-[11px] text-sky-200">Lampiran</p></div>
 <div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= $latest ? '1' : '0' ?></p><p class="text-[11px] text-sky-200">Terbaru</p></div>

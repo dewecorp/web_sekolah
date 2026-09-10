@@ -6,7 +6,7 @@ $heroTitle=$prTitle;
 $heroDesc=$prDesc;
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Prestasi';
 $heroTheme='amber';
-$heroStats=[['icon'=>'fa-trophy','label'=>count($rows).' prestasi','solid'=>true]];
+$heroStats=[['icon'=>'fa-calendar-day','label'=>Helper::pageDate('achievements'),'solid'=>true],['icon'=>'fa-trophy','label'=>count($rows).' prestasi','solid'=>false]];
 require ROOT.'/templates/frontend/page-hero.php'; ?>
 <div class="mt-4">
 <?php if(!$rows): ?><div class="bg-white dark:bg-slate-800 border rounded-3xl p-12 text-center text-slate-500 reveal"><span class="w-14 h-14 rounded-2xl bg-amber-100 grid place-items-center mx-auto text-2xl">🏆</span><p class="font-extrabold text-lg mt-3">Belum ada prestasi</p></div><?php else: ?>

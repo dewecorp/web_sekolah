@@ -13,7 +13,7 @@ $heroTitle=$title;
 $heroDesc='';
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Visi Misi';
 $heroTheme='emerald';
-$heroStats=[['icon'=>'fa-eye','label'=>'Visi','solid'=>true],['icon'=>'fa-list-check','label'=>$mCount.' misi','solid'=>false],['icon'=>'fa-flag','label'=>$gCount.' tujuan','solid'=>false]];
+$heroStats=[['icon'=>'fa-calendar-day','label'=>Helper::pageDate('settings'),'solid'=>true],['icon'=>'fa-eye','label'=>'Visi','solid'=>false],['icon'=>'fa-list-check','label'=>$mCount.' misi','solid'=>false],['icon'=>'fa-flag','label'=>$gCount.' tujuan','solid'=>false]];
 require ROOT.'/templates/frontend/page-hero.php'; ?>
 <div class="mt-4 rounded-[2rem] bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 text-white p-7 md:p-10 reveal relative overflow-hidden">
 <span class="absolute -right-12 -top-14 w-64 h-64 rounded-full border-[28px] border-white/10"></span><span class="absolute -left-16 -bottom-16 w-56 h-56 rounded-full border-[28px] border-white/10"></span>

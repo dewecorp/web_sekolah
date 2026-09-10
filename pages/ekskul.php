@@ -6,7 +6,7 @@ $heroTitle=$ekTitle;
 $heroDesc=$ekDesc;
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / '.Helper::e($ekTitle);
 $heroTheme='teal';
-$heroStats=[['icon'=>'fa-futbol','label'=>count($rows).' kegiatan aktif','solid'=>true]];
+$heroStats=[['icon'=>'fa-calendar-day','label'=>Helper::pageDate('extracurriculars'),'solid'=>true],['icon'=>'fa-futbol','label'=>count($rows).' kegiatan aktif','solid'=>false]];
 require ROOT.'/templates/frontend/page-hero.php'; ?>
 <div class="mt-4">
 <?php $ekIcon=['fa-futbol','fa-campground','fa-palette','fa-music','fa-robot','fa-book-quran']; ?>

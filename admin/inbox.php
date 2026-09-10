@@ -65,7 +65,7 @@ document.querySelectorAll('.msg-view').forEach(b=>b.addEventListener('click',()=
       +'<div class="flex gap-2"><span class="w-16 shrink-0 text-slate-400 text-xs font-bold pt-0.5">Waktu</span><span class="flex-1 text-slate-600">'+dt+'</span></div>'
       +'<div class="flex gap-2"><span class="w-16 shrink-0 text-slate-400 text-xs font-bold pt-0.5">Info</span><span class="flex-1 text-xs text-slate-500">'+words+' kata • '+chars+' karakter</span></div></div>'
       +'<div class="mt-3 rounded-2xl border bg-white p-3 text-sm leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto">'+esc(d.message)+'</div>'
-      +'<div class="mt-3 flex flex-wrap gap-2"><a href="mailto:'+esc(d.email)+'" class="flex-1 text-center text-xs font-bold px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white"><i class="fa fa-reply mr-1"></i>Balas Email</a><button id="swCopyMsg" type="button" class="flex-1 text-xs font-bold px-3 py-2 rounded-xl border hover:bg-slate-50"><i class="fa fa-copy mr-1"></i>Salin Pesan</button></div>'
+      +'<div class="mt-3 flex flex-wrap gap-2"><button id="swCopyMsg" type="button" class="flex-1 text-xs font-bold px-3 py-2 rounded-xl border hover:bg-slate-50"><i class="fa fa-copy mr-1"></i>Salin Pesan</button></div>'
       +'</div>',
     showConfirmButton:false, showCloseButton:true, width:600,
     didOpen:()=>{ document.getElementById('swCopyMsg')?.addEventListener('click',()=>{ navigator.clipboard?.writeText(d.message||''); Swal.showValidationMessage('Pesan disalin!'); setTimeout(()=>Swal.resetValidationMessage(),1200); }); }

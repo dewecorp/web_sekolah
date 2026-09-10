@@ -36,7 +36,7 @@ $heroTitle=$active?$active['name']:'Berita';
 $heroDesc=$active?(!empty($active['description'])?nl2br(Helper::e($active['description'])):''):'';
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Berita'.($active?' / '.Helper::e($active['name']):'');
 $heroTheme='sky';
-$heroStats=[['icon'=>'fa-newspaper','label'=>count($featured).' sorotan','solid'=>true],['icon'=>'fa-tags','label'=>count($cats).' kategori','solid'=>false]];
+$heroStats=[['icon'=>'fa-calendar-day','label'=>Helper::pageDate('posts','published_at'),'solid'=>true],['icon'=>'fa-newspaper','label'=>count($featured).' sorotan','solid'=>false],['icon'=>'fa-tags','label'=>count($cats).' kategori','solid'=>false]];
 $heroActions='<a href="'.Helper::url('indeks-berita').'" class="inline-flex items-center gap-2 bg-white text-slate-900 px-4 py-2 rounded-xl font-bold"><i class="fa fa-layer-group text-sky-600"></i>Indeks Berita</a>';
 require ROOT.'/templates/frontend/page-hero.php'; ?>
 <div class="mt-6 grid lg:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start"><div class="min-w-0 grid gap-6 content-start">

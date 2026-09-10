@@ -21,6 +21,7 @@ require ROOT . '/templates/frontend/header.php'; ?>
 <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mt-3">Agenda <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200">Sekolah</span></h1>
 <p class="text-slate-300 mt-2 max-w-2xl">Semua kegiatan terkurasi rapi. Jangan lewatkan momen penting sekolah.</p>
 <div class="grid grid-cols-3 max-w-lg gap-2.5 mt-6">
+<div class="rounded-2xl bg-white text-slate-900 border border-white/15 backdrop-blur p-3 text-center"><p class="text-sm font-extrabold"><i class="fa fa-calendar-day mr-1"></i><?= Helper::pageDate('agenda','event_date') ?></p><p class="text-[11px] opacity-70">Diperbarui</p></div>
 <div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= count($up) ?></p><p class="text-[11px] text-emerald-200">Mendatang</p></div>
 <div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= $monthCount ?></p><p class="text-[11px] text-emerald-200">Bulan ini</p></div>
 <div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= count($all) ?></p><p class="text-[11px] text-emerald-200">Total</p></div>

@@ -10,13 +10,15 @@ $total=count($srows); $foto=count(array_filter($srows,fn($x)=>!empty($x['tphoto'
 <div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-violet-700 via-indigo-600 to-sky-500 text-white p-7 md:p-12 shadow-xl reveal">
 <span class="absolute -right-16 -top-20 w-64 h-64 rounded-full border-[28px] border-white/10"></span>
 <span class="absolute -left-20 -bottom-24 w-72 h-72 rounded-full border-[36px] border-white/10"></span>
-<div class="relative max-w-3xl">
-<nav class="text-xs text-white/70 mb-3"><a href="<?= Helper::url() ?>" class="hover:text-white">Beranda</a> / Struktur</nav>
+<?php $hal=Database::setting('hero_align','center'); $haC=$hal==='left'?'text-left':($hal==='right'?'text-right':'text-center'); $hjC=$hal==='left'?'justify-start':($hal==='right'?'justify-end':'justify-center'); $hmC=$hal==='left'?'mr-auto':($hal==='right'?'ml-auto':'mx-auto'); ?>
+<div class="relative max-w-3xl <?= $hmC ?> <?= $haC ?>">
+<nav class="text-xs text-white/70 mb-3 <?= $haC ?>"><a href="<?= Helper::url() ?>" class="hover:text-white">Beranda</a> / Struktur</nav>
 <span class="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-[.16em]"><i class="fa fa-sitemap text-amber-300"></i>Organisasi Sekolah</span>
-<h1 class="text-3xl md:text-5xl font-extrabold leading-tight mt-4"><?= Helper::e($title) ?></h1>
-<?php if($desc): ?><p class="text-white/80 text-sm md:text-base max-w-2xl mt-4 text-justify leading-relaxed"><?= nl2br(Helper::e($desc)) ?></p><?php endif; ?>
-<div class="mt-5 flex flex-wrap gap-2 text-sm">
-<span class="inline-flex items-center gap-2 bg-white text-slate-900 px-4 py-2 rounded-xl font-bold"><i class="fa fa-users text-violet-600"></i><?= $total ?> pejabat</span>
+<h1 class="text-3xl md:text-5xl font-extrabold leading-tight mt-4 <?= $haC ?>"><?= Helper::e($title) ?></h1>
+<?php if($desc): ?><p class="text-white/80 text-sm md:text-base max-w-2xl mt-4 <?= $hmC ?> <?= $haC ?> leading-relaxed"><?= nl2br(Helper::e($desc)) ?></p><?php endif; ?>
+<div class="mt-5 flex flex-wrap gap-2 text-sm <?= $hjC ?> <?= $haC ?>">
+<span class="inline-flex items-center gap-2 bg-white text-slate-900 px-4 py-2 rounded-xl font-bold"><i class="fa fa-calendar-day text-violet-600"></i><?= Helper::pageDate('structures') ?></span>
+<span class="inline-flex items-center gap-2 border border-white/40 px-4 py-2 rounded-xl font-bold"><i class="fa fa-users"></i><?= $total ?> pejabat</span>
 <span class="inline-flex items-center gap-2 border border-white/40 px-4 py-2 rounded-xl font-bold"><i class="fa fa-image"></i><?= $foto ?> berfoto</span>
 <?php if(!empty($prof['org_chart'])): ?><a href="#bagan" class="inline-flex items-center gap-2 border border-white/40 px-4 py-2 rounded-xl font-bold hover:bg-white/10"><i class="fa fa-diagram-project"></i>Lihat bagan</a><?php endif; ?>
 </div>

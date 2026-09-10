@@ -7,7 +7,7 @@ $heroBadge='<i class="fa fa-chalkboard text-amber-300"></i>'.Helper::e($sTitle);
 $heroTitle=$sTitle; $heroDesc=$sDesc;
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Sarana Pembelajaran';
 $heroTheme='amber';
-$heroStats=[['icon'=>'fa-boxes-stacked','label'=>count($rows).' jenis','solid'=>true],['icon'=>'fa-circle-check','label'=>$totBaik.' baik','solid'=>false],['icon'=>'fa-triangle-exclamation','label'=>$totRus.' rusak','solid'=>false]];
+$heroStats=[['icon'=>'fa-calendar-day','label'=>Helper::pageDate('learning_facilities'),'solid'=>true],['icon'=>'fa-boxes-stacked','label'=>count($rows).' jenis','solid'=>false],['icon'=>'fa-circle-check','label'=>$totBaik.' baik','solid'=>false],['icon'=>'fa-triangle-exclamation','label'=>$totRus.' rusak','solid'=>false]];
 require ROOT."/templates/frontend/page-hero.php"; ?>
 <div class="w-full px-4 md:px-8 py-10">
 <?php if(!$rows): ?><div class="bg-white border rounded-3xl p-12 text-center mt-4 text-slate-500"><span class="w-14 h-14 rounded-2xl bg-amber-100 grid place-items-center mx-auto text-2xl">🧰</span><p class="font-extrabold text-lg mt-3">Belum ada data</p></div><?php else: ?>

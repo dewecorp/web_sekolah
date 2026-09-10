@@ -19,7 +19,7 @@ $heroTitle='Indeks Berita';
 $heroDesc='';
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / <a href="'.Helper::url('berita').'" class="hover:text-white">Berita</a> / Indeks';
 $heroTheme='sky';
-$heroStats=[['icon'=>'fa-newspaper','label'=>$totalAll.' berita','solid'=>true],['icon'=>'fa-calendar-days','label'=>count($years).' tahun','solid'=>false],['icon'=>'fa-fire','label'=>$topYear?('Teraktif '.$topYear['yr'].' ('.$topYear['total'].')'):'Belum ada data','solid'=>false]];
+$heroStats=[['icon'=>'fa-calendar-day','label'=>Helper::pageDate('posts','published_at'),'solid'=>true],['icon'=>'fa-newspaper','label'=>$totalAll.' berita','solid'=>false],['icon'=>'fa-calendar-days','label'=>count($years).' tahun','solid'=>false],['icon'=>'fa-fire','label'=>$topYear?('Teraktif '.$topYear['yr'].' ('.$topYear['total'].')'):'Belum ada data','solid'=>false]];
 require ROOT.'/templates/frontend/page-hero.php'; ?>
 <?php if(!$years): ?>
 <div class="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-2xl p-12 text-center mt-4 text-slate-500 reveal">Belum ada berita terbit.</div>

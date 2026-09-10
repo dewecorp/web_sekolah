@@ -55,6 +55,24 @@ final class Helper {
         $b = ['Jan'=>'Jan','Feb'=>'Feb','Mar'=>'Mar','Apr'=>'Apr','May'=>'Mei','Jun'=>'Jun','Jul'=>'Jul','Aug'=>'Agu','Sep'=>'Sep','Oct'=>'Okt','Nov'=>'Nov','Dec'=>'Des'];
         return strtr(date('d M Y', strtotime($d)), $b);
     }
+    public static function pageDate(string $table = '', string $dateCol = 'updated_at'): string {
+        if ($table !== '') {
+            try {
+                $pdo = Database::conn();
+                $cols = $pdo->query("SHOW COLUMNS FROM `$table`")->fetchAll(PDO::FETCH_COLUMN);
+                $col = in_array($dateCol, $cols, true) ? $dateCol : (in_array('updated_at', $cols, true) ? 'updated_at' : (in_array('created_at', $cols, true) ? 'created_at' : ''));
+                if ($col !== '') {
+                    $v = $pdo->query("SELECT `$col` FROM `$table` ORDER BY `$col` DESC LIMIT 1")->fetchColumn();
+                    if ($v) return self::tgl((string)$v);
+                }
+            } catch (Throwable) {}
+        }
+        try {
+            $v = Database::conn()->query("SELECT `updated_at` FROM settings ORDER BY `updated_at` DESC LIMIT 1")->fetchColumn();
+            if ($v) return self::tgl((string)$v);
+        } catch (Throwable) {}
+        return self::tgl(date('Y-m-d'));
+    }
     // Time ago Asia/Jakarta: baru saja, X mnt/jam/hr lalu
     public static function ago(?string $dt): string {
         if (!$dt) return '-';

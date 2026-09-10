@@ -31,11 +31,13 @@ $wa = preg_replace('/\D+/', '', $phone);
 <div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-500 text-white p-7 md:p-12 shadow-xl">
 <span class="absolute -right-16 -top-20 w-64 h-64 rounded-full border-[28px] border-white/10"></span>
 <span class="absolute -left-20 -bottom-24 w-72 h-72 rounded-full border-[36px] border-white/10"></span>
-<div class="relative max-w-3xl">
+<?php $hal=Database::setting('hero_align','center'); $haC=$hal==='left'?'text-left':($hal==='right'?'text-right':'text-center'); $hjC=$hal==='left'?'justify-start':($hal==='right'?'justify-end':'justify-center'); $hmC=$hal==='left'?'mr-auto':($hal==='right'?'ml-auto':'mx-auto'); ?>
+<div class="relative max-w-3xl <?= $hmC ?> <?= $haC ?>">
 <span class="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-[.16em]"><i class="fa fa-headset text-amber-300"></i>Hubungi Kami</span>
-<h1 class="text-3xl md:text-5xl font-extrabold leading-tight mt-4">Kontak <?= Helper::e(Database::setting('school_name','Sekolah')) ?></h1>
-<?php $contactDesc=Database::setting('contact_desc',''); if($contactDesc!==''): ?><p class="text-white/80 text-sm md:text-base max-w-2xl mt-4"><?= nl2br(Helper::e($contactDesc)) ?></p><?php endif; ?>
-<div class="mt-5 flex flex-wrap gap-2">
+<h1 class="text-3xl md:text-5xl font-extrabold leading-tight mt-4 <?= $haC ?>">Kontak <?= Helper::e(Database::setting('school_name','Sekolah')) ?></h1>
+<?php $contactDesc=Database::setting('contact_desc',''); if($contactDesc!==''): ?><p class="text-white/80 text-sm md:text-base max-w-2xl mt-4 <?= $hmC ?> <?= $haC ?>"><?= nl2br(Helper::e($contactDesc)) ?></p><?php endif; ?>
+<div class="mt-5 flex flex-wrap gap-2 <?= $hjC ?> <?= $haC ?>">
+<span class="inline-flex items-center gap-2 bg-white text-slate-900 px-4 py-2.5 rounded-xl font-bold text-sm"><i class="fa fa-calendar-day text-emerald-600"></i><?= Helper::pageDate('settings') ?></span>
 <?php if($phone): ?><a href="tel:<?= Helper::e($phone) ?>" class="inline-flex items-center gap-2 bg-white text-emerald-700 px-4 py-2.5 rounded-xl font-bold text-sm"><i class="fa fa-phone"></i><?= Helper::e($phone) ?></a><?php endif; ?>
 <?php if($wa): ?><a href="https://wa.me/<?= Helper::e($wa) ?>" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/40 px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-white/10"><i class="fab fa-whatsapp"></i>WhatsApp</a><?php endif; ?>
 <?php if($email): ?><a href="mailto:<?= Helper::e($email) ?>" class="inline-flex items-center gap-2 border border-white/40 px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-white/10"><i class="fa fa-envelope"></i>Email</a><?php endif; ?>

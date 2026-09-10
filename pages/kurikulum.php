@@ -24,13 +24,8 @@ $heroDesc='';
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Kurikulum';
 $heroTheme='emerald';
 $heroActions='<a href="#isi" class="inline-flex items-center gap-2 bg-white text-slate-900 px-4 py-2 rounded-xl font-bold"><i class="fa fa-arrow-down text-emerald-600"></i>Baca isi</a>';
-$heroStats=[['icon'=>'fa-list-check','label'=>$liCount.' poin','solid'=>false],['icon'=>'fa-clock','label'=>'± '.$mins.' mnt baca','solid'=>false],['icon'=>'fa-school','label'=>Database::setting('school_name','Sekolah'),'solid'=>false]];
+$heroStats=[['icon'=>'fa-calendar-day','label'=>Helper::pageDate('settings'),'solid'=>true],['icon'=>'fa-clock','label'=>'± '.$mins.' mnt baca','solid'=>false],['icon'=>'fa-school','label'=>Database::setting('school_name','Sekolah'),'solid'=>false]];
 require ROOT.'/templates/frontend/page-hero.php'; ?>
-<div class="grid md:grid-cols-3 gap-3 mt-4">
-<div class="rounded-2xl border bg-white dark:bg-slate-800 p-4 flex items-center gap-3 reveal"><span class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 grid place-items-center"><i class="fa fa-layer-group"></i></span><span><b class="block text-2xl font-extrabold"><?= $liCount ?></b><span class="text-xs text-slate-500">Komponen</span></span><span class="ml-auto text-[11px] font-bold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700">Terstruktur</span></div>
-<div class="rounded-2xl border bg-white dark:bg-slate-800 p-4 flex items-center gap-3 reveal"><span class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 grid place-items-center"><i class="fa fa-clock"></i></span><span><b class="block text-2xl font-extrabold"><?= $mins ?> mnt</b><span class="text-xs text-slate-500">Perkiraan baca</span></span></div>
-<div class="rounded-2xl border bg-white dark:bg-slate-800 p-4 flex items-center gap-3 reveal"><span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 grid place-items-center"><i class="fa fa-award"></i></span><span><b class="block text-sm font-bold leading-tight"><?= Helper::e(Database::setting('school_name','Sekolah')) ?></b><span class="text-xs text-slate-500">Kurikulum</span></span></div>
-</div>
 <div id="isi" class="mt-4 grid gap-4 max-w-full scroll-mt-28">
 <div class="rounded-[1.7rem] bg-white dark:bg-slate-800 border dark:border-slate-700 p-6 md:p-8 reveal relative overflow-hidden">
 <span class="absolute left-0 top-6 bottom-6 w-1 rounded-full bg-gradient-to-b from-emerald-500 to-cyan-500"></span>
@@ -38,7 +33,7 @@ require ROOT.'/templates/frontend/page-hero.php'; ?>
 <div class="kur-content mt-3 text-sm md:text-[15px] leading-relaxed text-slate-700 dark:text-slate-200"><?= $content ?></div>
 </div>
 <div class="rounded-[1.7rem] border dark:border-slate-700 bg-white dark:bg-slate-800 p-5 md:p-6 reveal">
-<h2 class="font-extrabold flex items-center gap-2 pb-3 mb-2 border-b border-slate-100 dark:border-slate-700"><span class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 text-white grid place-items-center shadow"><i class="fa fa-layer-group text-sm"></i></span>Komponen utama <span class="ml-auto text-[11px] font-bold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700"><?= count($comps ?? []) + ($compsHtml?substr_count(strtolower($compsHtml),'<li'):0) ?> poin</span></h2>
+<h2 class="font-extrabold flex items-center gap-2 pb-3 mb-2 border-b border-slate-100 dark:border-slate-700"><span class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 text-white grid place-items-center shadow"><i class="fa fa-layer-group text-sm"></i></span>Komponen utama</h2>
 <?php if($compsHtml!==''): ?><div class="vm-list mt-4 text-sm leading-relaxed"><?= $compsHtml ?></div><?php elseif(!empty($comps)): ?><div class="vm-list mt-4"><ol><?php foreach($comps as $cp): $parts=preg_split('/^(.+?)\s+[—–-]\s+(.+)$/u', trim($cp), -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY); if(count($parts)>=2){$t0=trim($parts[0]);$t1=trim($parts[1]);}else{$t0=trim($cp);$t1='';} ?><li><span><b><?= Helper::e($t0) ?></b><?php if($t1!==''): ?><span class="block text-slate-500 mt-0.5"><?= Helper::e($t1) ?></span><?php endif; ?></span></li><?php endforeach; ?></ol></div><?php else: ?><p class="text-xs text-slate-400 mt-2">Belum diisi. Kelola via Sekolah &gt; Kurikulum.</p><?php endif; ?>
 
 </div>

@@ -7,7 +7,7 @@ $heroBadge='<i class="fa fa-building-columns text-amber-300"></i>'.Helper::e($sT
 $heroTitle=$sTitle; $heroDesc=$sDesc;
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Sarana';
 $heroTheme='teal';
-$heroStats=[['icon'=>'fa-building-columns','label'=>count($rows).' sarana','solid'=>true],['icon'=>'fa-circle-check','label'=>$baik.' baik','solid'=>false],['icon'=>'fa-triangle-exclamation','label'=>$rusak.' rusak','solid'=>false]];
+$heroStats=[['icon'=>'fa-calendar-day','label'=>Helper::pageDate('facilities'),'solid'=>true],['icon'=>'fa-building-columns','label'=>count($rows).' sarana','solid'=>false],['icon'=>'fa-circle-check','label'=>$baik.' baik','solid'=>false],['icon'=>'fa-triangle-exclamation','label'=>$rusak.' rusak','solid'=>false]];
 require ROOT."/templates/frontend/page-hero.php"; ?>
 <div class="w-full px-4 md:px-8 py-10">
 <?php if(!$rows): ?><div class="bg-white border rounded-3xl p-12 text-center mt-4 text-slate-500"><span class="w-14 h-14 rounded-2xl bg-emerald-100 grid place-items-center mx-auto text-2xl">🏫</span><p class="font-extrabold text-lg mt-3">Belum ada data sarana</p></div><?php else: ?>

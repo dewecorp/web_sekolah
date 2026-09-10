@@ -12,7 +12,7 @@ $heroTitle='Galeri';
 $heroDesc='';
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Galeri';
 $heroTheme='violet';
-$heroStats=[['icon'=>'fa-images','label'=>$totalGal.' album','solid'=>true],['icon'=>'fa-camera','label'=>$totalImg.' foto','solid'=>false]];
+$heroStats=[['icon'=>'fa-calendar-day','label'=>Helper::pageDate('galleries'),'solid'=>true],['icon'=>'fa-images','label'=>$totalGal.' album','solid'=>false],['icon'=>'fa-camera','label'=>$totalImg.' foto','solid'=>false]];
 require ROOT.'/templates/frontend/page-hero.php'; ?>
 <?php if(!$gals): ?><div class="bg-white border rounded-2xl p-10 text-center mt-4 text-slate-500">Belum ada galeri</div><?php else: ?>
 <?php foreach($gals as $g): $ims=$imgsByGal[$g['id']]??[]; ?>

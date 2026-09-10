@@ -1,5 +1,20 @@
 <?php
 $metaTitle = 'Kontak - ' . Database::setting('school_name','Sekolah');
+try{$DB->exec("CREATE TABLE IF NOT EXISTS contact_messages(id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,name VARCHAR(150) NOT NULL,email VARCHAR(190) NOT NULL,subject VARCHAR(190) NOT NULL DEFAULT '',message MEDIUMTEXT NOT NULL,is_read TINYINT(1) NOT NULL DEFAULT 0,created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,KEY idx_read_created (is_read,created_at)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");}catch(Throwable $e){ error_log('inbox-migrate: '.$e->getMessage()); }
+$contactOk=''; $contactErr='';
+if($_SERVER['REQUEST_METHOD']==='POST' && ($_POST['contact_send']??'')==='1'){
+  if(!Security::verifyCsrf($_POST['csrf']??null)){ $contactErr='Sesi kedaluwarsa. Muat ulang halaman.'; }
+  else{
+    $nm=trim((string)($_POST['name']??'')); $em=trim((string)($_POST['email']??'')); $sj=trim((string)($_POST['subject']??'')); $ps=trim((string)($_POST['message']??''));
+    if(mb_strlen($nm)<2){ $contactErr='Nama minimal 2 huruf.'; }
+    elseif(!filter_var($em,FILTER_VALIDATE_EMAIL)||mb_strlen($em)>190){ $contactErr='Email tidak valid.'; }
+    elseif(mb_strlen($ps)<5){ $contactErr='Pesan minimal 5 huruf.'; }
+    else{
+      try{ $DB->prepare("INSERT INTO contact_messages(name,email,subject,message) VALUES(?,?,?,?)")->execute([mb_substr($nm,0,150),$em,mb_substr($sj,0,190),$ps]); $contactOk='Pesan terkirim. Terima kasih!'; $_POST=[]; }
+      catch(Throwable $e){ error_log('inbox-insert: '.$e->getMessage()); $contactErr='Gagal menyimpan pesan. '.$e->getMessage(); }
+    }
+  }
+}
 require ROOT."/templates/frontend/header.php";
 $addr = Database::setting("address","");
 $phone = Database::setting("phone","");
@@ -37,12 +52,14 @@ $wa = preg_replace('/\D+/', '', $phone);
 </div>
 <?php if($maps): ?><div class="rounded-2xl overflow-hidden border bg-white dark:bg-slate-800 min-h-[240px]"><?= $maps ?></div><?php endif; ?>
 </div>
-<form class="lg:col-span-3 rounded-2xl border bg-white dark:bg-slate-800 p-5 md:p-7 grid gap-3 content-start" onsubmit="Swal.fire('Berhasil!','Pesan terkirim.','success');return false">
+<form method="post" class="lg:col-span-3 rounded-2xl border bg-white dark:bg-slate-800 p-5 md:p-7 grid gap-3 content-start"><?= Security::csrfField() ?><input type="hidden" name="contact_send" value="1">
 <div><h2 class="font-extrabold text-lg">Kirim Pesan</h2><p class="text-sm text-slate-500">Isi formulir, pesan diteruskan ke email sekolah.</p></div>
-<div class="grid sm:grid-cols-2 gap-3"><label class="grid gap-1 text-sm font-semibold">Nama<input required placeholder="Nama lengkap" class="border rounded-xl p-2.5 font-normal"></label><label class="grid gap-1 text-sm font-semibold">Email<input required type="email" placeholder="nama@email.com" class="border rounded-xl p-2.5 font-normal"></label></div>
-<label class="grid gap-1 text-sm font-semibold">Subjek<input placeholder="Contoh: Info PPDB" class="border rounded-xl p-2.5 font-normal"></label>
-<label class="grid gap-1 text-sm font-semibold">Pesan<textarea required rows="5" placeholder="Tulis pesan Anda..." class="border rounded-xl p-2.5 font-normal"></textarea></label>
-<button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl py-3 font-bold"><i class="fa fa-paper-plane mr-1"></i>Kirim Pesan</button>
+<?php if($contactOk!==''): ?><script>document.addEventListener('DOMContentLoaded',()=>{ if(window.Swal)Swal.fire({title:'Berhasil!',text:<?= json_encode($contactOk,JSON_UNESCAPED_UNICODE) ?>,icon:'success',confirmButtonColor:'#059669',timer:2600,timerProgressBar:true,showConfirmButton:false}); });</script><?php endif; ?>
+<?php if($contactErr!==''): ?><script>document.addEventListener('DOMContentLoaded',()=>{ if(window.Swal)Swal.fire({title:'Gagal',text:<?= json_encode($contactErr,JSON_UNESCAPED_UNICODE) ?>,icon:'error',confirmButtonColor:'#dc2626',timer:3500,timerProgressBar:true,showConfirmButton:false}); });</script><?php endif; ?>
+<div class="grid sm:grid-cols-2 gap-3"><label class="grid gap-1 text-sm font-semibold">Nama<input name="name" required maxlength="150" value="<?= Helper::e($_POST['name']??'') ?>" placeholder="Nama lengkap" class="border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 font-normal bg-white dark:bg-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition placeholder:text-slate-400"></label><label class="grid gap-1 text-sm font-semibold">Email<input name="email" required type="email" maxlength="190" value="<?= Helper::e($_POST['email']??'') ?>" placeholder="nama@email.com" class="border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 font-normal bg-white dark:bg-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition placeholder:text-slate-400"></label></div>
+<label class="grid gap-1 text-sm font-semibold">Subjek<input name="subject" maxlength="190" value="<?= Helper::e($_POST['subject']??'') ?>" placeholder="Contoh: Info PPDB" class="border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 font-normal bg-white dark:bg-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition placeholder:text-slate-400"></label>
+<label class="grid gap-1 text-sm font-semibold">Pesan<textarea name="message" required rows="5" placeholder="Tulis pesan Anda..." class="border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 font-normal bg-white dark:bg-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition placeholder:text-slate-400 resize-y"><?= Helper::e($_POST['message']??'') ?></textarea></label>
+<button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl py-3 font-bold transition hover:-translate-y-0.5 hover:shadow-xl hover:brightness-105 active:translate-y-0 active:scale-[.99]"><i class="fa fa-paper-plane mr-1"></i>Kirim Pesan</button>
 </form>
 </div>
 </div>

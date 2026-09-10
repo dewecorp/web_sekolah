@@ -3,6 +3,8 @@
 <?php $link = function($p, $ic, $lb) use ($cur) { $t = trim($p, '/'); $a = $t === 'admin' ? $cur === '/admin' : ($cur === '/' . $t || str_starts_with($cur, '/' . $t . '/')); return '<a href="' . Helper::url($p) . '" class="flex items-center gap-2.5 px-3 py-2 rounded-lg transition ' . ($a ? 'bg-white text-emerald-800 font-bold shadow' : 'text-emerald-50/90 hover:bg-white/15 hover:text-white') . '"><i class="fa ' . $ic . ' w-4 text-center"></i>' . $lb . '</a>'; }; ?>
 <nav id="sideNav" class="grid gap-1 p-3 flex-1 overflow-y-auto overscroll-contain content-start">
 <?= $link('admin', 'fa-gauge', 'Dashboard') ?>
+<?php try{ $inboxUnread=(int)$db->query("SELECT COUNT(*) FROM contact_messages WHERE is_read=0 AND created_at >= NOW() - INTERVAL 24 HOUR")->fetchColumn(); }catch(Throwable){ $inboxUnread=0; } ?>
+<?= $link('admin/inbox', 'fa-inbox', 'Kotak Masuk'.($inboxUnread>0?' <span class="ml-auto text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-400 text-emerald-950">'.$inboxUnread.'</span>':'')) ?>
 <p class="px-3 mt-3 text-[11px] font-bold uppercase tracking-wide text-emerald-200/70">Konten</p>
 <?= $link('admin/pages', 'fa-file-lines', 'Halaman') ?>
 <?= $link('admin/posts', 'fa-newspaper', 'Berita') ?>

@@ -100,7 +100,7 @@ document.querySelectorAll('[data-carousel]').forEach(box=>{
   const slides=[...box.querySelectorAll('[data-slide]')];const dots=[...box.querySelectorAll('[data-dot]')];
   if(slides.length<2)return;let i=0,timer=null;
   const go=n=>{i=(n+slides.length)%slides.length;slides.forEach((s,k)=>{s.classList.toggle('opacity-100',k===i);s.classList.toggle('opacity-0',k!==i);s.classList.toggle('pointer-events-none',k!==i)});dots.forEach((d,k)=>{d.classList.toggle('bg-white',k===i);d.classList.toggle('bg-white/40',k!==i)})};
-  const interval=Math.max(1000,parseInt(box.dataset.interval||'5000',10)||5000);const play=()=>{timer=setInterval(()=>go(i+1),interval)};const stop=()=>{clearInterval(timer)};
+  const interval=Math.max(1000,parseInt(box.dataset.interval||'5000',10)||5000);const auto=box.dataset.autoplay!=='0';const play=()=>{if(!auto)return;timer=setInterval(()=>go(i+1),interval)};const stop=()=>{clearInterval(timer)};
   box.querySelector('[data-prev]')?.addEventListener('click',()=>{stop();go(i-1);play()});
   box.querySelector('[data-next]')?.addEventListener('click',()=>{stop();go(i+1);play()});
   dots.forEach((d,k)=>d.addEventListener('click',()=>{stop();go(k);play()}));

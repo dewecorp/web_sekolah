@@ -1,5 +1,5 @@
 <?php declare(strict_types=1); Auth::requireRole(['administrator','editor']); $title='Section Builder';
-$types = ['hero'=>['Hero','fa-panorama'],'carousel'=>['Carousel','fa-clone'],'countdown'=>['Countdown Timer','fa-clock'],'image'=>['Image','fa-image'],'video'=>['Video','fa-video'],'audio'=>['Audio','fa-music'],'html'=>['Custom HTML','fa-code'],'sambutan'=>['Sambutan','fa-user-tie'],'statistik'=>['Statistik','fa-chart-simple'],'berita'=>['Berita','fa-newspaper'],'agenda'=>['Agenda','fa-calendar-days'],'pengumuman'=>['Pengumuman','fa-bullhorn'],'galeri'=>['Galeri','fa-images'],'guru'=>['Guru','fa-chalkboard-user'],'prestasi'=>['Prestasi','fa-trophy'],'ekskul'=>['Ekskul','fa-futbol'],'cta'=>['CTA','fa-bullhorn']];
+$types = ['hero'=>['Hero','fa-panorama'],'carousel'=>['Carousel','fa-clone'],'carousel-berita'=>['Carousel Berita','fa-clone'],'kategori-berita'=>['Kategori Berita','fa-tags'],'countdown'=>['Countdown Timer','fa-clock'],'image'=>['Image','fa-image'],'video'=>['Video','fa-video'],'audio'=>['Audio','fa-music'],'html'=>['Custom HTML','fa-code'],'sambutan'=>['Sambutan','fa-user-tie'],'statistik'=>['Statistik','fa-chart-simple'],'berita'=>['Berita','fa-newspaper'],'agenda'=>['Agenda','fa-calendar-days'],'pengumuman'=>['Pengumuman','fa-bullhorn'],'galeri'=>['Galeri','fa-images'],'guru'=>['Guru','fa-chalkboard-user'],'prestasi'=>['Prestasi','fa-trophy'],'ekskul'=>['Ekskul','fa-futbol'],'cta'=>['CTA','fa-bullhorn']];
 $styles = ['default'=>'Default','card'=>'Card','minimal'=>'Minimal','gradient'=>'Grad Emerald','sunset'=>'Grad Sunset','ocean'=>'Grad Ocean','dark'=>'Dark','glass'=>'Glass','bordered'=>'Bordered','outline'=>'Outline','glow'=>'Glow','band'=>'Band','soft'=>'Soft','emerald-soft'=>'Emerald Soft','shadow'=>'Shadow'];
 $stylePrev = ['default'=>'#f1f5f9','card'=>'#ffffff','minimal'=>'#f8fafc','gradient'=>'linear-gradient(90deg,#059669,#14b8a6)','sunset'=>'linear-gradient(90deg,#f97316,#f43f5e)','ocean'=>'linear-gradient(90deg,#0284c7,#4f46e5)','dark'=>'#0f172a','glass'=>'linear-gradient(90deg,#e2e8f080,#f8fafc80)','bordered'=>'#ecfdf5','outline'=>'#ecfdf5','glow'=>'#ffffff','band'=>'#059669','soft'=>'#f8fafc','emerald-soft'=>'#ecfdf5','shadow'=>'#ffffff'];
 $bgs = ['white'=>'Putih','slate'=>'Slate','emerald-soft'=>'Emerald muda','emerald'=>'Emerald','dark'=>'Gelap','gradient-emerald'=>'Grad Emerald','gradient-indigo'=>'Grad Indigo','gradient-sunset'=>'Grad Sunset','gradient-ocean'=>'Grad Ocean','transparent'=>'Transparan'];
@@ -48,12 +48,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
   if ($act === 'quick_add') {
     $t = $_POST['type'] ?? 'custom'; if (!isset($types[$t])) $t = 'custom';
-    $key = $t.'-'.time();
+    $qp=in_array($_POST['sec_page']??'home',['home','berita'],true)?$_POST['sec_page']:'home';
+    $key = $qp.'-'.$t.'-'.time();
     $pos = (int)($_POST['position'] ?? 0);
-    if ($pos > 0) { $db->prepare("UPDATE homepage_sections SET sort_order=sort_order+1 WHERE sort_order>=?")->execute([$pos]); $mx = $pos; }
-    else $mx = (int)$db->query("SELECT COALESCE(MAX(sort_order),0)+1 FROM homepage_sections")->fetchColumn();
-    $db->prepare("INSERT INTO homepage_sections(section_key,type,title,subtitle,style,bg,padding,align,items_limit,sort_order,is_active,effect,grid) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)")
-      ->execute([$key,$t,$types[$t][0].' Baru','', 'card','white','lg','left',3,$mx,1,'fade-up','cards-3']);
+    if ($pos > 0) { $db->prepare("UPDATE homepage_sections SET sort_order=sort_order+1 WHERE page=? AND sort_order>=?")->execute([$qp,$pos]); $mx = $pos; }
+    else { $st=$db->prepare("SELECT COALESCE(MAX(sort_order),0)+1 FROM homepage_sections WHERE page=?"); $st->execute([$qp]); $mx=(int)$st->fetchColumn(); }
+    $db->prepare("INSERT INTO homepage_sections(section_key,page,type,title,subtitle,style,bg,padding,align,items_limit,sort_order,is_active,effect,grid) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+      ->execute([$key,$qp,$t,$types[$t][0].' Baru','', 'card','white','lg','left',3,$mx,1,'fade-up','cards-3']);
     $nid = (int)$db->lastInsertId();
     Auth::log($db,'create','sections',"Quick add $t");
     if (($_POST['ajax'] ?? '') === '1') { header('Content-Type: application/json'); echo json_encode(['ok'=>true,'id'=>$nid]); exit; }
@@ -163,6 +164,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       if (count($buttons) >= 5) break;
     }
     $buttonsJson = $buttons ? json_encode($buttons) : null;
+    if(in_array($stype,['berita','kategori-berita','carousel-berita'],true)){
+      $nc=(string)($_POST['news_cat']??'');
+      $car=['limit'=>max(1,min(10,(int)($_POST['car_limit']??5))),'delay'=>max(1000,min(20000,(int)($_POST['car_delay']??5000))),'mh'=>max(150,min(420,(int)($_POST['car_mh']??200))),'dh'=>max(180,min(520,(int)($_POST['car_dh']??270))),'auto'=>!empty($_POST['car_auto'])?1:0,'dots'=>!empty($_POST['car_dots'])?1:0];
+      $bjM=['news_cat'=>$nc,'car'=>$car]; if(!empty($buttonsJson)){ $jb2=json_decode($buttonsJson,true); if(is_array($jb2))$bjM=array_merge($jb2,$bjM); } $buttonsJson=json_encode($bjM);
+    }
      $b1 = $buttons[0] ?? ['text' => '', 'url' => '', 'target' => '_self'];
     $b2 = $buttons[1] ?? ['text' => '', 'url' => '', 'target' => '_self'];
      if(($_POST['type']??'')==='countdown'){
@@ -187,10 +193,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $gPh=in_array($_POST['gal_photo']??'md',['sm','md','lg'],true)?$_POST['gal_photo']:'md';
       $imgSize=$gSp.'|'.$gPh;
     }
-    $d = [$_POST['type'] ?? 'custom', $_POST['title'] ?? '', $_POST['subtitle'] ?? '', $_POST['content'] ?? '', $img, $b1['text'], $b1['url'], $b1['target'], $b2['text'], $b2['url'], $b2['target'], $buttonsJson, $_POST['style'] ?? 'default', $_POST['bg'] ?? 'white', $_POST['padding'] ?? 'lg', $_POST['align'] ?? 'left', (int)($_POST['items_limit'] ?? 3), (int)($_POST['sort_order'] ?? 0), !empty($_POST['is_active']) ? 1 : 0, $_POST['effect'] ?? 'fade-up', $_POST['grid'] ?? 'cards-3', $imgFx, $imgSize, $imgCw?:null, $imgCh?:null, $imgHover];
+    $secPage=in_array($_POST['sec_page']??'home',['home','berita'],true)?$_POST['sec_page']:'home';
+    $d = [$_POST['type'] ?? 'custom', $_POST['title'] ?? '', $_POST['subtitle'] ?? '', $_POST['content'] ?? '', $img, $b1['text'], $b1['url'], $b1['target'], $b2['text'], $b2['url'], $b2['target'], $buttonsJson, $_POST['style'] ?? 'default', $_POST['bg'] ?? 'white', $_POST['padding'] ?? 'lg', $_POST['align'] ?? 'left', (int)($_POST['items_limit'] ?? 3), (int)($_POST['sort_order'] ?? 0), !empty($_POST['is_active']) ? 1 : 0, $_POST['effect'] ?? 'fade-up', $_POST['grid'] ?? 'cards-3', $imgFx, $imgSize, $imgCw?:null, $imgCh?:null, $imgHover, $secPage];
     try {
-      if (!empty($_POST['id'])) { $db->prepare("UPDATE homepage_sections SET type=?,title=?,subtitle=?,content=?,image=?,btn_text=?,btn_url=?,btn_target=?,btn2_text=?,btn2_url=?,btn2_target=?,buttons_json=?,style=?,bg=?,padding=?,align=?,items_limit=?,sort_order=?,is_active=?,effect=?,grid=?,img_fx=?,img_size=?,img_cw=?,img_ch=?,img_hover=? WHERE id=?")->execute([...$d, (int)$_POST['id']]); Auth::log($db,'update','sections',"Ubah $key"); $secId=(int)$_POST['id']; }
-      else { $db->prepare("INSERT INTO homepage_sections(section_key,type,title,subtitle,content,image,btn_text,btn_url,btn_target,btn2_text,btn2_url,btn2_target,buttons_json,style,bg,padding,align,items_limit,sort_order,is_active,effect,grid,img_fx,img_size,img_cw,img_ch,img_hover) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")->execute([$key, ...$d]); $secId=(int)$db->lastInsertId(); Auth::log($db,'create','sections',"Tambah $key"); }
+      if (!empty($_POST['id'])) { $db->prepare("UPDATE homepage_sections SET type=?,title=?,subtitle=?,content=?,image=?,btn_text=?,btn_url=?,btn_target=?,btn2_text=?,btn2_url=?,btn2_target=?,buttons_json=?,style=?,bg=?,padding=?,align=?,items_limit=?,sort_order=?,is_active=?,effect=?,grid=?,img_fx=?,img_size=?,img_cw=?,img_ch=?,img_hover=?,page=? WHERE id=?")->execute([...$d, (int)$_POST['id']]); Auth::log($db,'update','sections',"Ubah $key"); $secId=(int)$_POST['id']; }
+      else { $db->prepare("INSERT INTO homepage_sections(section_key,page,type,title,subtitle,content,image,btn_text,btn_url,btn_target,btn2_text,btn2_url,btn2_target,buttons_json,style,bg,padding,align,items_limit,sort_order,is_active,effect,grid,img_fx,img_size,img_cw,img_ch,img_hover) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")->execute([$key, ...$d]); $secId=(int)$db->lastInsertId(); Auth::log($db,'create','sections',"Tambah $key"); }
       if ($stype === 'video' && $secId > 0) {
         $normUrl = function(string $u): string {
           $u = trim($u);
@@ -260,9 +267,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       Session::flash('ok','Section disimpan.');
     } catch (Throwable $e) { Session::flash('err','Gagal: key sudah dipakai.'); }
   }
-  header('Location: '.Helper::url('admin/sections')); exit;
+  $backTab=in_array($_POST['sec_page']??'home',['home','berita'],true)?$_POST['sec_page']:'home'; header('Location: '.Helper::url('admin/sections?tab='.$backTab)); exit;
 }
-$rows = $db->query("SELECT s.*,(SELECT COUNT(*) FROM section_slides WHERE section_id=s.id) slide_cnt FROM homepage_sections s ORDER BY s.sort_order,s.id")->fetchAll();
+if(!isset($secTab))$secTab='home'; $secTab=in_array($_GET['tab']??$secTab,['home','berita'],true)?$_GET['tab']??$secTab:'home';
+if(!empty($edit['page']))$secTab=$edit['page'];
+$st=$db->prepare("SELECT s.*,(SELECT COUNT(*) FROM section_slides WHERE section_id=s.id) slide_cnt FROM homepage_sections s WHERE s.page=? ORDER BY s.sort_order,s.id"); $st->execute([$secTab]); $rows=$st->fetchAll();
 $pageLinks = $db->query("SELECT title,slug FROM pages WHERE status='published' AND deleted_at IS NULL ORDER BY title LIMIT 100")->fetchAll();
 // Tombol dinamis inspector: dari buttons_json, fallback ke btn_text/btn2 lama
 $editButtons = [];
@@ -275,14 +284,15 @@ if (!$editButtons) $editButtons[] = ['text' => '', 'url' => '', 'target' => '_se
 require ROOT.'/templates/admin/header.php'; ?>
 <div class="flex flex-wrap items-center gap-2 mb-1">
 <h1 class="text-xl font-extrabold"><i class="fa fa-pen-ruler text-emerald-600 mr-1"></i>Section Builder</h1>
-<a href="<?= Helper::url() ?>" target="_blank" rel="noopener noreferrer" class="ml-auto text-sm px-3 py-1.5 border rounded-lg bg-white"><i class="fa fa-eye mr-1"></i>Live Preview</a>
+<div class="flex gap-1 bg-slate-100 rounded-lg p-1 text-xs font-bold"><a href="?tab=home" class="px-3 py-1.5 rounded-md <?= $secTab==='home'?'bg-white shadow':'text-slate-500' ?>"><i class="fa fa-home mr-1"></i>Landing</a><a href="?tab=berita" class="px-3 py-1.5 rounded-md <?= $secTab==='berita'?'bg-white shadow':'text-slate-500' ?>"><i class="fa fa-newspaper mr-1"></i>Berita</a></div>
+<a href="<?= Helper::url($secTab==='berita'?'berita':'') ?>" target="_blank" rel="noopener noreferrer" class="ml-auto text-sm px-3 py-1.5 border rounded-lg bg-white"><i class="fa fa-eye mr-1"></i>Live Preview</a>
 </div>
 <p class="text-xs text-slate-500 mb-3">Drag widget ke kanvas (atau klik) • drag kartu untuk urutkan • klik kartu untuk edit • hero upload gambar • carousel auto-slide.</p>
 <div class="bg-white rounded-2xl border p-3 mb-3">
 <p class="text-xs font-bold uppercase text-slate-400 mb-2"><i class="fa fa-plus mr-1"></i>Widget — drag ke kanvas / klik</p>
 <div class="grid grid-cols-4 sm:grid-cols-6 gap-2" id="palette">
 <?php foreach($types as $k=>$v): ?>
-<form method="post" class="contents pal-form" data-type="<?= $k ?>"><?= Security::csrfField() ?><input type="hidden" name="act" value="quick_add"><input type="hidden" name="type" value="<?= $k ?>">
+<form method="post" class="contents pal-form" data-type="<?= $k ?>"><?= Security::csrfField() ?><input type="hidden" name="act" value="quick_add"><input type="hidden" name="type" value="<?= $k ?>"><input type="hidden" name="sec_page" value="<?= $secTab ?>">
 <button draggable="true" data-ptype="<?= $k ?>" class="pal-btn border rounded-xl p-2.5 text-center hover:border-emerald-500 hover:bg-emerald-50 transition cursor-grab active:cursor-grabbing w-full"><i class="fa <?= $v[1] ?> text-lg text-emerald-600 pointer-events-none"></i><span class="block text-[11px] font-semibold mt-1 pointer-events-none"><?= $v[0] ?></span></button>
 </form><?php endforeach; ?>
 </div></div>
@@ -292,7 +302,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div id="canvas" class="grid gap-2 min-h-[120px] rounded-xl border-2 border-dashed border-transparent p-1 transition">
 <?php if(!$rows): ?><p class="text-sm text-slate-500 text-center py-8" id="emptyCanvas">Kanvas kosong. Drag widget ke sini.</p><?php endif; ?>
 <?php foreach($rows as $r): ?>
-<div draggable="true" data-id="<?= $r['id'] ?>" data-edit="?edit=<?= $r['id'] ?>" class="sec-card border rounded-xl p-2.5 flex items-center gap-2.5 bg-slate-50 hover:border-emerald-400 cursor-pointer transition <?= $r['is_active']?'':'opacity-60' ?>">
+<div draggable="true" data-id="<?= $r['id'] ?>" data-edit="?tab=<?= $secTab ?>&edit=<?= $r['id'] ?>" class="sec-card border rounded-xl p-2.5 flex items-center gap-2.5 bg-slate-50 hover:border-emerald-400 cursor-pointer transition <?= $r['is_active']?'':'opacity-60' ?>">
 <span class="text-slate-300 cursor-grab px-1 drag-handle"><i class="fa fa-grip-vertical"></i></span>
 <span class="w-9 h-9 rounded-lg grid place-items-center shrink-0 text-white" style="background:<?= Helper::e($bgPrev[$r['bg']] ?? '#059669') ?>;<?= in_array($r['bg'],['white','slate','transparent','emerald-soft'],true)?'color:#059669;border:1px solid #a7f3d0;':'' ?>"><i class="fa <?= $types[$r['type']][1] ?? 'fa-cube' ?>"></i></span>
 <span class="min-w-0 flex-1"><b class="text-sm block truncate"><?= Helper::e($r['title'] ?: $types[$r['type']][0] ?? $r['type']) ?></b>
@@ -322,7 +332,7 @@ $useSlides = $isCarousel;
 <button type="button" data-tab="lanjut" class="tab-btn px-2 py-1.5 rounded-md text-slate-500">Lanjut</button>
 </div>
 <form method="post" enctype="multipart/form-data" data-loading class="grid gap-2 text-sm" id="inspector"><?= Security::csrfField() ?>
-<input type="hidden" name="id" value="<?= (int)($edit['id'] ?? 0) ?>"><input type="hidden" name="old_image" value="<?= Helper::e($edit['image'] ?? '') ?>">
+<input type="hidden" name="id" value="<?= (int)($edit['id'] ?? 0) ?>"><input type="hidden" name="old_image" value="<?= Helper::e($edit['image'] ?? '') ?>"><input type="hidden" name="sec_page" value="<?= Helper::e($edit['page'] ?? ($secTab ?? 'home')) ?>">
 <?php
 $curType = $edit['type'] ?? '';
 // Field per fungsi section (tak semua section butuh semua field)
@@ -333,9 +343,9 @@ $showImage = in_array($curType, ['hero', 'image', 'custom', 'html', ''], true); 
 $showBtns = in_array($curType, ['hero', 'image', 'cta', 'custom', 'html', ''], true); // default 1 tombol + tambah
 $showVideo = ($curType === 'video');
 $showLimit = in_array($curType, ['carousel', 'berita', 'galeri', 'guru', 'prestasi', 'ekskul', 'agenda', 'pengumuman', ''], true);
-$showGrid = in_array($curType, ['berita','ekskul','prestasi','guru','galeri'], true) || $curType === '';
+$showGrid = in_array($curType, ['berita','kategori-berita','ekskul','prestasi','guru','galeri'], true) || $curType === '';
 $showSlide = ($curType === 'carousel');
-$limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'galeri' => 'Jumlah foto', 'guru' => 'Jumlah guru', 'prestasi' => 'Jumlah prestasi', 'ekskul' => 'Jumlah ekskul', 'agenda' => 'Jumlah agenda', 'pengumuman' => 'Jumlah pengumuman'];
+$limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'carousel-berita' => 'Jumlah berita (default)', 'kategori-berita' => 'Berita per kategori', 'galeri' => 'Jumlah foto', 'guru' => 'Jumlah guru', 'prestasi' => 'Jumlah prestasi', 'ekskul' => 'Jumlah ekskul', 'agenda' => 'Jumlah agenda', 'pengumuman' => 'Jumlah pengumuman'];
 ?>
 <div data-pane="konten" class="grid gap-2">
 <input type="hidden" name="type" value="<?= Helper::e($edit['type'] ?? ($_GET['new_type'] ?? 'custom')) ?>">
@@ -390,12 +400,28 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'galer
 <?php endforeach; ?>
 </div></div>
 <label class="grid gap-1" data-f="limit"<?= $showLimit ? '' : ' style="display:none"' ?>><span id="limitLabel"><?= Helper::e($limitLabel[$curType] ?? 'Limit item') ?></span><input type="number" name="items_limit" min="1" max="12" value="<?= (int)($edit['items_limit'] ?? 3) ?>" class="border rounded-lg p-2"></label>
+<?php $showNewsSrc=in_array($curType,['berita','kategori-berita','carousel-berita'],true); $newsCatSel=''; try{ $bjN=json_decode((string)($edit['buttons_json']??''),true); if(is_array($bjN)&&!empty($bjN['news_cat']))$newsCatSel=(string)$bjN['news_cat']; }catch(Throwable){} $newsCats=[]; try{ $newsCats=$db->query("SELECT id,name FROM categories ORDER BY name")->fetchAll(); }catch(Throwable){} ?>
+<div class="border rounded-xl p-2.5 bg-sky-50 grid gap-1.5" data-f="news_src"<?= $showNewsSrc?'':' style="display:none"' ?>>
+<p class="text-xs font-bold"><i class="fa fa-newspaper mr-1 text-sky-600"></i>Sumber Berita</p>
+<label class="grid gap-0.5 text-xs">Ambil dari kategori<select name="news_cat" class="border rounded-lg p-1.5 bg-white"><option value="">Semua kategori</option><?php foreach($newsCats as $nc): ?><option value="<?= (int)$nc['id'] ?>" <?= $newsCatSel===(string)$nc['id']?'selected':'' ?>><?= Helper::e($nc['name']) ?></option><?php endforeach; ?></select></label>
+<?php if($curType==='carousel-berita'): $carSet=[]; try{ $bjC=json_decode((string)($edit['buttons_json']??''),true); if(is_array($bjC)&&!empty($bjC['car']))$carSet=$bjC['car']; }catch(Throwable){} ?>
+<p class="text-xs font-bold mt-1"><i class="fa fa-sliders mr-1 text-sky-600"></i>Kontrol Carousel</p>
+<div class="grid grid-cols-2 gap-1.5">
+<label class="grid gap-0.5 text-xs">Jumlah tampil<input type="number" name="car_limit" min="1" max="10" value="<?= (int)($carSet['limit']??5) ?>" class="border rounded-lg p-1.5 bg-white"></label>
+<label class="grid gap-0.5 text-xs">Delay (ms)<input type="number" name="car_delay" min="1000" max="20000" step="500" value="<?= (int)($carSet['delay']??5000) ?>" class="border rounded-lg p-1.5 bg-white"></label>
+<label class="grid gap-0.5 text-xs">Tinggi mobile<input type="number" name="car_mh" min="150" max="420" value="<?= (int)($carSet['mh']??200) ?>" class="border rounded-lg p-1.5 bg-white"></label>
+<label class="grid gap-0.5 text-xs">Tinggi desktop<input type="number" name="car_dh" min="180" max="520" value="<?= (int)($carSet['dh']??270) ?>" class="border rounded-lg p-1.5 bg-white"></label>
+<label class="flex gap-1.5 items-center text-xs mt-4"><input type="checkbox" name="car_auto" value="1" <?= !empty($carSet['auto']??1)?'checked':'' ?>> Autoplay</label>
+<label class="flex gap-1.5 items-center text-xs mt-4"><input type="checkbox" name="car_dots" value="1" <?= !empty($carSet['dots']??1)?'checked':'' ?>> Titik navigasi</label>
+</div>
+<?php endif; ?>
+</div>
 </div>
 <div data-pane="gaya" class="hidden grid gap-2">
 <div data-f="gridpick"<?= $showGrid ? '' : ' style="display:none"' ?>>
-<p class="text-xs font-bold uppercase text-slate-400">Gaya Grid <span class="font-normal normal-case text-slate-400">(Berita, Ekskul, Prestasi, Guru, Galeri)</span></p>
+<p class="text-xs font-bold uppercase text-slate-400">Gaya Grid <span class="font-normal normal-case text-slate-400">(Berita, Kategori Berita, Ekskul, Prestasi, Guru, Galeri)</span></p>
 <div class="grid grid-cols-2 gap-1.5" data-gridpick>
-<?php $gridPrev=['cards-2'=>'▦▦','cards-3'=>'▦▦▦','cards-4'=>'▦▦▦▦','featured'=>'▦▤','list'=>'☰','overlay'=>'▣','minimal'=>'―']; $gridOpts=in_array($curType,['ekskul','prestasi','guru','galeri'],true)?array_intersect_key($grids,array_flip(['cards-2','cards-3','cards-4'])):$grids; foreach($gridOpts as $k=>$l): ?><button type="button" data-grid="<?= $k ?>" class="gridpick border rounded-lg p-1.5 text-center <?= ($edit['grid'] ?? 'cards-3') === $k ? 'ring-2 ring-emerald-500 border-emerald-500' : '' ?>"><span class="block text-xl leading-none"><?= $gridPrev[$k] ?? '▦' ?></span><span class="text-[10px] leading-tight block mt-1"><?= $l ?></span></button><?php endforeach; ?>
+<?php $gridPrev=['cards-2'=>'▦▦','cards-3'=>'▦▦▦','cards-4'=>'▦▦▦▦','featured'=>'▦▤','magazine'=>'▦▦','masonry'=>'▦','horizontal'=>'▤','timeline'=>'⋮','list'=>'☰','overlay'=>'▣','minimal'=>'―']; $gridOpts=$grids; foreach($gridOpts as $k=>$l): ?><button type="button" data-grid="<?= $k ?>" class="gridpick border rounded-lg p-1.5 text-center <?= ($edit['grid'] ?? 'cards-3') === $k ? 'ring-2 ring-emerald-500 border-emerald-500' : '' ?>"><span class="block text-xl leading-none"><?= $gridPrev[$k] ?? '▦' ?></span><span class="text-[10px] leading-tight block mt-1"><?= $l ?></span></button><?php endforeach; ?>
 </div><input type="hidden" name="grid" value="<?= Helper::e($edit['grid'] ?? 'cards-3') ?>">
 </div>
  <?php $showGal=in_array($curType,['galeri'],true); $galAnim=in_array($edit['img_fx']??'none',['marquee','marquee-alt'],true)?$edit['img_fx']:'none'; $galBubble=($edit['img_hover']??'none')==='bubble'; $galSpRaw=$edit['img_size']??'normal'; $galSpeed=strtok($galSpRaw,'|')?:'normal'; if(!in_array($galSpeed,['slow','normal','fast'],true))$galSpeed='normal'; $galPh=explode('|',$galSpRaw)[1]??'md'; if(!in_array($galPh,['sm','md','lg'],true))$galPh='md'; ?>

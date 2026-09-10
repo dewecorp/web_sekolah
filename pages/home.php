@@ -9,7 +9,7 @@ $teachers = $db->query("SELECT * FROM teachers WHERE is_active=1 ORDER BY sort_o
 $prestasi = $db->query("SELECT * FROM achievements WHERE is_active=1 ORDER BY id DESC LIMIT 6")->fetchAll();
 $ekskul = $db->query("SELECT * FROM extracurriculars WHERE is_active=1 ORDER BY sort_order LIMIT 6")->fetchAll();
 $secs = [];
-try { foreach($db->query("SELECT * FROM homepage_sections WHERE is_active=1 ORDER BY sort_order,id") as $r) $secs[]=$r; } catch (Throwable) {}
+try { foreach($db->query("SELECT * FROM homepage_sections WHERE page='home' AND is_active=1 ORDER BY sort_order,id") as $r) $secs[]=$r; } catch (Throwable) {}
 // Slide per-section (hero/carousel). Fallback: tabel sliders lama bila masih ada.
 $secSlides = [];
 try {

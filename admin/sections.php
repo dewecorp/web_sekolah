@@ -179,6 +179,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $bjC=['cd_msg'=>trim((string)($_POST['cd_msg']??'Acara telah dimulai!')),'cd_hide'=>!empty($_POST['cd_hide_zero']),'cd_info'=>trim((string)($_POST['cd_info']??'')),'cd_bg'=>$cdBg]; if(!empty($buttonsJson)){ $jb2=json_decode($buttonsJson,true); if(is_array($jb2)) $bjC=array_merge($jb2,$bjC); } $buttonsJson=json_encode($bjC);
       $img=$_POST['cd_style']??'glass';
     }
+    if(($_POST['type']??'')==='cta'){
+      $ctaBg=trim((string)($_POST['old_cta_bg']??''));
+      if(!empty($_FILES['cta_bg']['name']??'')){ $e=Security::validImage($_FILES['cta_bg'],$APP); if($e){ Session::flash('err',$e); header('Location: '.Helper::url('admin/sections')); exit; } $n=Security::safeName($_FILES['cta_bg']['name']); move_uploaded_file($_FILES['cta_bg']['tmp_name'],ROOT.'/assets/uploads/'.$n); if($ctaBg!==''&&$ctaBg!==$n)@unlink(ROOT.'/assets/uploads/'.basename($ctaBg)); $ctaBg=$n; }
+      if(!empty($_POST['cta_bg_clear'])){ if($ctaBg!=='')@unlink(ROOT.'/assets/uploads/'.basename($ctaBg)); $ctaBg=''; }
+      $ctaStyle=in_array($_POST['cta_style']??'gradient',['gradient','dark','light','image','glass'],true)?$_POST['cta_style']:'gradient';
+      $ctaBtn=in_array($_POST['cta_btn']??'white',['white','emerald','dark','outline','glass'],true)?$_POST['cta_btn']:'white';
+      $ctaHover=in_array($_POST['cta_btn_hover']??'auto',['auto','darken','lift','glow','zoom'],true)?$_POST['cta_btn_hover']:'auto';
+      $ctaAlign=in_array($_POST['cta_align']??'center',['left','center'],true)?$_POST['cta_align']:'center';
+      $bjT=['cta_bg'=>$ctaBg,'cta_style'=>$ctaStyle,'cta_btn'=>$ctaBtn,'cta_btn_hover'=>$ctaHover,'cta_align'=>$ctaAlign]; if(!empty($buttonsJson)){ $jb2=json_decode($buttonsJson,true); if(is_array($jb2))$bjT=array_merge($jb2,$bjT); } $buttonsJson=json_encode($bjT);
+    }
     $imgFx=$_POST['img_fx'] ?? 'none';
     $imgSizeOpts=array_keys(['thumb'=>1,'sm'=>1,'md'=>1,'lg'=>1,'full'=>1,'orig'=>1,'lead'=>1,'wide'=>1,'banner'=>1,'ads'=>1,'sq'=>1,'port'=>1,'story'=>1,'custom'=>1]);
     $imgSize=in_array($_POST['img_size']??'full',$imgSizeOpts,true)?$_POST['img_size']:'full';
@@ -192,6 +202,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $gSp=in_array($_POST['gal_speed']??'normal',['slow','normal','fast'],true)?$_POST['gal_speed']:'normal';
       $gPh=in_array($_POST['gal_photo']??'md',['sm','md','lg'],true)?$_POST['gal_photo']:'md';
       $imgSize=$gSp.'|'.$gPh;
+    }
+    if(($_POST['type']??'')==='sambutan'){
+      $wpos=in_array($_POST['wpos']??'left',['left','right','top'],true)?$_POST['wpos']:'left';
+      $wphoto=in_array($_POST['wphoto']??'bulat',['kotak','rounded','bulat','lingkaran','kartu','bingkai'],true)?$_POST['wphoto']:'bulat';
+      $wtext=in_array($_POST['wtext']??'default',['default','card','quote','center'],true)?$_POST['wtext']:'default';
+      $_POST['grid']=$wpos; $imgSize=$wphoto;
+      $bjW=['wtext'=>$wtext]; if(!empty($buttonsJson)){ $jb2=json_decode($buttonsJson,true); if(is_array($jb2))$bjW=array_merge($jb2,$bjW); } $buttonsJson=json_encode($bjW);
     }
     $secPage=in_array($_POST['sec_page']??'home',['home','berita'],true)?$_POST['sec_page']:'home';
     $d = [$_POST['type'] ?? 'custom', $_POST['title'] ?? '', $_POST['subtitle'] ?? '', $_POST['content'] ?? '', $img, $b1['text'], $b1['url'], $b1['target'], $b2['text'], $b2['url'], $b2['target'], $buttonsJson, $_POST['style'] ?? 'default', $_POST['bg'] ?? 'white', $_POST['padding'] ?? 'lg', $_POST['align'] ?? 'left', (int)($_POST['items_limit'] ?? 3), (int)($_POST['sort_order'] ?? 0), !empty($_POST['is_active']) ? 1 : 0, $_POST['effect'] ?? 'fade-up', $_POST['grid'] ?? 'cards-3', $imgFx, $imgSize, $imgCw?:null, $imgCh?:null, $imgHover, $secPage];
@@ -360,6 +377,17 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'carou
 <?php if($cdOldBg!==''): ?><img id="cdBgPrev" src="<?= Helper::upload($cdOldBg) ?>" alt="" class="h-24 w-full object-cover rounded-lg border mb-1.5"><label class="text-xs flex gap-1.5 items-center"><input type="checkbox" name="cd_bg_clear" value="1"> Hapus background</label><?php else: ?><img id="cdBgPrev" class="hidden h-24 w-full object-cover rounded-lg border mb-1.5" alt="Preview"><?php endif; ?>
 <input type="hidden" name="old_cd_bg" value="<?= Helper::e($cdOldBg) ?>">
 <input type="file" name="cd_bg" id="cdBgInp" accept="image/*" class="border rounded-lg p-2 w-full bg-white text-xs"></div>
+<?php $ctaOldBg=''; $ctaStyle='gradient'; $ctaBtn='white'; $ctaHover='auto'; $ctaAlign='center'; if(($edit['type']??'')==='cta'||$curType==='cta'){ try{ $bjT=json_decode((string)($edit['buttons_json']??''),true); if(is_array($bjT)){ if(!empty($bjT['cta_bg']))$ctaOldBg=$bjT['cta_bg']; if(!empty($bjT['cta_style']))$ctaStyle=$bjT['cta_style']; if(!empty($bjT['cta_btn']))$ctaBtn=$bjT['cta_btn']; if(!empty($bjT['cta_btn_hover']))$ctaHover=$bjT['cta_btn_hover']; if(!empty($bjT['cta_align']))$ctaAlign=$bjT['cta_align']; } }catch(Throwable){} if(!in_array($ctaStyle,['gradient','dark','light','image','glass'],true))$ctaStyle='gradient'; if(!in_array($ctaBtn,['white','emerald','dark','outline','glass'],true))$ctaBtn='white'; if(!in_array($ctaHover,['auto','darken','lift','glow','zoom'],true))$ctaHover='auto'; if(!in_array($ctaAlign,['left','center'],true))$ctaAlign='center'; } ?>
+<div class="border rounded-xl p-2.5 bg-emerald-50 grid gap-1.5" data-f="cta_bg"<?= $curType==='cta'?'':' style="display:none"' ?>>
+<p class="text-xs font-bold"><i class="fa fa-bullhorn mr-1 text-emerald-600"></i>Background CTA</p>
+<?php if($ctaOldBg!==''): ?><img id="ctaBgPrev" src="<?= Helper::upload($ctaOldBg) ?>" alt="" class="h-24 w-full object-cover rounded-lg border mb-1"><label class="text-xs flex gap-1.5 items-center"><input type="checkbox" name="cta_bg_clear" value="1"> Hapus background</label><?php else: ?><img id="ctaBgPrev" class="hidden h-24 w-full object-cover rounded-lg border mb-1" alt="Preview"><?php endif; ?>
+<input type="hidden" name="old_cta_bg" value="<?= Helper::e($ctaOldBg) ?>">
+<input type="file" name="cta_bg" id="ctaBgInp" accept="image/*" class="border rounded-lg p-2 w-full bg-white text-xs">
+<label class="grid gap-0.5 text-xs">Style background<select name="cta_style" class="border rounded-lg p-1.5 bg-white"><option value="gradient" <?= $ctaStyle==='gradient'?'selected':'' ?>>Gradasi Emerald</option><option value="dark" <?= $ctaStyle==='dark'?'selected':'' ?>>Gelap</option><option value="light" <?= $ctaStyle==='light'?'selected':'' ?>>Terang</option><option value="image" <?= $ctaStyle==='image'?'selected':'' ?>>Gambar (wajib upload)</option><option value="glass" <?= $ctaStyle==='glass'?'selected':'' ?>>Kaca</option></select></label>
+<label class="grid gap-0.5 text-xs">Style tombol<select name="cta_btn" class="border rounded-lg p-1.5 bg-white"><option value="white" <?= $ctaBtn==='white'?'selected':'' ?>>Putih solid</option><option value="emerald" <?= $ctaBtn==='emerald'?'selected':'' ?>>Emerald solid</option><option value="dark" <?= $ctaBtn==='dark'?'selected':'' ?>>Gelap solid</option><option value="outline" <?= $ctaBtn==='outline'?'selected':'' ?>>Outline putih</option><option value="glass" <?= $ctaBtn==='glass'?'selected':'' ?>>Kaca</option></select></label>
+<label class="grid gap-0.5 text-xs">Efek hover tombol<select name="cta_btn_hover" class="border rounded-lg p-1.5 bg-white"><option value="auto" <?= $ctaHover==='auto'?'selected':'' ?>>Otomatis (ikut style)</option><option value="darken" <?= $ctaHover==='darken'?'selected':'' ?>>Gelapkan</option><option value="lift" <?= $ctaHover==='lift'?'selected':'' ?>>Naik + bayangan</option><option value="glow" <?= $ctaHover==='glow'?'selected':'' ?>>Bersinar</option><option value="zoom" <?= $ctaHover==='zoom'?'selected':'' ?>>Membesar</option></select></label>
+<label class="grid gap-0.5 text-xs">Posisi konten<select name="cta_align" class="border rounded-lg p-1.5 bg-white"><option value="center" <?= $ctaAlign==='center'?'selected':'' ?>>Tengah</option><option value="left" <?= $ctaAlign==='left'?'selected':'' ?>>Kiri</option></select></label>
+</div>
 <?php if($showVideo): $vids=$editSlides; ?>
 <div class="border rounded-xl p-2.5 bg-slate-50 grid gap-1.5">
 <p class="text-xs font-bold"><i class="fa fa-video mr-1 text-emerald-600"></i>Daftar Video (<?= count($vids) ?>) <span class="font-normal text-slate-400">— upload / tautan, edit judul, hapus per baris</span></p>
@@ -437,6 +465,22 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'carou
 <div class="grid grid-cols-3 gap-1.5 mt-1.5">
 <?php foreach(['sm'=>'Kecil (h-32)','md'=>'Sedang (h-40)','lg'=>'Besar (h-56)'] as $k=>$l): ?><button type="button" data-galphoto="<?= $k ?>" class="galphotopick border rounded-lg p-1.5 text-center <?= $galPh===$k?'ring-2 ring-emerald-500 border-emerald-500':'' ?>"><span class="text-[10px] leading-tight block"><?= $l ?></span></button><?php endforeach; ?>
 </div><input type="hidden" name="gal_photo" value="<?= Helper::e($galPh) ?>">
+</div>
+<?php $showWelcome=($curType==='sambutan'); $wPos=in_array($edit['grid']??'left',['left','right','top'],true)?$edit['grid']:'left'; $rawWPhoto=trim((string)($edit['img_size']??'rounded')); if($rawWPhoto===''||$rawWPhoto==='full')$rawWPhoto='rounded'; $wPhoto=in_array($rawWPhoto,['kotak','rounded','bulat','lingkaran','kartu','bingkai'],true)?$rawWPhoto:'rounded'; $wText='default'; try{ $bjW=json_decode((string)($edit['buttons_json']??''),true); if(is_array($bjW)&&!empty($bjW['wtext']))$wText=$bjW['wtext']; }catch(Throwable){} if(!in_array($wText,['default','card','quote','center'],true))$wText='default'; ?>
+<div data-f="welcome"<?= $showWelcome?'':' style="display:none"' ?> class="grid gap-2 border rounded-xl p-2.5 bg-emerald-50/60">
+<p class="text-xs font-bold"><i class="fa fa-user-tie mr-1 text-emerald-600"></i>Gaya Sambutan</p>
+<p class="text-[11px] font-bold uppercase text-slate-400">Posisi Gambar</p>
+<div class="grid grid-cols-3 gap-1.5">
+<?php foreach(['left'=>'Kiri','right'=>'Kanan','top'=>'Atas'] as $k=>$l): ?><button type="button" data-wpos="<?= $k ?>" class="wpospick border rounded-lg p-1.5 text-center bg-white <?= $wPos===$k?'ring-2 ring-emerald-500 border-emerald-500':'' ?>"><span class="text-[10px] leading-tight block font-bold"><?= $l ?></span></button><?php endforeach; ?>
+</div><input type="hidden" name="wpos" value="<?= Helper::e($wPos) ?>">
+<p class="text-[11px] font-bold uppercase text-slate-400">Style Foto</p>
+<div class="grid grid-cols-3 gap-1.5">
+<?php foreach(['kotak'=>'Kotak','rounded'=>'Rounded','bulat'=>'Bulat','lingkaran'=>'Lingkaran','kartu'=>'Kartu','bingkai'=>'Bingkai'] as $k=>$l): ?><button type="button" data-wphoto="<?= $k ?>" class="wphotopick border rounded-lg p-1.5 text-center bg-white <?= $wPhoto===$k?'ring-2 ring-emerald-500 border-emerald-500':'' ?>"><span class="text-[10px] leading-tight block font-bold"><?= $l ?></span></button><?php endforeach; ?>
+</div><input type="hidden" name="wphoto" value="<?= Helper::e($wPhoto) ?>">
+<p class="text-[11px] font-bold uppercase text-slate-400">Style Teks</p>
+<div class="grid grid-cols-2 gap-1.5">
+<?php foreach(['default'=>'Default','card'=>'Kartu','quote'=>'Quote','center'=>'Tengah'] as $k=>$l): ?><button type="button" data-wtext="<?= $k ?>" class="wtextpick border rounded-lg p-1.5 text-center bg-white <?= $wText===$k?'ring-2 ring-emerald-500 border-emerald-500':'' ?>"><span class="text-[10px] leading-tight block font-bold"><?= $l ?></span></button><?php endforeach; ?>
+</div><input type="hidden" name="wtext" value="<?= Helper::e($wText) ?>">
 </div>
 <?php $showImgFx=in_array($curType,['hero','image','sambutan'],true); $showImgSize=($curType==='image'); ?>
 <div data-f="imgfx"<?= $showImgFx?'':' style="display:none"' ?>>
@@ -536,7 +580,7 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'carou
 <?php endif; ?>
 </div></div></div>
 <script>
-const TYPEHINT={hero:'Hero: 1 gambar + judul + subjudul + tombol. Tanpa slide, tanpa limit item.',carousel:'Carousel: multi-gambar lewat tab Slide. Tanpa tombol section, input tombol disembunyikan.',countdown:'Countdown: judul + subjudul + target waktu di Konten (cth: 2026-12-31 23:59).',image:'Image: 1 gambar + judul + subjudul overlay + tombol.',video:'Video: tempel link YouTube biasa (watch?v= / youtu.be / shorts) ATAU embed. Auto jadi embed. Tinggi proporsional max 420px.',audio:'Audio: URL file MP3 di Konten + judul. Auto render audio player.',html:'Custom HTML: tulis HTML bebas di Konten + tombol (tambah bila perlu).',sambutan:'Sambutan: otomatis dari Profil (nama, foto, sambutan). Cukup judul section.',statistik:'Statistik: otomatis dari Sekolah > Statistik. Cukup judul section.',berita:'Berita: judul + limit + gaya grid. Tanpa tombol section.',agenda:'Agenda: judul + limit agenda mendatang.',pengumuman:'Pengumuman: judul + limit info terbaru.',galeri:'Galeri: judul + limit foto.',guru:'Guru: judul + limit guru aktif.',prestasi:'Prestasi: judul + limit.',ekskul:'Ekskul: judul + limit.',cta:'CTA: judul + subjudul + tombol (tambah bila perlu). Tanpa limit item.',custom:'Custom: konten HTML + gambar + tombol.'};
+const TYPEHINT={hero:'Hero: 1 gambar + judul + subjudul + tombol. Tanpa slide, tanpa limit item.',carousel:'Carousel: multi-gambar lewat tab Slide. Tanpa tombol section, input tombol disembunyikan.',countdown:'Countdown: judul + subjudul + target waktu di Konten (cth: 2026-12-31 23:59).',image:'Image: 1 gambar + judul + subjudul overlay + tombol.',video:'Video: tempel link YouTube biasa (watch?v= / youtu.be / shorts) ATAU embed. Auto jadi embed. Tinggi proporsional max 420px.',audio:'Audio: URL file MP3 di Konten + judul. Auto render audio player.',html:'Custom HTML: tulis HTML bebas di Konten + tombol (tambah bila perlu).',sambutan:'Sambutan: otomatis dari Profil. Atur posisi gambar + style foto + style teks di tab Gaya.',statistik:'Statistik: otomatis dari Sekolah > Statistik. Cukup judul section.',berita:'Berita: judul + limit + gaya grid. Tanpa tombol section.',agenda:'Agenda: judul + limit agenda mendatang.',pengumuman:'Pengumuman: judul + limit info terbaru.',galeri:'Galeri: judul + limit foto.',guru:'Guru: judul + limit guru aktif.',prestasi:'Prestasi: judul + limit.',ekskul:'Ekskul: judul + limit.',cta:'CTA: judul + subjudul + tombol (tambah bila perlu). Tanpa limit item.',custom:'Custom: konten HTML + gambar + tombol.'};
 const TYPELIMIT={carousel:'Jumlah slide',berita:'Jumlah berita','carousel-berita':'Jumlah berita (default)','kategori-berita':'Berita per kategori',galeri:'Jumlah foto',guru:'Jumlah guru',prestasi:'Jumlah prestasi',ekskul:'Jumlah ekskul',agenda:'Jumlah agenda',pengumuman:'Jumlah pengumuman'};
 function applyType(){
   // Tipe terkunci (hidden input) — field sudah dirender server per fungsi. Jangan paksa tampil.
@@ -633,6 +677,7 @@ document.querySelectorAll('.imgsizepick').forEach(b=>b.addEventListener('click',
 }));
 document.getElementById('secImgInp')?.addEventListener('change',e=>{const f=e.target.files?.[0];const p=document.getElementById('secImgPrev');if(f&&p){p.src=URL.createObjectURL(f);p.classList.remove('hidden')}});
 document.getElementById('cdBgInp')?.addEventListener('change',e=>{const f=e.target.files?.[0];const p=document.getElementById('cdBgPrev');if(f&&p){p.src=URL.createObjectURL(f);p.classList.remove('hidden')}});
+document.getElementById('ctaBgInp')?.addEventListener('change',e=>{const f=e.target.files?.[0];const p=document.getElementById('ctaBgPrev');if(f&&p){p.src=URL.createObjectURL(f);p.classList.remove('hidden')}});
 document.getElementById('sl_img')?.addEventListener('change',e=>{
   const files=[...e.target.files||[]];const single=document.getElementById('sl_prev'),multi=document.getElementById('sl_prev_multi');
   if(single)single.classList.add('hidden');
@@ -654,6 +699,21 @@ document.querySelectorAll('.imghoverpick').forEach(b=>b.addEventListener('click'
   document.querySelectorAll('.imghoverpick').forEach(x=>x.classList.remove('ring-2','ring-emerald-500','border-emerald-500'));
   b.classList.add('ring-2','ring-emerald-500','border-emerald-500');
   const hid=document.querySelector('input[name="img_hover"]'); if(hid)hid.value=b.dataset.imghover;
+}));
+document.querySelectorAll('.wpospick').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.wpospick').forEach(x=>x.classList.remove('ring-2','ring-emerald-500','border-emerald-500'));
+  b.classList.add('ring-2','ring-emerald-500','border-emerald-500');
+  const hid=document.querySelector('input[name="wpos"]'); if(hid)hid.value=b.dataset.wpos;
+}));
+document.querySelectorAll('.wphotopick').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.wphotopick').forEach(x=>x.classList.remove('ring-2','ring-emerald-500','border-emerald-500'));
+  b.classList.add('ring-2','ring-emerald-500','border-emerald-500');
+  const hid=document.querySelector('input[name="wphoto"]'); if(hid)hid.value=b.dataset.wphoto;
+}));
+document.querySelectorAll('.wtextpick').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.wtextpick').forEach(x=>x.classList.remove('ring-2','ring-emerald-500','border-emerald-500'));
+  b.classList.add('ring-2','ring-emerald-500','border-emerald-500');
+  const hid=document.querySelector('input[name="wtext"]'); if(hid)hid.value=b.dataset.wtext;
 }));
 document.getElementById('vidAdd')?.addEventListener('click',()=>{
   const list=document.getElementById('vidList');

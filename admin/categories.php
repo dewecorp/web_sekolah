@@ -12,7 +12,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     $name=trim($_POST['name']??''); $slug=Security::slug($_POST['slug']??$name);
     if($name===''){ Session::flash('err','Nama wajib diisi.'); }
     else{
-      $grid=in_array($_POST['grid_style']??'', ['cards-2','cards-3','cards-4','magazine','masonry','horizontal','timeline','overlay','minimal'],true)?$_POST['grid_style']:'cards-3';
+      $grid=in_array($_POST['grid_style']??'', ['cards-2','cards-3','cards-4','featured','magazine','masonry','horizontal','timeline','list','overlay','minimal'],true)?$_POST['grid_style']:'cards-3';
       if(!empty($_POST['id'])){ $db->prepare("UPDATE categories SET name=?,slug=?,description=?,grid_style=? WHERE id=?")->execute([$name,$slug,$_POST['description']??'',$grid,(int)$_POST['id']]); Auth::log($db,'update','categories',"Ubah kategori $name"); }
       else{ $db->prepare("INSERT INTO categories(name,slug,description,grid_style) VALUES(?,?,?,?)")->execute([$name,$slug,$_POST['description']??'',$grid]); Auth::log($db,'create','categories',"Tambah kategori $name"); }
       Session::flash('ok','Kategori disimpan.');
@@ -54,7 +54,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <label class="grid gap-1 font-semibold">Nama<input name="name" id="f_name" required placeholder="Berita" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Slug <span class="font-normal text-slate-400 text-xs">otomatis dari nama</span><input name="slug" id="f_slug" placeholder="berita" class="border rounded-lg p-2 font-normal font-mono text-xs"></label>
 <label class="grid gap-1 font-semibold">Deskripsi<textarea name="description" id="f_desc" rows="3" placeholder="Keterangan kategori..." class="border rounded-lg p-2 font-normal"></textarea></label>
-<label class="grid gap-1 font-semibold">Gaya grid berita<select name="grid_style" id="f_grid" class="border rounded-lg p-2 font-normal"><?php foreach(['cards-2'=>'Kartu 2 Kolom','cards-3'=>'Kartu 3 Kolom','cards-4'=>'Kartu 4 Kolom','magazine'=>'Magazine','masonry'=>'Masonry','horizontal'=>'Horizontal','timeline'=>'Timeline','overlay'=>'Overlay','minimal'=>'Minimal'] as $k=>$v): ?><option value="<?= $k ?>"><?= $v ?></option><?php endforeach; ?></select></label>
+<label class="grid gap-1 font-semibold">Gaya grid berita<select name="grid_style" id="f_grid" class="border rounded-lg p-2 font-normal"><?php foreach(['cards-2'=>'Kartu 2 Kolom','cards-3'=>'Kartu 3 Kolom','cards-4'=>'Kartu 4 Kolom','featured'=>'Sorotan + List','magazine'=>'Magazine','masonry'=>'Masonry','horizontal'=>'Horizontal','timeline'=>'Timeline','list'=>'List Horizontal','overlay'=>'Overlay','minimal'=>'Minimal'] as $k=>$v): ?><option value="<?= $k ?>"><?= $v ?></option><?php endforeach; ?></select></label>
 <div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 

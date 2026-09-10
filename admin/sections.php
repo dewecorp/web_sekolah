@@ -337,12 +337,12 @@ $useSlides = $isCarousel;
 $curType = $edit['type'] ?? '';
 // Field per fungsi section (tak semua section butuh semua field)
 $showTitle = !in_array($curType, [], true);
-$showSubtitle = in_array($curType, ['hero', 'carousel', 'countdown', 'image', 'video', 'audio', 'berita', 'galeri', 'guru', 'prestasi', 'ekskul', 'cta', 'custom', 'html', 'agenda', 'pengumuman', 'sambutan', 'statistik', ''], true);
+$showSubtitle = in_array($curType, ['hero', 'carousel', 'carousel-berita', 'kategori-berita', 'countdown', 'image', 'video', 'audio', 'berita', 'galeri', 'guru', 'prestasi', 'ekskul', 'cta', 'custom', 'html', 'agenda', 'pengumuman', 'sambutan', 'statistik', ''], true);
 $showContent = in_array($curType, ['custom', 'countdown', 'audio', 'html', 'cta', ''], true);
 $showImage = in_array($curType, ['hero', 'image', 'custom', 'html', ''], true); // hero/image 1 gambar; carousel via tab Slide; video via field khusus
 $showBtns = in_array($curType, ['hero', 'image', 'cta', 'custom', 'html', ''], true); // default 1 tombol + tambah
 $showVideo = ($curType === 'video');
-$showLimit = in_array($curType, ['carousel', 'berita', 'galeri', 'guru', 'prestasi', 'ekskul', 'agenda', 'pengumuman', ''], true);
+$showLimit = in_array($curType, ['carousel', 'berita', 'carousel-berita', 'kategori-berita', 'galeri', 'guru', 'prestasi', 'ekskul', 'agenda', 'pengumuman', ''], true);
 $showGrid = in_array($curType, ['berita','kategori-berita','ekskul','prestasi','guru','galeri'], true) || $curType === '';
 $showSlide = ($curType === 'carousel');
 $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'carousel-berita' => 'Jumlah berita (default)', 'kategori-berita' => 'Berita per kategori', 'galeri' => 'Jumlah foto', 'guru' => 'Jumlah guru', 'prestasi' => 'Jumlah prestasi', 'ekskul' => 'Jumlah ekskul', 'agenda' => 'Jumlah agenda', 'pengumuman' => 'Jumlah pengumuman'];
@@ -537,7 +537,7 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'carou
 </div></div></div>
 <script>
 const TYPEHINT={hero:'Hero: 1 gambar + judul + subjudul + tombol. Tanpa slide, tanpa limit item.',carousel:'Carousel: multi-gambar lewat tab Slide. Tanpa tombol section, input tombol disembunyikan.',countdown:'Countdown: judul + subjudul + target waktu di Konten (cth: 2026-12-31 23:59).',image:'Image: 1 gambar + judul + subjudul overlay + tombol.',video:'Video: tempel link YouTube biasa (watch?v= / youtu.be / shorts) ATAU embed. Auto jadi embed. Tinggi proporsional max 420px.',audio:'Audio: URL file MP3 di Konten + judul. Auto render audio player.',html:'Custom HTML: tulis HTML bebas di Konten + tombol (tambah bila perlu).',sambutan:'Sambutan: otomatis dari Profil (nama, foto, sambutan). Cukup judul section.',statistik:'Statistik: otomatis dari Sekolah > Statistik. Cukup judul section.',berita:'Berita: judul + limit + gaya grid. Tanpa tombol section.',agenda:'Agenda: judul + limit agenda mendatang.',pengumuman:'Pengumuman: judul + limit info terbaru.',galeri:'Galeri: judul + limit foto.',guru:'Guru: judul + limit guru aktif.',prestasi:'Prestasi: judul + limit.',ekskul:'Ekskul: judul + limit.',cta:'CTA: judul + subjudul + tombol (tambah bila perlu). Tanpa limit item.',custom:'Custom: konten HTML + gambar + tombol.'};
-const TYPELIMIT={carousel:'Jumlah slide',berita:'Jumlah berita',galeri:'Jumlah foto',guru:'Jumlah guru',prestasi:'Jumlah prestasi',ekskul:'Jumlah ekskul',agenda:'Jumlah agenda',pengumuman:'Jumlah pengumuman'};
+const TYPELIMIT={carousel:'Jumlah slide',berita:'Jumlah berita','carousel-berita':'Jumlah berita (default)','kategori-berita':'Berita per kategori',galeri:'Jumlah foto',guru:'Jumlah guru',prestasi:'Jumlah prestasi',ekskul:'Jumlah ekskul',agenda:'Jumlah agenda',pengumuman:'Jumlah pengumuman'};
 function applyType(){
   // Tipe terkunci (hidden input) — field sudah dirender server per fungsi. Jangan paksa tampil.
   if(!document.getElementById('f_type'))return;
@@ -555,7 +555,7 @@ function applyType(){
   if(t==='audio'){hide('image');hide('btns');hide('limit')}
   if(t==='html'){hide('image');hide('limit')}
   if(['sambutan','statistik'].includes(t)){hide('subtitle');hide('content');hide('image');hide('btns');hide('limit')}
-  if(['berita','galeri','guru','prestasi','ekskul','agenda','pengumuman'].includes(t)){hide('content');hide('image');hide('btns')}
+  if(['berita','carousel-berita','kategori-berita','galeri','guru','prestasi','ekskul','agenda','pengumuman'].includes(t)){hide('content');hide('image');hide('btns')}
   if(t==='cta'){hide('content');hide('image');hide('limit')}
   if(t==='custom'){hide('limit')}
   const ll=document.getElementById('limitLabel');if(ll)ll.textContent=TYPELIMIT[t]||'Limit item';

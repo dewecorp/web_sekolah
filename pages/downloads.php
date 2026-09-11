@@ -17,7 +17,14 @@ $heroTheme='emerald';
 $heroStats=[['icon'=>'fa-file-lines','label'=>count($rows).' dokumen','solid'=>true]];
 require ROOT.'/templates/frontend/page-hero.php'; ?>
 <div class="mt-6 bg-white dark:bg-slate-800 border rounded-2xl p-5 md:p-6">
-<form method="get" class="flex gap-2 mb-4 max-w-md"><input name="q" value="<?= Helper::e($q) ?>" placeholder="Cari dokumen..." class="border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm flex-1 bg-white dark:bg-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition placeholder:text-slate-400"><button class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 rounded-xl text-sm font-bold transition"><i class="fa fa-search mr-1"></i>Cari</button><a href="<?= Helper::url('media-unduh') ?>" class="px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm hover:border-emerald-300 transition">Reset</a></form>
+<form method="get" action="<?= Helper::url('media-unduh') ?>" id="dlFilterForm" class="flex gap-2 mb-4 max-w-md"><input name="q" id="dlFilterQ" value="<?= Helper::e($q) ?>" placeholder="Cari dokumen..." autocomplete="off" class="border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-sm flex-1 bg-white dark:bg-slate-900 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition placeholder:text-slate-400"><a href="<?= Helper::url('media-unduh') ?>" class="px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm hover:border-emerald-300 transition">Reset</a></form>
+<script>
+(function(){
+  const f=document.getElementById('dlFilterForm');if(!f)return;
+  let t=null;
+  f.querySelector('#dlFilterQ')?.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>f.submit(),500)});
+})();
+</script>
 <div class="overflow-x-auto">
 <table class="w-full text-sm text-left">
 <thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="p-3">No</th><th class="p-3">Nama Dokumen</th><th class="p-3">Ukuran</th><th class="p-3">Tanggal</th><th class="p-3">Aksi</th></tr></thead>

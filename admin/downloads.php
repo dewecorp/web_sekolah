@@ -10,7 +10,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
   if(!Security::verifyCsrf($_POST['csrf']??null)){ Session::flash('err','CSRF tidak valid.'); header('Location: '.Helper::url('admin/downloads')); exit; }
   if($act==='delete'){
     $s=$db->prepare("SELECT * FROM downloads WHERE id=?"); $s->execute([(int)$_POST['id']]); $m=$s->fetch();
-    if($m){ if($m['doc_type']==='file' && !empty($m['filename'])) @unlink(ROOT.'/assets/uploads/'.$m['filename']); $db->prepare("DELETE FROM downloads WHERE id=?")->execute([$m['id']]); Auth::log($db,'delete','downloads','Hapus '.$m['title']); Session::flash('ok','Dokumen dihapus.'); }
+    if($m){ if($m['doc_type']==='file' && !empty($m['filename'])){ @unlink(ROOT.'/assets/uploads/'.$m['filename']); try { $db->prepare("DELETE FROM media WHERE filename=?")->execute([$m['filename']]); } catch (Throwable) {} } $db->prepare("DELETE FROM downloads WHERE id=?")->execute([$m['id']]); Auth::log($db,'delete','downloads','Hapus '.$m['title']); Session::flash('ok','Dokumen dihapus.'); }
     header('Location: '.Helper::url('admin/downloads')); exit;
   }
   if($act==='toggle'){
@@ -22,7 +22,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     if($ids){
       $in=implode(',',array_fill(0,count($ids),'?'));
       $st=$db->prepare("SELECT * FROM downloads WHERE id IN ($in)"); $st->execute($ids); $found=$st->fetchAll();
-      foreach($found as $m){ if($m['doc_type']==='file' && !empty($m['filename'])) @unlink(ROOT.'/assets/uploads/'.$m['filename']); $db->prepare("DELETE FROM downloads WHERE id=?")->execute([$m['id']]); }
+      foreach($found as $m){ if($m['doc_type']==='file' && !empty($m['filename'])){ @unlink(ROOT.'/assets/uploads/'.$m['filename']); try { $db->prepare("DELETE FROM media WHERE filename=?")->execute([$m['filename']]); } catch (Throwable) {} } $db->prepare("DELETE FROM downloads WHERE id=?")->execute([$m['id']]); }
       Auth::log($db,'delete','downloads','Hapus massal '.count($found).' dokumen'); Session::flash('ok',count($found).' dokumen dihapus.');
     }
     header('Location: '.Helper::url('admin/downloads')); exit;
@@ -59,12 +59,23 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
       } else { Session::flash('err','File wajib diupload.'); header('Location: '.Helper::url('admin/downloads')); exit; }
     }
     if($id){
+      $prev=null; try { $ps=$db->prepare("SELECT filename,doc_type FROM downloads WHERE id=?"); $ps->execute([$id]); $prev=$ps->fetch(); } catch (Throwable) {}
+      $newUpload=$type==='file' && !empty($_FILES['file']['name']??'');
       if($type==='file' && $filename!=='' && $fileUrl!=='') $fileUrl='';
-      if($type==='link' && $filename!==''){ @unlink(ROOT.'/assets/uploads/'.$filename); $filename=''; }
+      if($type==='link' && $filename!==''){ @unlink(ROOT.'/assets/uploads/'.$filename); try { $db->prepare("DELETE FROM media WHERE filename=?")->execute([$filename]); } catch (Throwable) {} $filename=''; }
+      if($newUpload && $prev && !empty($prev['filename']) && $prev['filename']!==$filename){ @unlink(ROOT.'/assets/uploads/'.$prev['filename']); try { $db->prepare("DELETE FROM media WHERE filename=?")->execute([$prev['filename']]); } catch (Throwable) {} }
       $db->prepare("UPDATE downloads SET title=?,doc_type=?,filename=?,file_url=?,mime=?,extension=?,size_bytes=? WHERE id=?")->execute([$title,$type,$filename?:null,$fileUrl?:null,$mime,$ext,$size,$id]);
+      if($type==='file' && $newUpload && $filename!==''){
+        try { $db->prepare("INSERT INTO media(filename,filepath,mime,extension,size_bytes,alt,uploaded_by) VALUES(?,?,?,?,?,?,?)")->execute([$filename,'assets/uploads/'.$filename,$mime,$ext,$size,$title,$_SESSION['user']['id']??null]); } catch (Throwable) {}
+      } elseif($type==='file' && $filename!==''){
+        try { $db->prepare("UPDATE media SET alt=? WHERE filename=?")->execute([$title,$filename]); } catch (Throwable) {}
+      }
       Auth::log($db,'update','downloads','Ubah '.$title); Session::flash('ok','Dokumen diubah.');
     } else {
       $db->prepare("INSERT INTO downloads(title,doc_type,filename,file_url,mime,extension,size_bytes,uploaded_by) VALUES(?,?,?,?,?,?,?,?)")->execute([$title,$type,$filename?:null,$fileUrl?:null,$mime,$ext,$size,$_SESSION['user']['id']??null]);
+      if($type==='file' && $filename!==''){
+        try { $db->prepare("INSERT INTO media(filename,filepath,mime,extension,size_bytes,alt,uploaded_by) VALUES(?,?,?,?,?,?,?)")->execute([$filename,'assets/uploads/'.$filename,$mime,$ext,$size,$title,$_SESSION['user']['id']??null]); } catch (Throwable) {}
+      }
       Auth::log($db,'create','downloads','Tambah '.$title); Session::flash('ok','Dokumen ditambah.');
     }
     header('Location: '.Helper::url('admin/downloads')); exit;

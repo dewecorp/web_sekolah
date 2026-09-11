@@ -4,7 +4,7 @@ $totL=array_sum(array_column($classes,'n_l')); $totP=array_sum(array_column($cla
 $sTitle=Database::setting('siswa_title','Data Siswa'); if(trim($sTitle)==='')$sTitle='Data Siswa'; $sDesc=Database::setting('siswa_desc','');
 $sCols=Database::setting('siswa_cols','4'); if(!in_array($sCols,['2','3','4'],true))$sCols='4'; $sGrid=$sCols==='2'?'md:grid-cols-2':($sCols==='3'?'md:grid-cols-3':'sm:grid-cols-2 lg:grid-cols-4');
 $metaTitle=$sTitle.' - '.Database::setting('school_name','Sekolah'); require ROOT."/templates/frontend/header.php";
-$heroBadge='<i class="fa fa-user-graduate text-amber-300"></i>'.Helper::e($sTitle);
+$heroBadge='<i class="fa fa-user-graduate text-white"></i>'.Helper::e($sTitle);
 $heroTitle=$sTitle; $heroDesc=$sDesc;
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Siswa';
 $heroTheme='sky';
@@ -33,3 +33,4 @@ require ROOT."/templates/frontend/page-hero.php"; ?>
 </div>
 <script>(function(){var q=document.getElementById('qStu'),rows=[...document.querySelectorAll('#stuGrid .srow')],em=document.getElementById('stuEmpty');q?.addEventListener('input',()=>{var s=(q.value||'').toLowerCase(),n=0;rows.forEach(r=>{var ok=!s||r.dataset.t.includes(s);r.style.display=ok?'':'none';if(ok)n++});if(em)em.classList.toggle('hidden',n>0)})})();</script>
 <?php require ROOT."/templates/frontend/footer.php"; ?>
+

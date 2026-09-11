@@ -34,3 +34,4 @@ $pg = $st->fetch();
 if ($pg) { require ROOT.'/pages/dynamic.php'; exit; }
 http_response_code(404); require ROOT.'/templates/error/404.php'; exit;
 } catch (Throwable $e) { http_response_code(500); require ROOT.'/templates/error/500.php'; exit; }
+

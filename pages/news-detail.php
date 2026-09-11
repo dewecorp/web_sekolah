@@ -57,7 +57,7 @@ try{ $ls=$db->prepare("SELECT p.id,p.title,p.slug,p.featured_image,p.published_a
 try{ $catId=$p['category_id']??null; $related=[]; if($catId){ $rl=$db->prepare("SELECT p.id,p.title,p.slug,p.featured_image,p.published_at,p.created_at,p.views,c.name cat FROM posts p LEFT JOIN categories c ON c.id=p.category_id WHERE p.status='published' AND p.deleted_at IS NULL AND p.id<>? AND p.category_id=? ORDER BY p.published_at DESC, p.id DESC LIMIT 4"); $rl->execute([(int)$p['id'],(int)$catId]); $related=$rl->fetchAll(); } if(count($related)<4){ $ex=array_merge([(int)$p['id']],array_map(fn($x)=>(int)($x['id']??0),$related)); $ph=implode(',',array_fill(0,count($ex),'?')); $rl2=$db->prepare("SELECT p.id,p.title,p.slug,p.featured_image,p.published_at,p.created_at,p.views,c.name cat FROM posts p LEFT JOIN categories c ON c.id=p.category_id WHERE p.status='published' AND p.deleted_at IS NULL AND p.id NOT IN ($ph) ORDER BY p.published_at DESC, p.id DESC LIMIT ".(4-count($related))); $rl2->execute($ex); $related=array_merge($related,$rl2->fetchAll()); } }catch(Throwable){ $related=[]; } ?>
 <div class="w-full px-4 md:px-8 py-10">
 <?php
-$heroBadge='<i class="fa fa-newspaper text-amber-300"></i>'.Helper::e($p['cat']??'Berita');
+$heroBadge='<i class="fa fa-newspaper text-white"></i>'.Helper::e($p['cat']??'Berita');
 $heroTitle=$p['title'];
 $heroDesc=!empty($p['excerpt'])?nl2br(Helper::e($p['excerpt'])):'';
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / <a href="'.Helper::url('berita').'" class="hover:text-white">Berita</a> / '.Helper::e($p['cat']??'Berita');
@@ -117,3 +117,4 @@ require ROOT.'/templates/frontend/page-hero.php'; ?>
 <style>.share-btn{width:2.65rem;height:2.65rem;border-radius:.8rem;color:#fff;display:grid;place-items:center;transition:.2s}.share-btn:hover{transform:translateY(-3px);box-shadow:0 8px 18px #0f172a30}</style>
 <script>document.querySelector('[data-copy-url]')?.addEventListener('click',async e=>{const b=e.currentTarget;try{await navigator.clipboard.writeText(b.dataset.copyUrl);const o=b.innerHTML;b.innerHTML='<i class="fa fa-check"></i>';setTimeout(()=>b.innerHTML=o,1200)}catch(_){prompt('Salin tautan:',b.dataset.copyUrl)}})</script>
 <?php require ROOT.'/templates/frontend/footer.php'; ?>
+

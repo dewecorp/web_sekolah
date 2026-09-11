@@ -7,7 +7,7 @@ require ROOT.'/templates/frontend/header.php';
 $totalGal=count($gals); $totalImg=0; foreach($imgsByGal as $v) $totalImg+=count($v); ?>
 <div class="w-full px-4 md:px-8 py-10">
 <?php
-$heroBadge='<i class="fa fa-images text-amber-300"></i>Galeri Sekolah';
+$heroBadge='<i class="fa fa-images text-white"></i>Galeri Sekolah';
 $heroTitle='Galeri';
 $heroDesc='';
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Galeri';
@@ -22,3 +22,4 @@ require ROOT.'/templates/frontend/page-hero.php'; ?>
 <img src="<?= Helper::url($im['filepath']) ?>" alt="<?= Helper::e($im['caption']??$g['title']) ?>" data-lightbox loading="lazy" class="h-44 w-full object-cover rounded-xl border cursor-zoom-in card-hover reveal">
 <?php endforeach; ?></div><?php endif; ?><?php endforeach; ?><?php endif; ?></div>
 <?php require ROOT.'/templates/frontend/footer.php'; ?>
+

@@ -1,7 +1,7 @@
 <?php if((Database::setting('prestasi_show','1')==='0')){ http_response_code(404); require ROOT.'/templates/error/404.php'; exit; } $rows=$db->query("SELECT * FROM achievements WHERE is_active=1 ORDER BY id DESC")->fetchAll(); $prTitle=Database::setting('prestasi_title','Prestasi Sekolah'); if(trim($prTitle)==='')$prTitle='Prestasi Sekolah'; $prDesc=Database::setting('prestasi_desc',''); $metaTitle=$prTitle.' - '.Database::setting('school_name','Sekolah'); require ROOT.'/templates/frontend/header.php'; ?>
 <div class="w-full px-4 md:px-8 py-10">
 <?php
-$heroBadge='<i class="fa fa-trophy text-amber-300"></i>'.Helper::e($prTitle);
+$heroBadge='<i class="fa fa-trophy text-white"></i>'.Helper::e($prTitle);
 $heroTitle=$prTitle;
 $heroDesc=$prDesc;
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Prestasi';
@@ -22,3 +22,4 @@ require ROOT.'/templates/frontend/page-hero.php'; ?>
 </article>
 <?php endforeach; ?></div><?php endif; ?></div>
 <?php require ROOT.'/templates/frontend/footer.php'; ?>
+

@@ -14,7 +14,7 @@ $verifyBing = Database::setting('bing_verification','');
 $verifyYandex = Database::setting('yandex_verification','');
 $analyticsId = Database::setting('ga_measurement_id','');
 $siteTheme = Database::setting('site_theme','elegant');
-if (!in_array($siteTheme,['elegant','classic','vibrant','editorial','minimal'],true)) $siteTheme='elegant';
+if (!in_array($siteTheme,['elegant','classic','vibrant','editorial','minimal','violet'],true)) $siteTheme='elegant';
 $themePrimary = Database::setting('theme_primary','#059669');
 $themeAccent = Database::setting('theme_accent','#f59e0b');
 if (!preg_match('/^#[0-9a-fA-F]{6}$/',$themePrimary)) $themePrimary='#059669';
@@ -82,6 +82,11 @@ if (!in_array($themeRadius,['soft','square','round'],true)) $themeRadius='soft';
 .theme-vibrant article,.theme-vibrant main [class*="rounded-2xl"]{box-shadow:0 12px 35px rgba(15,23,42,.08)}
 .theme-editorial{background:#fffaf5}.theme-editorial h1,.theme-editorial h2,.theme-editorial h3{font-family:Georgia,'Times New Roman',serif;letter-spacing:-.025em}.theme-editorial #mainNav{border-bottom:4px solid var(--school-primary)}.theme-editorial article{border-top:3px solid var(--school-accent)}
 .theme-minimal{background:#fff}.theme-minimal #mainNav{box-shadow:none;background:#fff!important}.theme-minimal main [class*="shadow"]{box-shadow:none!important}.theme-minimal article,.theme-minimal main [class*="rounded-2xl"]{border-color:#e2e8f0}
+.theme-violet{background-image:radial-gradient(circle at 10% 5%,color-mix(in srgb,#8b5cf6,transparent 88%),transparent 30%),radial-gradient(circle at 90% 20%,color-mix(in srgb,#d946ef,transparent 90%),transparent 28%),linear-gradient(180deg,#faf5ff,#fff 40%,#faf5ff)}
+.theme-violet #mainNav{box-shadow:0 10px 35px rgba(124,58,237,.14);border-bottom:3px solid color-mix(in srgb,#7c3aed,white 30%)}
+.theme-violet .fx-hero h1,.theme-violet .fx-hero p,.theme-violet [class*="rounded-[2rem]"] h1,.theme-violet [class*="rounded-[2rem]"] p,.theme-violet [data-carousel] h2,.theme-violet [data-carousel] p{color:#fff!important}
+.theme-violet main [class*="rounded-2xl"]{box-shadow:0 14px 38px rgba(124,58,237,.10)}
+.theme-violet ::selection{background:#7c3aed;color:#fff}
 </style>
 <script>if(localStorage.theme==='dark')document.documentElement.classList.add('dark')</script>
 <noscript><style>#loader{display:none!important}</style></noscript>

@@ -9,14 +9,14 @@ require ROOT . '/templates/frontend/header.php'; ?>
 <div class="absolute bottom-0 -left-24 w-[26rem] h-[26rem] bg-indigo-500/20 rounded-full blur-3xl"></div>
 <div class="absolute inset-0 opacity-[0.15]" style="background-image:linear-gradient(#fff1 1px,transparent 1px),linear-gradient(90deg,#fff1 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(ellipse 80% 70% at 50% 30%,#000 60%,transparent 100%)"></div>
 <div class="relative max-w-7xl mx-auto px-4 pt-12 pb-10">
-<span class="inline-flex items-center gap-1.5 text-[11px] font-bold bg-white/10 border border-white/15 rounded-full px-3 py-1"><a href="<?= Helper::url() ?>" class="hover:text-white text-sky-200">Beranda</a><span class="opacity-50">/</span>Pengumuman</span>
+<span class="inline-flex items-center gap-1.5 text-[11px] font-bold bg-white/10 border border-white/15 rounded-full px-3 py-1"><a href="<?= Helper::url() ?>" class="hover:text-white text-white/80">Beranda</a><span class="opacity-50">/</span>Pengumuman</span>
 <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mt-3">Pengu<span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-indigo-200">muman</span></h1>
 <p class="text-slate-300 mt-2 max-w-2xl">Informasi resmi sekolah. Terbaru di atas, lengkap dengan tanggal dan lampiran.</p>
 <div class="grid grid-cols-3 max-w-lg gap-2.5 mt-6">
 <div class="rounded-2xl bg-white text-slate-900 border border-white/15 backdrop-blur p-3 text-center"><p class="text-sm font-extrabold"><i class="fa fa-calendar-day mr-1"></i><?= Helper::pageDate('announcements','published_at') ?></p><p class="text-[11px] opacity-70">Diperbarui</p></div>
-<div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= count($all) ?></p><p class="text-[11px] text-sky-200">Total</p></div>
-<div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= $withFile ?></p><p class="text-[11px] text-sky-200">Lampiran</p></div>
-<div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= $latest ? '1' : '0' ?></p><p class="text-[11px] text-sky-200">Terbaru</p></div>
+<div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= count($all) ?></p><p class="text-[11px] text-white/80">Total</p></div>
+<div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= $withFile ?></p><p class="text-[11px] text-white/80">Lampiran</p></div>
+<div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= $latest ? '1' : '0' ?></p><p class="text-[11px] text-white/80">Terbaru</p></div>
 </div></div>
 <?php if ($latest): $ldt = $latest['published_at'] ?? $latest['created_at']; $lfile = !empty($latest['attachment']); ?>
 <div class="relative max-w-7xl mx-auto px-4 pb-10 -mt-2">
@@ -24,7 +24,7 @@ require ROOT . '/templates/frontend/header.php'; ?>
 <div class="rounded-3xl bg-slate-900/95 backdrop-blur p-5 md:p-6 flex flex-col md:flex-row gap-4">
 <span class="w-12 h-12 rounded-2xl bg-gradient-to-b from-amber-400 to-orange-500 grid place-items-center text-xl shrink-0 shadow-lg">📢</span>
 <div class="flex-1 min-w-0">
-<p class="text-[11px] font-extrabold text-amber-300 tracking-widest uppercase">Sorotan • <?= Helper::e(Helper::ago($ldt)) ?></p>
+<p class="text-[11px] font-extrabold text-white tracking-widest uppercase">Sorotan • <?= Helper::e(Helper::ago($ldt)) ?></p>
 <h2 class="text-xl md:text-2xl font-extrabold mt-1"><?= Helper::e($latest['title']) ?></h2>
 <p class="text-sm text-slate-300 mt-1.5 line-clamp-2"><?= Helper::e(Helper::excerpt($latest['content'], 180)) ?></p>
 <div class="flex flex-wrap gap-2 mt-3">
@@ -49,7 +49,7 @@ require ROOT . '/templates/frontend/header.php'; ?>
 <div class="flex flex-wrap items-center gap-1.5">
 <h2 class="font-extrabold text-[15px] flex-1 min-w-[160px]"><?= Helper::e($x['title']) ?></h2>
 <?php if ($i === 0): ?><span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-400 text-slate-900">TERBARU</span><?php endif; ?>
-<?php if ($hasFile): ?><span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-900 text-sky-700 dark:text-sky-200"><i class="fa fa-paperclip mr-0.5"></i>Lampiran</span><?php endif; ?>
+<?php if ($hasFile): ?><span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-900 text-sky-700 dark:text-white/80"><i class="fa fa-paperclip mr-0.5"></i>Lampiran</span><?php endif; ?>
 </div>
 <p class="text-[11px] text-slate-400 mt-1.5 flex flex-wrap gap-x-3"><span><i class="fa fa-clock mr-1"></i><?= Helper::e(Helper::ago($dt)) ?></span><span><i class="fa fa-calendar-day mr-1"></i><?= Helper::e(Helper::tgl($dt)) ?></span></p>
 <div class="ann-content text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed text-justify"><?= $x['content'] ?></div>
@@ -75,3 +75,5 @@ require ROOT . '/templates/frontend/header.php'; ?>
 })();
 </script>
 <?php require ROOT . '/templates/frontend/footer.php'; ?>
+
+

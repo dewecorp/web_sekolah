@@ -17,14 +17,14 @@ require ROOT . '/templates/frontend/header.php'; ?>
 <div class="absolute top-10 right-0 w-[28rem] h-[28rem] bg-teal-400/20 rounded-full blur-3xl"></div>
 <div class="absolute inset-0 opacity-[0.15]" style="background-image:linear-gradient(#fff1 1px,transparent 1px),linear-gradient(90deg,#fff1 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(ellipse 80% 70% at 50% 30%,#000 60%,transparent 100%)"></div>
 <div class="relative max-w-7xl mx-auto px-4 pt-12 pb-10">
-<span class="inline-flex items-center gap-1.5 text-[11px] font-bold bg-white/10 border border-white/15 rounded-full px-3 py-1"><a href="<?= Helper::url() ?>" class="hover:text-white text-emerald-200">Beranda</a><span class="opacity-50">/</span>Agenda</span>
+<span class="inline-flex items-center gap-1.5 text-[11px] font-bold bg-white/10 border border-white/15 rounded-full px-3 py-1"><a href="<?= Helper::url() ?>" class="hover:text-white text-white/80">Beranda</a><span class="opacity-50">/</span>Agenda</span>
 <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mt-3">Agenda <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200">Sekolah</span></h1>
 <p class="text-slate-300 mt-2 max-w-2xl">Semua kegiatan terkurasi rapi. Jangan lewatkan momen penting sekolah.</p>
 <div class="grid grid-cols-3 max-w-lg gap-2.5 mt-6">
 <div class="rounded-2xl bg-white text-slate-900 border border-white/15 backdrop-blur p-3 text-center"><p class="text-sm font-extrabold"><i class="fa fa-calendar-day mr-1"></i><?= Helper::pageDate('agenda','event_date') ?></p><p class="text-[11px] opacity-70">Diperbarui</p></div>
-<div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= count($up) ?></p><p class="text-[11px] text-emerald-200">Mendatang</p></div>
-<div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= $monthCount ?></p><p class="text-[11px] text-emerald-200">Bulan ini</p></div>
-<div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= count($all) ?></p><p class="text-[11px] text-emerald-200">Total</p></div>
+<div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= count($up) ?></p><p class="text-[11px] text-white/80">Mendatang</p></div>
+<div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= $monthCount ?></p><p class="text-[11px] text-white/80">Bulan ini</p></div>
+<div class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur p-3 text-center"><p class="text-2xl font-extrabold"><?= count($all) ?></p><p class="text-[11px] text-white/80">Total</p></div>
 </div></div>
 <?php if ($next): $nxd = $next['event_date']; ?>
 <div class="relative max-w-7xl mx-auto px-4 pb-10 -mt-2">
@@ -32,9 +32,9 @@ require ROOT . '/templates/frontend/header.php'; ?>
 <div class="rounded-3xl bg-slate-900/95 backdrop-blur p-5 md:p-6 flex flex-col md:flex-row gap-5 items-start">
 <div class="text-center bg-gradient-to-b from-emerald-500 to-teal-600 rounded-2xl px-5 py-4 min-w-[92px] shadow-lg shadow-emerald-900/50"><p class="text-3xl font-extrabold leading-none"><?= date('d', strtotime($nxd)) ?></p><p class="text-xs font-bold uppercase tracking-widest mt-1"><?= $monthShort[(int)date('n', strtotime($nxd))] ?> <?= date('Y', strtotime($nxd)) ?></p></div>
 <div class="flex-1 min-w-0">
-<p class="text-[11px] font-bold text-amber-300 tracking-widest uppercase"><span class="relative flex w-2 h-2 inline-block mr-1"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span></span>Acara terdekat</p>
+<p class="text-[11px] font-bold text-white tracking-widest uppercase"><span class="relative flex w-2 h-2 inline-block mr-1"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span></span>Acara terdekat</p>
 <h2 class="text-xl md:text-2xl font-extrabold mt-1"><?= Helper::e($next['title']) ?></h2>
-<p class="text-sm text-slate-300 mt-1 flex flex-wrap gap-x-4 gap-y-1"><span><i class="fa fa-clock mr-1.5 text-emerald-300"></i><?= Helper::tgl($nxd) ?><?php if (!empty($next['start_time'])): ?> • <?= Helper::e($next['start_time']) ?><?php if (!empty($next['end_time'])): ?>–<?= Helper::e($next['end_time']) ?><?php endif; ?><?php endif; ?></span><?php if (!empty($next['location'])): ?><span><i class="fa fa-location-dot mr-1.5 text-emerald-300"></i><?= Helper::e($next['location']) ?></span><?php endif; ?></p>
+<p class="text-sm text-slate-300 mt-1 flex flex-wrap gap-x-4 gap-y-1"><span><i class="fa fa-clock mr-1.5 text-white"></i><?= Helper::tgl($nxd) ?><?php if (!empty($next['start_time'])): ?> • <?= Helper::e($next['start_time']) ?><?php if (!empty($next['end_time'])): ?>–<?= Helper::e($next['end_time']) ?><?php endif; ?><?php endif; ?></span><?php if (!empty($next['location'])): ?><span><i class="fa fa-location-dot mr-1.5 text-white"></i><?= Helper::e($next['location']) ?></span><?php endif; ?></p>
 <?php if (!empty($next['description'])): ?><p class="text-sm text-slate-400 mt-2 line-clamp-2"><?= Helper::e($next['description']) ?></p><?php endif; ?>
 </div>
 <div class="flex md:flex-col gap-2 items-center bg-white/5 border border-white/10 rounded-2xl p-3 text-center shrink-0">
@@ -105,3 +105,5 @@ require ROOT . '/templates/frontend/header.php'; ?>
 })();
 </script>
 <?php require ROOT . '/templates/frontend/footer.php'; ?>
+
+

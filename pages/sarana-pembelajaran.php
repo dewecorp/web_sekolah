@@ -3,7 +3,7 @@ $rows=$db->query("SELECT * FROM learning_facilities ORDER BY sort_order,id")->fe
 $sTitle=Database::setting('learn_title','Sarana Pembelajaran'); if(trim($sTitle)==='')$sTitle='Sarana Pembelajaran'; $sDesc=Database::setting('learn_desc','');
 $totBaik=array_sum(array_column($rows,'good_qty')); $totSed=array_sum(array_column($rows,'mid_qty')); $totRus=array_sum(array_column($rows,'bad_qty')); $totAll=$totBaik+$totSed+$totRus;
 $metaTitle=$sTitle.' - '.Database::setting('school_name','Sekolah'); require ROOT."/templates/frontend/header.php";
-$heroBadge='<i class="fa fa-chalkboard text-amber-300"></i>'.Helper::e($sTitle);
+$heroBadge='<i class="fa fa-chalkboard text-white"></i>'.Helper::e($sTitle);
 $heroTitle=$sTitle; $heroDesc=$sDesc;
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Sarana Pembelajaran';
 $heroTheme='amber';
@@ -34,3 +34,4 @@ require ROOT."/templates/frontend/page-hero.php"; ?>
 <?php endif; ?>
 </div>
 <?php require ROOT."/templates/frontend/footer.php"; ?>
+

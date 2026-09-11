@@ -3,7 +3,7 @@ $rows=$db->query("SELECT * FROM facilities ORDER BY sort_order,id")->fetchAll();
 $sTitle=Database::setting('sarana_title','Sarana & Infrastruktur'); if(trim($sTitle)==='')$sTitle='Sarana & Infrastruktur'; $sDesc=Database::setting('sarana_desc','');
 $baik=count(array_filter($rows,fn($x)=>($x['cond']??'baik')==='baik')); $rusak=count($rows)-$baik;
 $metaTitle=$sTitle.' - '.Database::setting('school_name','Sekolah'); require ROOT."/templates/frontend/header.php";
-$heroBadge='<i class="fa fa-building-columns text-amber-300"></i>'.Helper::e($sTitle);
+$heroBadge='<i class="fa fa-building-columns text-white"></i>'.Helper::e($sTitle);
 $heroTitle=$sTitle; $heroDesc=$sDesc;
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Sarana';
 $heroTheme='teal';
@@ -32,3 +32,4 @@ require ROOT."/templates/frontend/page-hero.php"; ?>
 <?php endif; ?>
 </div>
 <?php require ROOT."/templates/frontend/footer.php"; ?>
+

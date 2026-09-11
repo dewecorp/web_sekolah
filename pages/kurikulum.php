@@ -18,7 +18,7 @@ $liCount=substr_count(strtolower($content),'<li');
 ?>
 <div class="w-full max-w-full px-4 md:px-8 py-10">
 <?php
-$heroBadge='<i class="fa fa-book-open text-amber-300"></i>Kurikulum Sekolah';
+$heroBadge='<i class="fa fa-book-open text-white"></i>Kurikulum Sekolah';
 $heroTitle=$title;
 $heroDesc='';
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Kurikulum';
@@ -56,3 +56,4 @@ require ROOT.'/templates/frontend/page-hero.php'; ?>
 .kur-content li::marker{color:var(--school-primary,#059669);font-weight:800}
 </style>
 <?php require ROOT.'/templates/frontend/footer.php'; ?>
+

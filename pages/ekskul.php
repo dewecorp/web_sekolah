@@ -1,7 +1,7 @@
 <?php if((Database::setting('ekskul_show','1')==='0')){ http_response_code(404); require ROOT.'/templates/error/404.php'; exit; } $rows=$db->query("SELECT * FROM extracurriculars WHERE is_active=1 ORDER BY sort_order")->fetchAll(); $ekTitle=Database::setting('ekskul_title','Ekstrakurikuler'); if(trim($ekTitle)==='')$ekTitle='Ekstrakurikuler'; $ekDesc=Database::setting('ekskul_desc',''); $metaTitle=$ekTitle.' - '.Database::setting('school_name','Sekolah'); require ROOT.'/templates/frontend/header.php'; ?>
 <div class="w-full px-4 md:px-8 py-10">
 <?php
-$heroBadge='<i class="fa fa-futbol text-amber-300"></i>'.Helper::e($ekTitle);
+$heroBadge='<i class="fa fa-futbol text-white"></i>'.Helper::e($ekTitle);
 $heroTitle=$ekTitle;
 $heroDesc=$ekDesc;
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / '.Helper::e($ekTitle);
@@ -29,3 +29,4 @@ require ROOT.'/templates/frontend/page-hero.php'; ?>
 </article>
 <?php endforeach; ?></div><?php endif; ?></div>
 <?php require ROOT.'/templates/frontend/footer.php'; ?>
+

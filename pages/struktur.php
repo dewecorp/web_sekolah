@@ -13,7 +13,7 @@ $total=count($srows); $foto=count(array_filter($srows,fn($x)=>!empty($x['tphoto'
 <?php $hal=Database::setting('hero_align','center'); $haC=$hal==='left'?'text-left':($hal==='right'?'text-right':'text-center'); $hjC=$hal==='left'?'justify-start':($hal==='right'?'justify-end':'justify-center'); $hmC=$hal==='left'?'mr-auto':($hal==='right'?'ml-auto':'mx-auto'); ?>
 <div class="relative max-w-3xl <?= $hmC ?> <?= $haC ?>">
 <nav class="text-xs text-white/70 mb-3 <?= $haC ?>"><a href="<?= Helper::url() ?>" class="hover:text-white">Beranda</a> / Struktur</nav>
-<span class="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-[.16em]"><i class="fa fa-sitemap text-amber-300"></i>Organisasi Sekolah</span>
+<span class="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-[.16em]"><i class="fa fa-sitemap text-white"></i>Organisasi Sekolah</span>
 <h1 class="text-3xl md:text-5xl font-extrabold leading-tight mt-4 <?= $haC ?>"><?= Helper::e($title) ?></h1>
 <?php if($desc): ?><p class="text-white/80 text-sm md:text-base max-w-2xl mt-4 <?= $hmC ?> <?= $haC ?> leading-relaxed"><?= nl2br(Helper::e($desc)) ?></p><?php endif; ?>
 <div class="mt-5 flex flex-wrap gap-2 text-sm <?= $hjC ?> <?= $haC ?>">
@@ -50,3 +50,4 @@ $total=count($srows); $foto=count(array_filter($srows,fn($x)=>!empty($x['tphoto'
 (function(){var q=document.getElementById('qStr'),rows=[...document.querySelectorAll('#strGrid .srow')],em=document.getElementById('strEmpty');q?.addEventListener('input',()=>{var s=(q.value||'').toLowerCase(),n=0;rows.forEach(r=>{var ok=!s||r.dataset.t.includes(s);r.style.display=ok?'':'none';if(ok)n++});if(em)em.classList.toggle('hidden',n>0)})})();
 </script>
 <?php require ROOT.'/templates/frontend/footer.php'; ?>
+

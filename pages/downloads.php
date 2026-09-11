@@ -10,7 +10,7 @@ function dlSize(int $b): string { if($b<1024) return $b.' B'; if($b<1024*1024) r
 require ROOT.'/templates/frontend/header.php'; ?>
 <div class="w-full px-4 md:px-8 py-10">
 <?php
-$heroBadge='<i class="fa fa-file-arrow-down text-amber-300"></i>Unduhan';
+$heroBadge='<i class="fa fa-file-arrow-down text-white"></i>Unduhan';
 $heroTitle='Media Unduh';
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Media Unduh';
 $heroTheme='emerald';
@@ -50,3 +50,4 @@ $btnUrl = $isPdf ? Helper::url('media-unduh/preview?file=' . urlencode($r['filen
 </div>
 </div>
 <?php require ROOT.'/templates/frontend/footer.php'; ?>
+

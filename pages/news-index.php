@@ -14,7 +14,7 @@ $topYear=$years[0]??null;
 ?>
 <div class="w-full px-4 md:px-8 py-10">
 <?php
-$heroBadge='<i class="fa fa-layer-group text-amber-300"></i>Indeks Berita';
+$heroBadge='<i class="fa fa-layer-group text-white"></i>Indeks Berita';
 $heroTitle='Indeks Berita';
 $heroDesc='';
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / <a href="'.Helper::url('berita').'" class="hover:text-white">Berita</a> / Indeks';
@@ -67,3 +67,4 @@ require ROOT.'/templates/frontend/page-hero.php'; ?>
 })();
 </script>
 <?php require ROOT.'/templates/frontend/footer.php'; ?>
+

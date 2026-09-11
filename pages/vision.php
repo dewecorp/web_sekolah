@@ -8,7 +8,7 @@ $gCount=max(substr_count(strtolower($goals),'<li'),count(array_filter(array_map(
 ?>
 <div class="w-full px-4 md:px-8 py-10">
 <?php
-$heroBadge='<i class="fa fa-bullseye text-amber-300"></i>Visi Misi Tujuan';
+$heroBadge='<i class="fa fa-bullseye text-white"></i>Visi Misi Tujuan';
 $heroTitle=$title;
 $heroDesc='';
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Visi Misi';
@@ -19,7 +19,7 @@ require ROOT.'/templates/frontend/page-hero.php'; ?>
 <span class="absolute -right-12 -top-14 w-64 h-64 rounded-full border-[28px] border-white/10"></span><span class="absolute -left-16 -bottom-16 w-56 h-56 rounded-full border-[28px] border-white/10"></span>
 <span class="absolute inset-0 pointer-events-none opacity-15" style="background-image:linear-gradient(rgba(255,255,255,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.14) 1px,transparent 1px);background-size:36px 36px;mask-image:radial-gradient(ellipse at center,black 40%,transparent 75%)"></span>
 <div class="relative max-w-3xl">
-<span class="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-[.16em]"><i class="fa fa-quote-left text-amber-300"></i>Visi Sekolah</span>
+<span class="inline-flex items-center gap-2 rounded-full bg-white/15 border border-white/20 px-3 py-1 text-[11px] font-bold uppercase tracking-[.16em]"><i class="fa fa-quote-left text-white"></i>Visi Sekolah</span>
 <blockquote class="text-2xl md:text-3xl font-extrabold leading-tight mt-4 text-white"><?= $vision!==''?strip_tags($vision,'<br><strong><em>'):'Visi belum diisi — kelola via Sekolah > Visi, Misi & Tujuan.' ?></blockquote>
 </div>
 </div>
@@ -35,3 +35,4 @@ require ROOT.'/templates/frontend/page-hero.php'; ?>
 </div>
 </div>
 <?php require ROOT.'/templates/frontend/footer.php'; ?>
+

@@ -18,9 +18,9 @@ $mega = $db->query("SELECT m.*, mi.label, mi.url FROM mega_menus m LEFT JOIN men
 function menuTree($items,$parent=null){ $o=[]; foreach($items as $i){ if(($i['parent_id']??null)==$parent) $o[]=$i; } return $o; }
 function menuLink($u,$forceTarget=null){ [$href,$t]=Helper::menuUrl($u); $t=$forceTarget?:$t; return 'href="'.Helper::e($href).'"'.($t==='_blank'?' target="_blank" rel="noopener noreferrer"':''); }
 ?>
-<div class="bg-emerald-700 text-white text-xs hidden md:block"><div class="max-w-7xl mx-auto px-4 py-1.5 flex justify-between items-center gap-3">
-<div class="flex gap-4 min-w-0"><span class="shrink-0"><i class="fa fa-calendar-day mr-1"></i><span data-clock-date><?= Helper::tgl(date('Y-m-d')) ?></span> • <span data-clock-time class="font-mono font-bold"><?= date('H:i:s') ?></span> WIB</span><span class="truncate"><i class="fa fa-location-dot mr-1"></i><?= Helper::e($top_addr) ?></span><span class="hidden lg:inline"><i class="fa fa-phone mr-1"></i><?= Helper::e($top_phone) ?></span><span class="hidden xl:inline"><i class="fa fa-envelope mr-1"></i><?= Helper::e($top_email) ?></span></div>
-<div class="flex gap-3"><a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a><a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a><a href="#" aria-label="Youtube"><i class="fab fa-youtube"></i></a></div>
+<div class="bg-emerald-700 text-white text-xs block"><div class="max-w-7xl mx-auto px-4 py-1.5 flex justify-between items-center gap-2">
+<div class="flex gap-3 min-w-0 items-center flex-wrap"><span class="shrink-0"><i class="fa fa-calendar-day mr-1"></i><span data-clock-date><?= Helper::tgl(date('Y-m-d')) ?></span> • <span data-clock-time class="font-mono font-bold"><?= date('H:i:s') ?></span></span><span class="hidden sm:inline truncate"><i class="fa fa-location-dot mr-1"></i><?= Helper::e($top_addr) ?></span><span class="hidden md:inline"><i class="fa fa-phone mr-1"></i><?= Helper::e($top_phone) ?></span><span class="hidden xl:inline"><i class="fa fa-envelope mr-1"></i><?= Helper::e($top_email) ?></span></div>
+<div class="flex gap-3 shrink-0"><a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a><a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a><a href="#" aria-label="Youtube"><i class="fab fa-youtube"></i></a></div>
 </div></div>
 <header id="mainNav" class="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b-0 transition">
 <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">

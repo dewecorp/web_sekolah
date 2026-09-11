@@ -168,6 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $nc=(string)($_POST['news_cat']??'');
       $car=['limit'=>max(1,min(10,(int)($_POST['car_limit']??5))),'delay'=>max(1000,min(20000,(int)($_POST['car_delay']??5000))),'mh'=>max(150,min(420,(int)($_POST['car_mh']??200))),'dh'=>max(180,min(520,(int)($_POST['car_dh']??270))),'auto'=>!empty($_POST['car_auto'])?1:0,'dots'=>!empty($_POST['car_dots'])?1:0];
       $bjM=['news_cat'=>$nc,'car'=>$car]; if(!empty($buttonsJson)){ $jb2=json_decode($buttonsJson,true); if(is_array($jb2))$bjM=array_merge($jb2,$bjM); } $buttonsJson=json_encode($bjM);
+      foreach(['news_empty_text','share_heading','share_description'] as $nk){ if(array_key_exists($nk,$_POST)){ $nv=trim((string)$_POST[$nk]); $db->prepare("INSERT INTO settings(`key`,`value`) VALUES(?,?) ON DUPLICATE KEY UPDATE `value`=VALUES(`value`)")->execute([$nk,$nv]); } }
     }
      $b1 = $buttons[0] ?? ['text' => '', 'url' => '', 'target' => '_self'];
     $b2 = $buttons[1] ?? ['text' => '', 'url' => '', 'target' => '_self'];
@@ -428,10 +429,14 @@ $limitLabel = ['carousel' => 'Jumlah slide', 'berita' => 'Jumlah berita', 'carou
 <?php endforeach; ?>
 </div></div>
 <label class="grid gap-1" data-f="limit"<?= $showLimit ? '' : ' style="display:none"' ?>><span id="limitLabel"><?= Helper::e($limitLabel[$curType] ?? 'Limit item') ?></span><input type="number" name="items_limit" min="1" max="12" value="<?= (int)($edit['items_limit'] ?? 3) ?>" class="border rounded-lg p-2"></label>
-<?php $showNewsSrc=in_array($curType,['berita','kategori-berita','carousel-berita'],true); $newsCatSel=''; try{ $bjN=json_decode((string)($edit['buttons_json']??''),true); if(is_array($bjN)&&!empty($bjN['news_cat']))$newsCatSel=(string)$bjN['news_cat']; }catch(Throwable){} $newsCats=[]; try{ $newsCats=$db->query("SELECT id,name FROM categories ORDER BY name")->fetchAll(); }catch(Throwable){} ?>
+<?php $showNewsSrc=in_array($curType,['berita','kategori-berita','carousel-berita'],true); $newsCatSel=''; try{ $bjN=json_decode((string)($edit['buttons_json']??''),true); if(is_array($bjN)&&!empty($bjN['news_cat']))$newsCatSel=(string)$bjN['news_cat']; }catch(Throwable){} $newsCats=[]; try{ $newsCats=$db->query("SELECT id,name FROM categories ORDER BY name")->fetchAll(); }catch(Throwable){} $newsPageSets=[]; try{ foreach($db->query("SELECT `key`,`value` FROM settings WHERE `key` IN ('news_empty_text','share_heading','share_description')") as $nr)$newsPageSets[$nr['key']]=$nr['value']; }catch(Throwable){} ?>
 <div class="border rounded-xl p-2.5 bg-sky-50 grid gap-1.5" data-f="news_src"<?= $showNewsSrc?'':' style="display:none"' ?>>
 <p class="text-xs font-bold"><i class="fa fa-newspaper mr-1 text-sky-600"></i>Sumber Berita</p>
 <label class="grid gap-0.5 text-xs">Ambil dari kategori<select name="news_cat" class="border rounded-lg p-1.5 bg-white"><option value="">Semua kategori</option><?php foreach($newsCats as $nc): ?><option value="<?= (int)$nc['id'] ?>" <?= $newsCatSel===(string)$nc['id']?'selected':'' ?>><?= Helper::e($nc['name']) ?></option><?php endforeach; ?></select></label>
+<p class="text-xs font-bold mt-1"><i class="fa fa-file-lines mr-1 text-sky-600"></i>Pengaturan Laman Berita</p>
+<label class="grid gap-0.5 text-xs">Pesan saat berita kosong<input name="news_empty_text" value="<?= Helper::e($newsPageSets['news_empty_text']??'Belum ada berita pada kategori ini.') ?>" class="border rounded-lg p-1.5 bg-white"></label>
+<label class="grid gap-0.5 text-xs">Judul panel berbagi<input name="share_heading" value="<?= Helper::e($newsPageSets['share_heading']??'Bagikan berita ini') ?>" class="border rounded-lg p-1.5 bg-white"></label>
+<label class="grid gap-0.5 text-xs">Deskripsi panel berbagi<textarea name="share_description" rows="2" class="border rounded-lg p-1.5 bg-white"><?= Helper::e($newsPageSets['share_description']??'Sebarkan informasi kepada keluarga dan teman.') ?></textarea></label>
 <?php if($curType==='carousel-berita'): $carSet=[]; try{ $bjC=json_decode((string)($edit['buttons_json']??''),true); if(is_array($bjC)&&!empty($bjC['car']))$carSet=$bjC['car']; }catch(Throwable){} ?>
 <p class="text-xs font-bold mt-1"><i class="fa fa-sliders mr-1 text-sky-600"></i>Kontrol Carousel</p>
 <div class="grid grid-cols-2 gap-1.5">

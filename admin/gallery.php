@@ -4,7 +4,19 @@ $act=$_POST['act']??''; $t=trim($_POST['title']??'');
 if($act==='del_album'){ $db->prepare("DELETE FROM galleries WHERE id=?")->execute([(int)$_POST['id']]); Auth::log($db,'delete','gallery','Hapus album'); Session::flash('ok','Album dihapus.'); }
 elseif($act==='del_img'){ $s=$db->prepare("SELECT * FROM gallery_images WHERE id=?"); $s->execute([(int)$_POST['id']]); $im=$s->fetch(); if($im){ @unlink(ROOT.'/assets/uploads/'.basename($im['filepath'])); $db->prepare("DELETE FROM gallery_images WHERE id=?")->execute([$im['id']]); } Session::flash('ok','Foto dihapus.'); }
 elseif($act==='album'){ if($t===''){ Session::flash('err','Judul wajib.'); } else { $slug=Security::slug($t); if(!empty($_POST['id'])) $db->prepare("UPDATE galleries SET title=?,slug=?,description=?,status=? WHERE id=?")->execute([$t,$slug,$_POST['description']??'',$_POST['status']??'published',(int)$_POST['id']]); else $db->prepare("INSERT INTO galleries(title,slug,description,status) VALUES(?,?,?,?)")->execute([$t,$slug,$_POST['description']??'',$_POST['status']??'published']); Auth::log($db,'create','gallery',"Album $t"); Session::flash('ok','Album disimpan.'); } }
-elseif($act==='photo' && !empty($_FILES['f']['name']) && !empty($_POST['gallery_id'])){ $e=Security::validImage($_FILES['f'],$APP); if($e){ Session::flash('err',$e); header('Location: '.Helper::url('admin/gallery')); exit; } $n=Security::safeName($_FILES['f']['name']); move_uploaded_file($_FILES['f']['tmp_name'],ROOT.'/assets/uploads/'.$n); $db->prepare("INSERT INTO gallery_images(gallery_id,filepath,caption) VALUES(?,?,?)")->execute([(int)$_POST['gallery_id'],'assets/uploads/'.$n,$_POST['caption']??'']); Session::flash('ok','Foto ditambah.'); }
+elseif($act==='photo' && !empty($_POST['gallery_id'])){
+  $files=[];
+  if(isset($_FILES['f'])){
+    if(is_array($_FILES['f']['name']??null)){ $cnt=count($_FILES['f']['name']); for($i=0;$i<$cnt;$i++){ if(empty($_FILES['f']['name'][$i])||(($_FILES['f']['error'][$i]??4)!==0))continue; $files[]=['name'=>$_FILES['f']['name'][$i],'type'=>$_FILES['f']['type'][$i]??'','tmp_name'=>$_FILES['f']['tmp_name'][$i],'error'=>$_FILES['f']['error'][$i],'size'=>$_FILES['f']['size'][$i]]; } }
+    elseif(!empty($_FILES['f']['name'])) $files[]=$_FILES['f'];
+  }
+  if(!$files){ Session::flash('err','Pilih minimal 1 foto.'); header('Location: '.Helper::url('admin/gallery')); exit; }
+  if(count($files)>20){ Session::flash('err','Maksimal 20 foto sekaligus.'); header('Location: '.Helper::url('admin/gallery')); exit; }
+  $ok=0; $fail='';
+  foreach($files as $ff){ $e=Security::validImage($ff,$APP); if($e){ $fail=$e.' ('.$ff['name'].')'; continue; } $n=Security::safeName($ff['name']); move_uploaded_file($ff['tmp_name'],ROOT.'/assets/uploads/'.$n); $db->prepare("INSERT INTO gallery_images(gallery_id,filepath,caption) VALUES(?,?,?)")->execute([(int)$_POST['gallery_id'],'assets/uploads/'.$n,$_POST['caption']??'']); $ok++; }
+  if($ok) Session::flash('ok',$ok.' foto ditambah.' . ($fail?' Gagal: '.$fail:''));
+  else Session::flash('err',$fail?:'Upload gagal.');
+}
 header('Location: '.Helper::url('admin/gallery'.(!empty($_POST['gallery_id'])?'?album='.(int)$_POST['gallery_id']:''))); exit; }
 $albums=$db->query("SELECT g.*,(SELECT COUNT(*) FROM gallery_images WHERE gallery_id=g.id) cnt FROM galleries g ORDER BY id DESC")->fetchAll();
 $sel=(int)($_GET['album']??($albums[0]['id']??0)); $imgs=[]; if($sel){ $s=$db->prepare("SELECT * FROM gallery_images WHERE gallery_id=? ORDER BY id DESC"); $s->execute([$sel]); $imgs=$s->fetchAll(); }
@@ -49,8 +61,8 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div class="flex items-center gap-2 px-5 py-3.5 border-b"><h2 class="font-extrabold"><i class="fa fa-image text-emerald-600 mr-1"></i>Upload Foto</h2><button data-close class="ml-auto w-8 h-8 rounded-lg border grid place-items-center hover:bg-slate-100"><i class="fa fa-xmark"></i></button></div>
 <form method="post" enctype="multipart/form-data" data-loading class="p-5 grid gap-2.5 text-sm"><?= Security::csrfField() ?>
 <input type="hidden" name="act" value="photo"><input type="hidden" name="gallery_id" value="<?= $sel ?>">
-<label class="grid gap-1 font-semibold">Foto<img id="galPrev" class="hidden h-24 w-full object-cover rounded-lg border mb-1.5" alt="Preview"><input type="file" name="f" id="galInp" accept="image/*" required class="border rounded-lg p-2 font-normal"></label>
-<label class="grid gap-1 font-semibold">Caption<input name="caption" placeholder="Keterangan foto" class="border rounded-lg p-2 font-normal"></label>
+<label class="grid gap-1 font-semibold">Foto <span class="font-normal text-slate-400">(bisa pilih banyak sekaligus, maks 20)</span><div id="galPrevBox" class="hidden grid-cols-4 gap-1.5 mb-1.5"></div><input type="file" name="f[]" id="galInp" accept="image/*" multiple required class="border rounded-lg p-2 font-normal"></label>
+<label class="grid gap-1 font-semibold">Caption <span class="font-normal text-slate-400">(berlaku untuk semua foto)</span><input name="caption" placeholder="Keterangan foto" class="border rounded-lg p-2 font-normal"></label>
 <div class="flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-8 py-2 font-bold w-full sm:w-auto sm:min-w-[200px]"><i class="fa fa-upload mr-1"></i>Upload</button><button type="button" data-close class="ml-2 border rounded-xl px-5">Batal</button></div>
 </form></div></div></div>
 
@@ -68,7 +80,12 @@ function closeAll(){modal.classList.add('hidden');pmodal.classList.add('hidden')
 document.getElementById('btnAdd').addEventListener('click',()=>openModal(null));
 document.querySelectorAll('.btn-edit').forEach(b=>b.addEventListener('click',()=>openModal(JSON.parse(b.dataset.row))));
 document.getElementById('btnPhoto')?.addEventListener('click',()=>{pmodal.classList.remove('hidden');document.body.style.overflow='hidden'});
-document.getElementById('galInp')?.addEventListener('change',e=>{const f=e.target.files?.[0];const p=document.getElementById('galPrev');if(f&&p){p.src=URL.createObjectURL(f);p.classList.remove('hidden')}});
+document.getElementById('galInp')?.addEventListener('change',e=>{
+  const files=[...e.target.files||[]],box=document.getElementById('galPrevBox');
+  if(!box)return; box.innerHTML=''; box.classList.add('hidden');
+  if(!files.length)return; box.classList.remove('hidden');
+  files.slice(0,20).forEach(f=>{const im=document.createElement('img');im.src=URL.createObjectURL(f);im.className='h-16 w-full object-cover rounded-lg border';box.appendChild(im)});
+});
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeAll));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAll()});
 </script>

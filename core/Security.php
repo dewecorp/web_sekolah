@@ -109,6 +109,42 @@ final class Security {
         $ext = strtolower(pathinfo($orig, PATHINFO_EXTENSION));
         return date('Ymd-His') . '-' . bin2hex(random_bytes(6)) . '.' . $ext;
     }
+    public const COMMENT_MAX_LINKS = 2;
+    public const COMMENT_MIN_SECONDS = 5;
+    public const COMMENT_FLOOD_SECONDS = 30;
+    public const COMMENT_MAX_PER_10MIN = 5;
+    public static function commentRateAllowed(PDO $db, string $ip): array {
+        try {
+            $s = $db->prepare("SELECT COUNT(*) FROM post_comments WHERE ip=? AND created_at > NOW() - INTERVAL 10 MINUTE");
+            $s->execute([$ip]);
+            if ((int)$s->fetchColumn() >= self::COMMENT_MAX_PER_10MIN) return [false, 'Terlalu banyak komentar. Coba lagi dalam 10 menit.'];
+            $s = $db->prepare("SELECT MAX(created_at) FROM post_comments WHERE ip=?");
+            $s->execute([$ip]);
+            $last = $s->fetchColumn();
+            if ($last && (time() - strtotime((string)$last) < self::COMMENT_FLOOD_SECONDS)) return [false, 'Tunggu sebentar sebelum mengirim komentar lagi.'];
+        } catch (Throwable) {}
+        return [true, ''];
+    }
+    public static function isDuplicateComment(PDO $db, int $postId, string $email, string $comment): bool {
+        try {
+            $s = $db->prepare("SELECT 1 FROM post_comments WHERE post_id=? AND email=? AND comment=? AND created_at > NOW() - INTERVAL 10 MINUTE LIMIT 1");
+            $s->execute([$postId, $email, $comment]);
+            return (bool)$s->fetch();
+        } catch (Throwable) { return false; }
+    }
+    public static function isCommentSpam(string $comment, string $name, string $email, string $website = ''): array {
+        preg_match_all('~(https?://|www\.|\[url|<a\s+href)~i', $comment . ' ' . $website, $m);
+        if (count($m[0]) > self::COMMENT_MAX_LINKS) return [true, 'Terlalu banyak tautan.'];
+        $text = mb_strtolower($comment . ' ' . $name . ' ' . $website, 'UTF-8');
+        $bad = ['viagra','cialis','casino','togel','slot gacor','maxwin','sbobet','poker online','judi online','porn','xxx','escort','pinjaman online','payday loan','obat kuat','backlink','jasa seo','seo murah','crypto giveaway','double your bitcoin','binary option','forex profit','guaranteed profit','weight loss','miracle cure'];
+        foreach ($bad as $w) if ($w !== '' && str_contains($text, $w)) return [true, 'Terdeteksi kata spam.'];
+        if (preg_match('~(https?://|www\.|<a|</a>)~i', $name)) return [true, 'Nama tidak valid.'];
+        $plain = trim((string)preg_replace('~https?://\S+~', '', $comment));
+        if (mb_strlen($plain) < 3) return [true, 'Komentar terlalu pendek.'];
+        if (preg_match('/(.)\1{9,}/u', $comment)) return [true, 'Terdeteksi spam.'];
+        if (preg_match('/[A-Z\W]*[A-Z]{15,}/', $comment)) return [true, 'Hindari huruf kapital berlebihan.'];
+        return [false, ''];
+    }
     // Validasi upload video: MP4/WebM/Ogg + size + block executable
     public static function validVideo(array $f, array $cfg): ?string {
         if (($f['error'] ?? 4) !== 0) return 'Upload gagal.';

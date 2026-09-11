@@ -34,8 +34,8 @@ try { $db->exec("DELETE FROM activity_logs WHERE created_at < NOW() - INTERVAL 2
 try { $db->exec("CREATE TABLE IF NOT EXISTS contact_messages(id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,name VARCHAR(150) NOT NULL,email VARCHAR(190) NOT NULL,subject VARCHAR(190) NOT NULL DEFAULT '',message MEDIUMTEXT NOT NULL,is_read TINYINT(1) NOT NULL DEFAULT 0,created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,KEY idx_read_created (is_read,created_at)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"); } catch (Throwable) {}
 $role = $_SESSION['user']['role'] ?? 'author';
 $roleMap = [
-  'administrator' => ['pages','posts','categories','media','downloads','gallery','announcements','agenda','teachers','students','sarana','sarana-pembelajaran','ekskul','prestasi','structure','curriculum','vision','statistics','menus','megamenu','widgets','footer','sections','themes','appearance','settings','seo','users','logs','inbox'],
-  'editor' => ['pages','posts','categories','media','downloads','gallery','announcements','agenda','teachers','students','sarana','sarana-pembelajaran','ekskul','prestasi','structure','curriculum','vision','statistics','menus','megamenu','widgets','footer','sections','themes','appearance','inbox'],
+  'administrator' => ['pages','posts','categories','media','downloads','gallery','comments','announcements','agenda','teachers','students','sarana','sarana-pembelajaran','ekskul','prestasi','structure','curriculum','vision','statistics','menus','megamenu','widgets','footer','sections','themes','appearance','settings','seo','users','logs','inbox'],
+  'editor' => ['pages','posts','categories','media','downloads','gallery','comments','announcements','agenda','teachers','students','sarana','sarana-pembelajaran','ekskul','prestasi','structure','curriculum','vision','statistics','menus','megamenu','widgets','footer','sections','themes','appearance','inbox'],
   'author' => ['posts','pages','media','gallery'],
 ];
 $allow = $roleMap[$role] ?? $roleMap['author'];

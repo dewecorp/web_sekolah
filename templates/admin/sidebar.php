@@ -15,6 +15,10 @@
 <?= $link('admin/downloads', 'fa-file-arrow-down', 'Media Unduh') ?>
 <?= $link('admin/gallery', 'fa-images', 'Galeri') ?>
 <?php if($role!=='author'): ?>
+<?php try{ $cPending=(int)$db->query("SELECT COUNT(*) FROM post_comments WHERE status='pending'")->fetchColumn(); }catch(Throwable){ $cPending=0; } ?>
+<?= $link('admin/comments', 'fa-comments', 'Komentar'.($cPending>0?' <span class="ml-auto text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-red-500 text-white">'.$cPending.'</span>':'')) ?>
+<?php endif; ?>
+<?php if($role!=='author'): ?>
 <?= $link('admin/announcements', 'fa-bullhorn', 'Pengumuman') ?>
 <?= $link('admin/agenda', 'fa-calendar-days', 'Agenda') ?>
 <p class="px-3 mt-3 text-[11px] font-bold uppercase tracking-wide text-emerald-200/70">Sekolah</p>

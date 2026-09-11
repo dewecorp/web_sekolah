@@ -28,9 +28,6 @@ require ROOT.'/templates/admin/header.php'; ?>
 <label class="grid gap-1"><?= $l ?><input name="s[<?= $k ?>]" value="<?= Helper::e($sets[$k]??'') ?>" class="border rounded-lg p-2"></label><?php endforeach; ?>
 <label class="grid gap-1">Hero Alignment<select name="s[hero_align]" class="border rounded-lg p-2"><option value="left" <?= ($sets['hero_align']??'center')==='left'?'selected':'' ?>>Kiri</option><option value="center" <?= ($sets['hero_align']??'center')==='center'?'selected':'' ?>>Tengah</option><option value="right" <?= ($sets['hero_align']??'center')==='right'?'selected':'' ?>>Kanan</option></select><span class="text-xs font-normal text-slate-400">Rata kiri/tengah/kanan hero & semua elemen</span></label>
 <label class="grid gap-1">Logo<?php if(!empty($sets['logo'])): ?><img id="logoPreview" src="<?= Helper::upload($sets['logo']) ?>" alt="Logo" class="h-20 w-20 object-contain rounded-xl border bg-slate-50 p-1.5 shadow-sm"><?php else: ?><img id="logoPreview" class="hidden h-20 w-20 object-contain rounded-xl border bg-slate-50 p-1.5 shadow-sm" alt="Preview"><?php endif; ?><input type="file" name="logo" id="logoInput" accept="image/*" class="border rounded-lg p-2"></label></div>
-<div class="bg-white rounded-2xl border p-4 grid gap-2"><h2 class="font-bold"><i class="fa fa-share-nodes text-emerald-600 mr-1"></i>Media Sosial</h2>
-<?php foreach(['facebook'=>'Facebook','instagram'=>'Instagram','youtube'=>'YouTube','tiktok'=>'TikTok'] as $k=>$l): ?>
-<label class="grid gap-1"><?= $l ?><input name="s[<?= $k ?>]" value="<?= Helper::e($sets[$k]??'') ?>" placeholder="https://..." class="border rounded-lg p-2"></label><?php endforeach; ?></div>
 </div>
 <div class="grid gap-3">
 <div class="bg-white rounded-2xl border p-4 grid gap-2"><h2 class="font-bold">Profil</h2>
@@ -38,11 +35,6 @@ require ROOT.'/templates/admin/header.php'; ?>
 <label class="grid gap-1">Jabatan<input name="principal_title" value="<?= Helper::e($prof['principal_title']??'') ?>" class="border rounded-lg p-2"></label>
 <label class="grid gap-1">Sambutan<textarea name="principal_greeting" id="principalGreeting" rows="6"><?= Helper::e($prof['principal_greeting']??'') ?></textarea><span id="editorWarn" class="hidden text-xs font-normal text-red-600">Editor gagal dimuat (CDN diblokir). Textarea biasa tetap bisa disimpan.</span></label>
 <label class="grid gap-1">Foto Kepala Sekolah<?php if(!empty($prof['principal_photo'])): ?><img id="ppPreview" src="<?= Helper::upload($prof['principal_photo']) ?>" alt="Foto Kepala Sekolah" class="h-32 w-28 object-cover rounded-xl border shadow-sm"><?php else: ?><img id="ppPreview" class="hidden h-32 w-28 object-cover rounded-xl border shadow-sm" alt="Preview"><?php endif; ?><input type="file" name="principal_photo" id="ppInput" accept="image/*" class="border rounded-lg p-2"></label></div>
-<div class="bg-white rounded-2xl border p-4 grid gap-2"><h2 class="font-bold"><i class="fa fa-clock text-emerald-600 mr-1"></i>Jam Layanan Kontak</h2>
-<label class="grid gap-1">Hari<input name="s[service_days]" value="<?= Helper::e($sets['service_days']??'Senin - Jumat') ?>" placeholder="Senin - Jumat" class="border rounded-lg p-2"></label>
-<div class="grid grid-cols-2 gap-2">
-<label class="grid gap-1">Jam Buka<input type="time" name="s[service_open]" value="<?= Helper::e($sets['service_open']??'07:00') ?>" class="border rounded-lg p-2"></label>
-<label class="grid gap-1">Jam Tutup<input type="time" name="s[service_close]" value="<?= Helper::e($sets['service_close']??'15:30') ?>" class="border rounded-lg p-2"></label></div></div>
 </div>
 <div class="lg:col-span-2 flex justify-center"><button class="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl px-10 py-2.5 font-bold w-full sm:w-auto sm:min-w-[220px]"><i class="fa fa-floppy-disk mr-1"></i>Simpan Identitas</button></div></form>
 <script src="https://cdn.jsdelivr.net/npm/tinymce@7.6.1/tinymce.min.js"></script>

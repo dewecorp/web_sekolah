@@ -11,19 +11,80 @@ final class Security {
     public static function verifyCsrf(?string $t): bool {
         return is_string($t) && hash_equals($_SESSION['csrf'] ?? '', $t);
     }
-    // Rate limit sederhana: max 5 percobaan / 10 menit per IP
-    public static function loginAllowed(PDO $db, string $ip): bool {
-        $s = $db->prepare("SELECT COUNT(*) FROM login_attempts WHERE ip=? AND attempted_at > NOW() - INTERVAL 10 MINUTE");
-        $s->execute([$ip]);
-        return ((int)$s->fetchColumn()) < 5;
+    /**
+     * Anti brute-force dengan lockout eksponensial.
+     * Maksimal 5 percobaan gagal dalam jendela lockout.
+     * Setiap kelipatan 5 gagal, durasi lockout naik: 1, 5, 15, 60 menit (maks).
+     * Pembatasan diterapkan per IP dan per username secara terpisah.
+     */
+    public static function loginAllowed(PDO $db, string $ip, string $user): bool {
+        self::cleanupAttempts($db);
+        $maxFailures = 5;
+        $steps = [1, 5, 15, 60]; // menit
+
+        foreach ([$ip, $user] as $key) {
+            $recentFailures = self::countRecentFailures($db, $key, $steps);
+            $level = (int) floor($recentFailures / $maxFailures);
+            if ($level === 0) continue;
+            $lockMinutes = $steps[min($level - 1, count($steps) - 1)];
+            if (self::hasFailureWithin($db, $key, $lockMinutes)) {
+                return false;
+            }
+        }
+        return true;
     }
+
+    private static function countRecentFailures(PDO $db, string $key, array $steps): int {
+        $maxWindow = max($steps);
+        $s = $db->prepare("SELECT COUNT(*) FROM login_attempts WHERE (ip=? OR username=?) AND attempted_at > NOW() - INTERVAL ? MINUTE");
+        $s->execute([$key, $key, $maxWindow]);
+        return (int) $s->fetchColumn();
+    }
+
+    private static function hasFailureWithin(PDO $db, string $key, int $minutes): bool {
+        $s = $db->prepare("SELECT 1 FROM login_attempts WHERE (ip=? OR username=?) AND attempted_at > NOW() - INTERVAL ? MINUTE LIMIT 1");
+        $s->execute([$key, $key, $minutes]);
+        return (bool) $s->fetch();
+    }
+
+    private static function cleanupAttempts(PDO $db): void {
+        try { $db->exec("DELETE FROM login_attempts WHERE attempted_at < NOW() - INTERVAL 24 HOUR"); } catch (Throwable) {}
+    }
+
+    public static function remainingLockoutSeconds(PDO $db, string $ip, string $user): int {
+        $maxFailures = 5;
+        $steps = [1, 5, 15, 60];
+        $max = 0;
+        foreach ([$ip, $user] as $key) {
+            $recentFailures = self::countRecentFailures($db, $key, $steps);
+            $level = (int) floor($recentFailures / $maxFailures);
+            if ($level === 0) continue;
+            $lockMinutes = $steps[min($level - 1, count($steps) - 1)];
+            $s = $db->prepare("SELECT MAX(attempted_at) FROM login_attempts WHERE (ip=? OR username=?) AND attempted_at > NOW() - INTERVAL ? MINUTE");
+            $s->execute([$key, $key, $lockMinutes]);
+            $latest = $s->fetchColumn();
+            if ($latest) {
+                $elapsed = time() - strtotime((string)$latest);
+                $remaining = ($lockMinutes * 60) - $elapsed;
+                if ($remaining > $max) $max = $remaining;
+            }
+        }
+        return $max;
+    }
+
     public static function logAttempt(PDO $db, string $ip, string $user): void {
-        $s = $db->prepare("INSERT INTO login_attempts(ip,username) VALUES(?,?)");
+        $s = $db->prepare("INSERT INTO login_attempts(ip,username,attempted_at) VALUES(?,?,NOW())");
         $s->execute([$ip, $user]);
     }
-    public static function clearAttempts(PDO $db, string $ip): void {
-        $s = $db->prepare("DELETE FROM login_attempts WHERE ip=?");
-        $s->execute([$ip]);
+
+    public static function clearAttempts(PDO $db, string $ip, ?string $user = null): void {
+        if ($user === null) {
+            $s = $db->prepare("DELETE FROM login_attempts WHERE ip=?");
+            $s->execute([$ip]);
+        } else {
+            $s = $db->prepare("DELETE FROM login_attempts WHERE ip=? OR username=?");
+            $s->execute([$ip, $user]);
+        }
     }
     public static function slug(string $t): string {
         $t = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $t) ?: $t;

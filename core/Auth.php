@@ -1,10 +1,30 @@
 <?php
 declare(strict_types=1);
 final class Auth {
+    public static ?string $lastError = null;
+    public const IDLE_SECONDS = 7200; // 2 jam idle timeout
     public static function user(): ?array { return $_SESSION['user'] ?? null; }
     public static function check(): bool { return isset($_SESSION['user']); }
+    public static function isIdle(): bool {
+        if (!self::check()) return false;
+        $last = $_SESSION['last_active'] ?? 0;
+        if ($last === 0) return false;
+        return (time() - (int)$last) > self::IDLE_SECONDS;
+    }
+    public static function touchActivity(): void {
+        if (self::check()) $_SESSION['last_active'] = time();
+    }
     public static function requireLogin(): void {
         if (!self::check()) { header('Location: ' . BASE_URL . '/admin/login'); exit; }
+        if (self::isIdle()) {
+            $db = null;
+            try { $db = Database::conn(); } catch (Throwable) {}
+            if ($db) self::logout($db);
+            else { $_SESSION = []; if (ini_get('session.use_cookies')) { $p = session_get_cookie_params(); setcookie(session_name(), '', time()-42000, $p['path'], $p['domain'], $p['secure'], $p['httponly']); } session_destroy(); }
+            header('Location: ' . BASE_URL . '/admin/login');
+            exit;
+        }
+        self::touchActivity();
     }
     public static function requireRole(array $roles): void {
         self::requireLogin();
@@ -17,6 +37,7 @@ final class Auth {
         if (!$u || !password_verify($pass, $u['password'])) return false;
         session_regenerate_id(true);
         $_SESSION['user'] = ['id'=>(int)$u['id'],'name'=>$u['name'],'username'=>$u['username'],'role'=>$u['role'],'avatar'=>$u['avatar']];
+        $_SESSION['last_active'] = time();
         $db->prepare("UPDATE users SET last_login_at=NOW() WHERE id=?")->execute([$u['id']]);
         if ($remember) {
             $tok = bin2hex(random_bytes(32));

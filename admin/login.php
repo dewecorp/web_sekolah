@@ -4,14 +4,19 @@ if (Auth::check()) { header('Location: '.BASE_URL.'/admin'); exit; }
 $err = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
-    if (!Security::loginAllowed($db, $ip)) $err = 'Terlalu banyak percobaan. Tunggu 10 menit.';
-    elseif (!Security::verifyCsrf($_POST['csrf'] ?? null)) $err = 'CSRF tidak valid.';
+    $id = trim($_POST['id'] ?? ''); $pw = $_POST['password'] ?? '';
+    if (!Security::loginAllowed($db, $ip, $id)) {
+        $remaining = Security::remainingLockoutSeconds($db, $ip, $id);
+        $err = 'Terlalu banyak percobaan gagal. Silakan tunggu ' . Helper::humanDuration(max($remaining, 60)) . ' sebelum mencoba lagi.';
+    } elseif (!Security::verifyCsrf($_POST['csrf'] ?? null)) $err = 'CSRF tidak valid.';
     else {
-        $id = trim($_POST['id'] ?? ''); $pw = $_POST['password'] ?? '';
         if (Auth::login($db, $id, $pw, !empty($_POST['remember']))) {
-            Security::clearAttempts($db, $ip);
+            Security::clearAttempts($db, $ip, $id);
             header('Location: '.BASE_URL.'/admin'); exit;
-        } else { Security::logAttempt($db, $ip, $id); $err = 'Username/email atau password salah.'; }
+        } else {
+            Security::logAttempt($db, $ip, $id);
+            $err = 'Username/email atau password salah.';
+        }
     }
 }
 ?>

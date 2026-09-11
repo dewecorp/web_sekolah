@@ -99,6 +99,20 @@ final class Helper {
     // Ikon edit/hapus standar
     public static function editBtn(int $id): array { return ['kind'=>'link','href'=>'?edit='.$id,'icon'=>'fa-pen','tip'=>'Edit']; }
     public static function delBtn(int $id, string $act='delete'): array { return ['icon'=>'fa-trash','tip'=>'Hapus','confirm'=>true,'cls'=>'text-red-600 hover:text-red-700 hover:border-red-300','extra'=>'<input type="hidden" name="act" value="'.$act.'"><input type="hidden" name="id" value="'.$id.'">']; }
+    public static function humanDuration(int $s): string {
+        if ($s < 60) return $s . ' detik';
+        if ($s < 3600) {
+            $m = (int) round($s / 60);
+            return $m . ' menit';
+        }
+        if ($s < 86400) {
+            $h = (int) floor($s / 3600);
+            $m = (int) floor(($s % 3600) / 60);
+            return $h . ' jam' . ($m > 0 ? ' ' . $m . ' menit' : '');
+        }
+        $d = (int) floor($s / 86400);
+        return $d . ' hari';
+    }
     public static function paginate(int $total, int $per, int $page, string $base): string {
         $pages = max(1, (int)ceil($total / $per));
         if ($pages < 2) return '';

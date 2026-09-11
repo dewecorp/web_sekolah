@@ -52,4 +52,25 @@ if(_ok)_toast('success',_ok,'#10b981');
 if(_warn)_toast('warning',_warn,'#f59e0b');
 if(_er)Swal.fire({title:'Gagal',text:_er,icon:'error',confirmButtonColor:'#dc2626'});
 </script>
+<?php if (Auth::check()): ?>
+<script>
+(function(){
+  const IDLE_MS=<?= Auth::IDLE_SECONDS * 1000 ?>;
+  const WARN_MS=60000; // peringatan 1 menit sebelumnya
+  const loginUrl=<?= json_encode(Helper::url('admin/login')) ?>;
+  let lastActive=Date.now(), warned=false;
+  const events=['mousemove','mousedown','keydown','click','scroll','touchstart'];
+  const reset=()=>{ lastActive=Date.now(); warned=false; };
+  events.forEach(e=>document.addEventListener(e,reset,{passive:true}));
+  setInterval(()=>{
+    const idle=Date.now()-lastActive;
+    if(idle>=IDLE_MS){ window.location.href=loginUrl; return; }
+    if(idle>=IDLE_MS-WARN_MS && !warned){
+      warned=true;
+      Swal.fire({title:'Sesi hampir habis',text:'Anda tidak aktif selama 2 jam. Anda akan segera diarahkan ke halaman login.',icon:'warning',showConfirmButton:true,confirmButtonText:'Tetap masuk',timer:WARN_MS,timerProgressBar:true,allowOutsideClick:false}).then(()=>{ lastActive=Date.now(); warned=false; });
+    }
+  },10000);
+})();
+</script>
+<?php endif; ?>
 </body></html>

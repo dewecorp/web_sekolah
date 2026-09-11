@@ -403,4 +403,23 @@ CREATE TABLE IF NOT EXISTS login_attempts (
   INDEX idx_ip_time (ip, attempted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS downloads (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  doc_type ENUM('file','link') NOT NULL DEFAULT 'file',
+  filename VARCHAR(255) DEFAULT NULL,
+  file_url VARCHAR(500) DEFAULT NULL,
+  mime VARCHAR(100) DEFAULT NULL,
+  extension VARCHAR(20) DEFAULT NULL,
+  size_bytes INT UNSIGNED DEFAULT 0,
+  download_count INT UNSIGNED DEFAULT 0,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  uploaded_by INT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_active (is_active),
+  INDEX idx_type (doc_type),
+  CONSTRAINT fk_downloads_user FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS=1;

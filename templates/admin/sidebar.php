@@ -12,6 +12,7 @@
 <?= $link('admin/categories', 'fa-tags', 'Kategori') ?>
 <?php endif; ?>
 <?= $link('admin/media', 'fa-photo-film', 'Media') ?>
+<?= $link('admin/downloads', 'fa-file-arrow-down', 'Media Unduh') ?>
 <?= $link('admin/gallery', 'fa-images', 'Galeri') ?>
 <?php if($role!=='author'): ?>
 <?= $link('admin/announcements', 'fa-bullhorn', 'Pengumuman') ?>

@@ -10,6 +10,9 @@ if ($uri === '/berita') { require ROOT.'/pages/news.php'; exit; }
 if ($uri === '/indeks-berita' || $uri === '/berita/indeks') { require ROOT.'/pages/news-index.php'; exit; }
 if (str_starts_with($uri, '/berita/')) { $slug = basename($uri); require ROOT.'/pages/news-detail.php'; exit; }
 if ($uri === '/galeri') { require ROOT.'/pages/gallery.php'; exit; }
+if ($uri === '/media-unduh') { require ROOT.'/pages/downloads.php'; exit; }
+if ($uri === '/media-unduh/preview') { require ROOT.'/pages/download-preview.php'; exit; }
+
 if ($uri === '/guru') { require ROOT.'/pages/teachers.php'; exit; }
 if ($uri === '/siswa') { require ROOT.'/pages/students.php'; exit; }
 if ($uri === '/sarana') { require ROOT.'/pages/sarana.php'; exit; }

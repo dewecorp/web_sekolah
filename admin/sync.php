@@ -59,6 +59,30 @@ function simad_mark(PDO $db, string $key, int $added, int $updated, int $skipped
   $db->prepare("INSERT INTO settings(`key`,`value`) VALUES(?,?) ON DUPLICATE KEY UPDATE `value`=VALUES(`value`)")
     ->execute([$key,date('d-m-Y H:i')." | +$added baru, $updated diperbarui".($skipped?", $skipped dilewati":'')]);
 }
+function simad_refresh_stats(PDO $db): array {
+  try{ $nSiswa=(int)$db->query("SELECT COUNT(*) FROM students")->fetchColumn(); }catch(Throwable){ $nSiswa=0; }
+  try{ $nGuru=(int)$db->query("SELECT COUNT(*) FROM teachers WHERE is_active=1")->fetchColumn(); }catch(Throwable){ $nGuru=0; }
+  try{ $nEkskul=(int)$db->query("SELECT COUNT(*) FROM extracurriculars WHERE is_active=1")->fetchColumn(); }catch(Throwable){ $nEkskul=0; }
+  try{ $nRombel=(int)$db->query("SELECT COUNT(*) FROM student_classes")->fetchColumn(); }catch(Throwable){ $nRombel=0; }
+  try{
+    $rows=$db->query("SELECT id,name FROM statistics")->fetchAll();
+    $up=$db->prepare("UPDATE statistics SET value=? WHERE id=?");
+    foreach($rows as $r){
+      $n=mb_strtolower((string)($r['name']??''));
+      $v=null;
+      if(str_contains($n,'siswa')||str_contains($n,'peserta didik')||str_contains($n,'murid')||str_contains($n,'santri')||str_contains($n,'pelajar')) $v=$nSiswa;
+      elseif(str_contains($n,'guru')||str_contains($n,'tendik')||str_contains($n,'pendidik')||str_contains($n,'pengajar')) $v=$nGuru;
+      elseif(str_contains($n,'ekstra')||str_contains($n,'ekskul')) $v=$nEkskul;
+      elseif(str_contains($n,'rombel')||str_contains($n,'rombongan')||$n==='kelas') $v=$nRombel;
+      if($v!==null) $up->execute([$v,(int)$r['id']]);
+    }
+  }catch(Throwable){}
+  try{
+    $has=$db->query("SELECT COUNT(*) FROM school_profile")->fetchColumn();
+    if($has) $db->prepare("UPDATE school_profile SET total_students=?,total_teachers=?,total_extracurricular=?")->execute([$nSiswa,$nGuru,$nEkskul]);
+  }catch(Throwable){}
+  return [$nSiswa,$nGuru,$nEkskul,$nRombel];
+}
 
 function simad_sync_guru(PDO $db, array $rows): array {
   $added=0;$updated=0;$skipped=0;
@@ -210,9 +234,16 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     if(!$rows) return ['ok'=>false,'msg'=>'Respon JSON tidak berisi array data.','code'=>$f['code']??0];
     [$a,$u,$s]=match($t){ 'guru'=>simad_sync_guru($db,$rows), 'siswa'=>simad_sync_siswa($db,$rows), default=>simad_sync_ekskul($db,$rows) };
     simad_mark($db,$lastK,$a,$u,$s);
-    Auth::log($db,'sync','sync',"Sinkron $t: +$a baru, $u update");
-    return ['ok'=>true,'added'=>$a,'updated'=>$u,'skipped'=>$s,'total'=>count($rows)];
+    [$nSiswa,$nGuru,$nEkskul,$nRombel]=simad_refresh_stats($db);
+    Auth::log($db,'sync','sync',"Sinkron $t: +$a baru, $u update | stat: $nSiswa siswa, $nGuru guru, $nEkskul ekskul, $nRombel rombel");
+    return ['ok'=>true,'added'=>$a,'updated'=>$u,'skipped'=>$s,'total'=>count($rows),'stats'=>['siswa'=>$nSiswa,'guru'=>$nGuru,'ekskul'=>$nEkskul,'rombel'=>$nRombel]];
   };
+  if($act==='refresh_stats'){
+    header('Content-Type: application/json');
+    [$nSiswa,$nGuru,$nEkskul,$nRombel]=simad_refresh_stats($db);
+    Auth::log($db,'sync','sync',"Refresh statistik: $nSiswa siswa, $nGuru guru, $nEkskul ekskul, $nRombel rombel");
+    echo json_encode(['ok'=>true,'stats'=>['siswa'=>$nSiswa,'guru'=>$nGuru,'ekskul'=>$nEkskul,'rombel'=>$nRombel]]); exit;
+  }
   if($act==='test'){
     $cur=simad_settings($db);
     if(!isset($map[$type])){ header('Content-Type: application/json'); echo json_encode(['ok'=>false,'msg'=>'Tipe tidak dikenal']); exit; }
@@ -239,6 +270,9 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div class="flex flex-wrap items-center gap-2 mb-4">
 <h1 class="text-xl font-extrabold"><i class="fa fa-arrows-rotate text-emerald-600 mr-1"></i>Sinkron SIMAD</h1>
 <span class="text-[11px] bg-slate-800 text-white px-2.5 py-0.5 rounded-full font-bold">guru • siswa • ekskul</span>
+<?php $stPreview=[]; try{ foreach($db->query("SELECT name,value FROM statistics ORDER BY sort_order,id LIMIT 4") as $r) $stPreview[]=$r; }catch(Throwable){} ?>
+<?php if($stPreview): ?><span class="text-[11px] bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full font-bold">stat: <?= Helper::e(implode(' • ',array_map(fn($x)=>$x['name'].' '.$x['value'],$stPreview))) ?></span><?php endif; ?>
+<button id="btnRefreshStats" class="bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold px-4 py-2 rounded-xl shadow"><i class="fa fa-chart-simple mr-1"></i>Refresh Statistik</button>
 <button id="btnSyncAll" class="ml-auto bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-4 py-2 rounded-xl shadow"><i class="fa fa-cloud-arrow-down mr-1"></i>Sinkron Semua</button>
 </div>
 
@@ -294,6 +328,12 @@ require ROOT.'/templates/admin/header.php'; ?>
     const t=b.dataset.sync,el=document.getElementById('res-'+t);el.textContent='Menyinkron...';b.disabled=true;
     try{const j=await post({act:'sync_'+t});msg(t,j);if(j.ok)setTimeout(()=>location.reload(),1200)}catch(e){el.innerHTML='<span class="text-red-600 font-bold">Gagal koneksi.</span>'}b.disabled=false;
   }));
+  document.getElementById('btnRefreshStats')?.addEventListener('click',async e=>{
+    const b=e.currentTarget;b.disabled=true;const o=b.innerHTML;b.innerHTML='<i class="fa fa-spinner fa-spin mr-1"></i>Menghitung...';
+    try{const j=await post({act:'refresh_stats'});if(j.ok){Swal.fire({icon:'success',title:'Statistik diperbarui',text:j.stats.siswa+' siswa, '+j.stats.guru+' guru, '+j.stats.ekskul+' ekskul, '+j.stats.rombel+' rombel.',timer:2000,showConfirmButton:false});setTimeout(()=>location.reload(),1200)}else Swal.fire('Gagal',j.msg||'Gagal','error')}
+    catch(_){Swal.fire('Gagal','Koneksi gagal','error')}
+    b.disabled=false;b.innerHTML=o;
+  });
   document.getElementById('btnSyncAll')?.addEventListener('click',async e=>{
     const b=e.currentTarget;b.disabled=true;b.innerHTML='<i class="fa fa-spinner fa-spin mr-1"></i>Menyinkron...';
     try{const j=await post({act:'sync_all'});['guru','siswa','ekskul'].forEach(t=>msg(t,j));if(j.ok)setTimeout(()=>location.reload(),1500);else b.disabled=false}

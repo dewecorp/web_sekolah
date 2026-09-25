@@ -32,6 +32,7 @@
 <?= $link('admin/curriculum', 'fa-book-open', 'Kurikulum') ?>
 <?= $link('admin/vision', 'fa-bullseye', 'Visi, Misi & Tujuan') ?>
 <?= $link('admin/statistics', 'fa-chart-simple', 'Statistik') ?>
+<?= $link('admin/sync', 'fa-arrows-rotate', 'Sinkron SIMAD') ?>
 <p class="px-3 mt-3 text-[11px] font-bold uppercase tracking-wide text-emerald-200/70">Tampilan</p>
 <?= $link('admin/menus', 'fa-list-ul', 'Menu') ?>
 <?= $link('admin/megamenu', 'fa-layer-group', 'Mega Menu') ?>

@@ -40,12 +40,19 @@ elseif($act==='bulk_delete'){ $ids=array_filter(array_map('intval',(array)($_POS
 elseif($act==='delete'){ $db->prepare("DELETE FROM teachers WHERE id=?")->execute([(int)$_POST['id']]); Auth::log($db,'delete','teachers','Hapus guru'); Session::flash('ok','Data dihapus.'); }
 elseif($nm===''){ Session::flash('err','Nama wajib.'); }
 else{ $ph=$_POST['old_photo']??null; if(!empty($_FILES['photo']['name']??'')){ $e=Security::validImage($_FILES['photo'],$APP); if($e){ Session::flash('err',$e); header('Location: '.Helper::url('admin/teachers')); exit; } $n=Security::safeName($_FILES['photo']['name']); move_uploaded_file($_FILES['photo']['tmp_name'],ROOT.'/assets/uploads/'.$n); $ph=$n; }
-if(!empty($_POST['id'])) $db->prepare("UPDATE teachers SET name=?,nip=?,position=?,type=?,photo=?,education=?,subject=?,description=?,is_active=?,sort_order=? WHERE id=?")->execute([$nm,$_POST['nip']??'',$_POST['position']??'Guru',$_POST['type']??'guru',$ph,$_POST['education']??'',$_POST['subject']??'',$_POST['description']??'',(int)($_POST['is_active']??1),(int)($_POST['sort_order']??0),(int)$_POST['id']]);
-else $db->prepare("INSERT INTO teachers(name,nip,position,type,photo,education,subject,description,is_active,sort_order) VALUES(?,?,?,?,?,?,?,?,?,?)")->execute([$nm,$_POST['nip']??'',$_POST['position']??'Guru',$_POST['type']??'guru',$ph,$_POST['education']??'',$_POST['subject']??'',$_POST['description']??'',(int)($_POST['is_active']??1),(int)($_POST['sort_order']??0)]);
+$posArr=$_POST['position']??[]; if(!is_array($posArr)) $posArr=[$posArr];
+$posArr=array_values(array_unique(array_filter(array_map(fn($x)=>trim((string)$x),$posArr))));
+$pos=$posArr?implode(', ',$posArr):'Guru';
+if(!empty($_POST['id'])) $db->prepare("UPDATE teachers SET name=?,nip=?,position=?,type=?,photo=?,education=?,subject=?,description=?,is_active=?,sort_order=? WHERE id=?")->execute([$nm,$_POST['nip']??'',$pos,$_POST['type']??'guru',$ph,$_POST['education']??'',$_POST['subject']??'',$_POST['description']??'',(int)($_POST['is_active']??1),(int)($_POST['sort_order']??0),(int)$_POST['id']]);
+else $db->prepare("INSERT INTO teachers(name,nip,position,type,photo,education,subject,description,is_active,sort_order) VALUES(?,?,?,?,?,?,?,?,?,?)")->execute([$nm,$_POST['nip']??'',$pos,$_POST['type']??'guru',$ph,$_POST['education']??'',$_POST['subject']??'',$_POST['description']??'',(int)($_POST['is_active']??1),(int)($_POST['sort_order']??0)]);
 Auth::log($db,'save','teachers',"Simpan $nm"); Session::flash('ok','Data disimpan.'); }
 header('Location: '.Helper::url('admin/teachers')); exit; }
 $rows=$db->query("SELECT * FROM teachers ORDER BY name ASC,id ASC")->fetchAll();
 $nGuru=count(array_filter($rows,fn($x)=>($x['type']??'')==='guru')); $nTendik=count(array_filter($rows,fn($x)=>($x['type']??'')==='tendik'));
+$jabList=[];
+try{ foreach($db->query("SELECT DISTINCT position FROM structures WHERE position IS NOT NULL AND position<>'' ORDER BY position") as $r) $jabList[]=trim((string)$r['position']); }catch(Throwable){}
+foreach($rows as $r){ foreach(array_map('trim',explode(',',(string)($r['position']??''))) as $p){ if($p!=='') $jabList[]=$p; } }
+$jabList=array_values(array_unique(array_filter($jabList)));
 $sets=[]; foreach($db->query("SELECT `key`,`value` FROM settings WHERE `key` IN ('guru_title','guru_desc','guru_show','guru_cols')") as $r) $sets[$r['key']]=$r['value'];
 require ROOT.'/templates/admin/header.php'; ?>
 <div class="flex flex-wrap items-center gap-2 mb-4">
@@ -92,7 +99,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <input type="hidden" name="id" id="f_id" value="0"><input type="hidden" name="old_photo" id="f_old" value="">
 <label class="grid gap-1 font-semibold">Nama<input name="name" id="f_name" required placeholder="Nama lengkap" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">NUPTK<input name="nip" id="f_nip" placeholder="NUPTK" class="border rounded-lg p-2 font-normal"></label>
-<label class="grid gap-1 font-semibold">Jabatan<input name="position" id="f_position" value="Guru" class="border rounded-lg p-2 font-normal"></label>
+<label class="grid gap-1 font-semibold">Jabatan (bisa pilih banyak)<select name="position[]" id="f_position" multiple class="border rounded-lg p-2 font-normal swal2-select" style="width:100%"><?php foreach($jabList as $j): ?><option value="<?= Helper::e($j) ?>"><?= Helper::e($j) ?></option><?php endforeach; ?></select><span class="text-xs font-normal text-slate-400">Sumber: Struktur Organisasi. Ketik untuk tambah baru.</span></label>
 <label class="grid gap-1 font-semibold">Tipe<select name="type" id="f_type" class="border rounded-lg p-2 font-normal"><option value="guru">guru</option><option value="tendik">tendik</option></select></label>
 <label class="grid gap-1 font-semibold">Mapel / Bidang<input name="subject" id="f_subject" placeholder="Matematika" class="border rounded-lg p-2 font-normal"></label>
 <label class="grid gap-1 font-semibold">Pendidikan<input name="education" id="f_edu" placeholder="S1 Pendidikan" class="border rounded-lg p-2 font-normal"></label>
@@ -135,7 +142,10 @@ function openModal(d){
   document.getElementById('f_id').value=d?.id||0;
   document.getElementById('f_name').value=d?.name||'';
   document.getElementById('f_nip').value=d?.nip||'';
-  document.getElementById('f_position').value=d?.position||'Guru';
+  const posSel=$('#f_position');
+  const curPos=String(d?.position||'').split(',').map(s=>s.trim()).filter(Boolean);
+  curPos.forEach(v=>{ if(posSel.find('option[value="'+v+'"]').length===0) posSel.append(new Option(v,v,true,true)); });
+  posSel.val(curPos.length?curPos:['Guru']).trigger('change');
   document.getElementById('f_sort').value=d?.sort_order??0;
   document.getElementById('f_subject').value=d?.subject||'';
   document.getElementById('f_edu').value=d?.education||'';
@@ -164,6 +174,19 @@ modal.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',clo
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 document.getElementById('f_photo').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const pv=document.getElementById('f_prev');pv.src=URL.createObjectURL(f);pv.classList.remove('hidden')});
 <?php if($edit): ?>openModal(<?= json_encode(['id'=>$edit['id'],'name'=>$edit['name'],'nip'=>$edit['nip']??'','position'=>$edit['position'],'type'=>$edit['type'],'photo'=>$edit['photo']??'','education'=>$edit['education']??'','subject'=>$edit['subject']??'','description'=>$edit['description']??'','is_active'=>(int)$edit['is_active'],'sort_order'=>(int)$edit['sort_order']]) ?>);<?php endif; ?>
+</script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+<style>
+#teacherModal .select2-container .select2-selection--multiple{min-height:40px!important;border:1px solid #e2e8f0!important;border-radius:.65rem!important;box-shadow:0 1px 2px rgba(15,23,42,.06),0 4px 12px rgba(15,23,42,.04)!important;padding:.15rem .4rem!important}
+#teacherModal .select2-container--default.select2-container--focus .select2-selection--multiple{border-color:#10b981!important;box-shadow:0 0 0 3px rgba(16,185,129,.18),0 4px 14px rgba(16,185,129,.12)!important;outline:none!important}
+#teacherModal .select2-container--default .select2-selection--multiple .select2-selection__choice{background:#ecfdf5!important;border:1px solid #a7f3d0!important;border-radius:.5rem!important;font-size:.75rem!important;font-weight:700!important;color:#047857!important}
+</style>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(function(){
+  $('#f_position').select2({placeholder:'Pilih jabatan (bisa banyak)',allowClear:true,width:'100%',tags:true,tokenSeparators:[','],dropdownParent:$('#teacherModal')});
+});
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>

@@ -20,6 +20,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div class="flex flex-wrap items-center gap-2 mb-4">
 <h1 class="text-xl font-extrabold"><i class="fa fa-futbol text-emerald-600 mr-1"></i>Ekstrakurikuler</h1>
 <span class="text-[11px] bg-slate-800 text-white px-2.5 py-0.5 rounded-full font-bold"><?= count($eks) ?> ekskul</span>
+<span class="text-[11px] bg-emerald-600 text-white px-2.5 py-0.5 rounded-full font-bold"><?= array_sum(array_map(fn($x)=>(int)($x['member_count']??0),$eks)) ?> anggota</span>
 <a href="<?= Helper::url('ekstrakurikuler') ?>" target="_blank" rel="noopener noreferrer" class="text-sm px-3 py-1.5 border rounded-lg bg-white"><i class="fa fa-eye mr-1"></i>Lihat Public</a>
 <button id="btnAddEks" class="ml-auto bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-4 py-2 rounded-xl shadow"><i class="fa fa-plus mr-1"></i>Tambah Ekskul</button>
 </div>
@@ -36,14 +37,15 @@ require ROOT.'/templates/admin/header.php'; ?>
 <div class="px-4 py-3 font-bold border-b">Daftar Ekstrakurikuler</div>
 <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 border-b text-sm"><span id="selCountEks" class="text-slate-500">0 dipilih</span><button type="button" id="btnBulkEks" class="ml-auto bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg"><i class="fa fa-trash mr-1"></i>Hapus Terpilih</button></div>
 <div class="overflow-x-auto"><table class="w-full text-sm min-w-[600px]">
-<tr class="text-left text-slate-500 text-xs uppercase bg-slate-50"><th class="p-3 w-8"><input type="checkbox" id="checkAllEks"></th><th class="p-3 w-10">No</th><th class="p-3">Nama</th><th class="p-3">Pembina</th><th class="p-3">Hari</th><th class="p-3">Jam</th><th class="p-3">Tempat</th><th class="p-3 text-right">Aksi</th></tr>
-<?php if(!$eks): ?><tr><td colspan="8" class="p-10 text-center text-slate-500"><i class="fa fa-futbol text-3xl block mb-2"></i>Belum ada ekskul. Klik Tambah Ekskul.</td></tr><?php endif; ?>
+<tr class="text-left text-slate-500 text-xs uppercase bg-slate-50"><th class="p-3 w-8"><input type="checkbox" id="checkAllEks"></th><th class="p-3 w-10">No</th><th class="p-3">Nama</th><th class="p-3">Pembina</th><th class="p-3">Hari</th><th class="p-3">Jam</th><th class="p-3 text-center">Anggota</th><th class="p-3">Tempat</th><th class="p-3 text-right">Aksi</th></tr>
+<?php if(!$eks): ?><tr><td colspan="9" class="p-10 text-center text-slate-500"><i class="fa fa-futbol text-3xl block mb-2"></i>Belum ada ekskul. Klik Tambah Ekskul.</td></tr><?php endif; ?>
 <?php $noEks=1; foreach($eks as $e): ?>
 <tr class="border-t hover:bg-slate-50">
 <td class="p-3"><input type="checkbox" form="bulkEks" name="ids[]" value="<?= $e['id'] ?>" class="rowcheck rowcheckEks"></td><td class="p-3 text-slate-500"><?= $noEks++ ?></td><td class="p-3 font-semibold"><?= Helper::e($e['name']) ?><span class="block text-[11px] font-normal text-slate-400"><?= Helper::e(Helper::excerpt($e['description']??'',80)) ?></span></td>
 <td class="p-3 text-sm"><?= Helper::e($e['coach']??'-') ?></td>
 <td class="p-3 text-sm"><?= Helper::e($e['day']??'-') ?></td>
 <td class="p-3 text-sm"><?= Helper::e($e['time'] ? date('H:i', strtotime($e['time'])) : '-') ?></td>
+<td class="p-3 text-center font-extrabold text-emerald-700"><?= (int)($e['member_count']??0) ?></td>
 <td class="p-3 text-sm"><?= Helper::e($e['schedule']??'-') ?></td>
 <td class="p-3"><span class="flex gap-1 justify-end">
 <button class="btn-edit w-8 h-8 border rounded-lg grid place-items-center bg-white hover:text-emerald-600" title="Edit" data-row='<?= htmlspecialchars(json_encode(['id'=>$e['id'],'name'=>$e['name'],'coach'=>$e['coach']??'','day'=>$e['day']??'','time'=>$e['time']??'','schedule'=>$e['schedule']??'','description'=>$e['description']??'']),ENT_QUOTES) ?>'><i class="fa fa-pen text-xs"></i></button>

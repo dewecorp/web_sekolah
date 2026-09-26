@@ -178,8 +178,8 @@ function simad_sync_siswa(PDO $db, array $rows): array {
 function simad_sync_ekskul(PDO $db, array $rows): array {
   $added=0;$updated=0;$skipped=0;
   $find=$db->prepare("SELECT id FROM extracurriculars WHERE name=? LIMIT 1");
-  $ins=$db->prepare("INSERT INTO extracurriculars(name,description,coach,`day`,`time`,schedule,is_active,sort_order) VALUES(?,?,?,?,?,?,1,0)");
-  $upd=$db->prepare("UPDATE extracurriculars SET description=?,coach=?,`day`=?,`time`=?,schedule=? WHERE id=?");
+  $ins=$db->prepare("INSERT INTO extracurriculars(name,description,coach,`day`,`time`,schedule,member_count,is_active,sort_order) VALUES(?,?,?,?,?,?,?,1,0)");
+  $upd=$db->prepare("UPDATE extracurriculars SET description=?,coach=?,`day`=?,`time`=?,schedule=?,member_count=? WHERE id=?");
   $days=['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu','Ahad'];
   foreach($rows as $r){
     if(!is_array($r)){ $skipped++; continue; }
@@ -193,14 +193,13 @@ function simad_sync_ekskul(PDO $db, array $rows): array {
     if($coach==='') $coach=simad_pick($r,['coach','pelatih','guru']);
     $desc=simad_pick($r,['description','deskripsi','keterangan']);
     $cnt=isset($r['jumlah_anggota'])?(int)$r['jumlah_anggota']:(isset($r['anggota'])&&is_array($r['anggota'])?count($r['anggota']):0);
-    if($desc===''&&$cnt>0) $desc=$cnt.' anggota';
     $sched=simad_pick($r,['schedule','jadwal','lokasi','tempat','ruang']);
     if($sched===''&&$day!==null) $sched=$day.($time!==''?" jam ".mb_substr($time,0,5):'');
     if(isset($r['waktu_selesai'])&&trim((string)$r['waktu_selesai'])!==''&&$time!=='') $sched=($sched!==''?$sched.' ':($day??'')).'('.mb_substr($time,0,5).' - '.mb_substr(trim((string)$r['waktu_selesai']),0,5).')';
     $find->execute([$nm]); $id=$find->fetchColumn()?:null;
     try{
-      if($id){ $upd->execute([$desc,$coach,$day,$time!==''?$time:null,$sched,(int)$id]); $updated++; }
-      else{ $ins->execute([$nm,$desc,$coach,$day,$time!==''?$time:null,$sched]); $added++; }
+      if($id){ $upd->execute([$desc,$coach,$day,$time!==''?$time:null,$sched,$cnt,(int)$id]); $updated++; }
+      else{ $ins->execute([$nm,$desc,$coach,$day,$time!==''?$time:null,$sched,$cnt]); $added++; }
     }catch(Throwable){ $skipped++; }
   }
   return [$added,$updated,$skipped];

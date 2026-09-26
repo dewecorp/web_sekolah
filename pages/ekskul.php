@@ -6,7 +6,7 @@ $heroTitle=$ekTitle;
 $heroDesc=$ekDesc;
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / '.Helper::e($ekTitle);
 $heroTheme='teal';
-$heroStats=[['icon'=>'fa-calendar-day','label'=>Helper::pageDate('extracurriculars'),'solid'=>true],['icon'=>'fa-futbol','label'=>count($rows).' kegiatan aktif','solid'=>false]];
+$heroStats=[['icon'=>'fa-calendar-day','label'=>Helper::pageDate('extracurriculars'),'solid'=>true],['icon'=>'fa-futbol','label'=>count($rows).' kegiatan aktif','solid'=>false],['icon'=>'fa-users','label'=>array_sum(array_map(fn($x)=>(int)($x['member_count']??0),$rows)).' anggota','solid'=>false]];
 require ROOT.'/templates/frontend/page-hero.php'; ?>
 <div class="mt-4">
 <?php $ekIcon=['fa-futbol','fa-campground','fa-palette','fa-music','fa-robot','fa-book-quran']; ?>
@@ -16,7 +16,7 @@ require ROOT.'/templates/frontend/page-hero.php'; ?>
 <article class="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-3xl p-5 card-hover reveal">
 <div class="flex items-center gap-3">
 <span class="w-12 h-12 rounded-2xl bg-gradient-to-b from-emerald-500 to-teal-600 text-white grid place-items-center text-xl shrink-0"><i class="fa <?= $ic ?>"></i></span>
-<div class="min-w-0"><h2 class="font-extrabold leading-snug"><?= Helper::e($r['name']) ?></h2></div>
+<div class="min-w-0"><h2 class="font-extrabold leading-snug"><?= Helper::e($r['name']) ?></h2><?php if(isset($r['member_count'])): ?><span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700"><i class="fa fa-users mr-0.5"></i><?= (int)$r['member_count'] ?> anggota</span><?php endif; ?></div>
 </div>
 <?php if(!empty($r['description'])): ?><p class="text-sm text-slate-600 dark:text-slate-300 mt-3 leading-relaxed text-justify"><?= nl2br(Helper::e($r['description'])) ?></p><?php endif; ?>
 <?php if(!empty($r['coach'])): ?><div class="mt-3 flex items-center gap-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-100 dark:border-emerald-800 p-2.5"><span class="w-9 h-9 rounded-lg bg-emerald-600 text-white grid place-items-center shrink-0"><i class="fa fa-user-tie text-sm"></i></span><span class="min-w-0"><span class="block text-[10px] font-bold text-emerald-600 uppercase tracking-wide">Pembina</span><span class="block text-sm font-bold truncate"><?= Helper::e($r['coach']) ?></span></span></div><?php endif; ?>

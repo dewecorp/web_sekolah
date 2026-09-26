@@ -263,7 +263,8 @@ $fx=$s['effect']??'fade-up'; $fxCls=$fx==='none'?'fx-none':'fx fx-'.$fx;
 <div class="flex items-center gap-3">
 <span class="w-12 h-12 rounded-2xl bg-gradient-to-b from-emerald-500 to-teal-600 text-white grid place-items-center text-xl shrink-0"><i class="fa <?= $ic ?>"></i></span>
 <div class="min-w-0"><h3 class="font-bold leading-snug truncate"><?= Helper::e($r['name']) ?></h3>
-<?php if(!empty($r['coach'])): ?><p class="text-[11px] text-slate-500"><i class="fa fa-user-tie mr-1 text-emerald-500"></i><?= Helper::e($r['coach']) ?></p><?php endif; ?></div>
+<?php if(!empty($r['coach'])): ?><p class="text-[11px] text-slate-500"><i class="fa fa-user-tie mr-1 text-emerald-500"></i><?= Helper::e($r['coach']) ?></p><?php endif; ?>
+<?php if(isset($r['member_count'])): ?><p class="text-[11px] font-bold text-emerald-600"><i class="fa fa-users mr-1"></i><?= (int)$r['member_count'] ?> anggota</p><?php endif; ?></div>
 </div>
 <?php if(!empty($r['description'])): ?><p class="text-xs text-slate-500 mt-3 line-clamp-3"><?= Helper::e(Helper::excerpt($r['description'],110)) ?></p><?php endif; ?>
 <?php if(!empty($r['schedule'])): ?><div class="flex flex-wrap gap-1.5 mt-3"><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-200"><i class="fa fa-clock mr-0.5"></i><?= Helper::e($r['schedule']) ?></span></div><?php endif; ?></article>

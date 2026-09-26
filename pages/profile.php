@@ -11,7 +11,7 @@ $heroTitle='Profil Sekolah';
 $heroDesc=($tg=Database::setting('tagline',''))!==''?nl2br(Helper::e($tg)):'';
 $heroCrumb='<a href="'.Helper::url().'" class="hover:text-white">Beranda</a> / Profil';
 $heroTheme='emerald';
-try{ $pstats=$db->query("SELECT * FROM statistics WHERE is_active=1 ORDER BY sort_order,id LIMIT 3")->fetchAll(); }catch(Throwable){ $pstats=[]; }
+try{ $pstats=$db->query("SELECT * FROM statistics WHERE is_active=1 ORDER BY sort_order,id LIMIT 3")->fetchAll(); foreach($pstats as &$ps){ $lv=Helper::liveStat((string)($ps['name']??'')); if($lv!==null) $ps['value']=$lv; } unset($ps); }catch(Throwable){ $pstats=[]; }
 $heroStats=[['icon'=>'fa-calendar-day','label'=>Helper::pageDate('school_profile'),'solid'=>true]]; foreach($pstats as $ps){ $heroStats[]=['icon'=>$ps['icon']??'fa-chart-simple','label'=>number_format((int)$ps['value']).($ps['suffix']??'').' '.($ps['name']??''),'solid'=>false]; }
 require ROOT.'/templates/frontend/page-hero.php'; ?>
 <div class="bg-white dark:bg-slate-800 border rounded-2xl p-6 mt-6 reveal min-w-0 max-w-full overflow-hidden"><h2 class="font-bold mb-2">Sejarah</h2><p class="text-sm text-slate-600 dark:text-slate-300 text-justify leading-relaxed break-words"><?= nl2br(Helper::e($profile['history']??'Belum diisi.')) ?></p></div>

@@ -3,6 +3,18 @@ declare(strict_types=1);
 final class Helper {
     public static function e(?string $v): string { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
     public static function setting(string $k, string $d = ''): string { return Database::setting($k, $d); }
+    // Hitung statistik live dari data real (bukan nilai simpan). Nama item fleksibel.
+    public static function liveStat(string $name): ?int {
+        try {
+            $db = Database::conn();
+            $n = mb_strtolower(trim($name));
+            if (str_contains($n,'siswa')||str_contains($n,'peserta didik')||str_contains($n,'murid')||str_contains($n,'santri')||str_contains($n,'pelajar')) return (int)$db->query("SELECT COUNT(*) FROM students")->fetchColumn();
+            if (str_contains($n,'guru')||str_contains($n,'tendik')||str_contains($n,'pendidik')||str_contains($n,'pengajar')) return (int)$db->query("SELECT COUNT(*) FROM teachers WHERE is_active=1")->fetchColumn();
+            if (str_contains($n,'ekstra')||str_contains($n,'ekskul')) return (int)$db->query("SELECT COUNT(*) FROM extracurriculars WHERE is_active=1")->fetchColumn();
+            if (str_contains($n,'rombel')||str_contains($n,'rombongan')||$n==='kelas') return (int)$db->query("SELECT COUNT(*) FROM student_classes")->fetchColumn();
+        } catch (Throwable) {}
+        return null;
+    }
     public static function url(string $p = ''): string { return rtrim(BASE_URL, '/') . '/' . ltrim($p, '/'); }
     // URL menu: dukung absolut (https://web lain), relatif (/profil), # dan mailto/tel
     public static function menuUrl(string $u): array {

@@ -1,4 +1,4 @@
-<?php if((Database::setting('guru_show','1')==='0')){ http_response_code(404); require ROOT.'/templates/error/404.php'; exit; } $t=$db->query("SELECT * FROM teachers WHERE is_active=1 ORDER BY sort_order")->fetchAll(); $gTitle=Database::setting('guru_title','Guru & Staff'); if(trim($gTitle)==='')$gTitle='Guru & Staff'; $gDesc=Database::setting('guru_desc',''); $metaTitle=$gTitle.' - '.Database::setting('school_name','Sekolah'); require ROOT."/templates/frontend/header.php"; ?>
+<?php if((Database::setting('guru_show','1')==='0')){ http_response_code(404); require ROOT.'/templates/error/404.php'; exit; } $t=$db->query("SELECT * FROM teachers WHERE is_active=1 ORDER BY name ASC,id ASC")->fetchAll(); $gTitle=Database::setting('guru_title','Guru & Staff'); if(trim($gTitle)==='')$gTitle='Guru & Staff'; $gDesc=Database::setting('guru_desc',''); $metaTitle=$gTitle.' - '.Database::setting('school_name','Sekolah'); require ROOT."/templates/frontend/header.php"; ?>
 <div class="w-full px-4 md:px-8 py-10">
 <?php
 $heroBadge='<i class="fa fa-chalkboard-user text-white"></i>'.Helper::e($gTitle);

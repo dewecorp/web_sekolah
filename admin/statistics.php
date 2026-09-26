@@ -20,11 +20,13 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
   header('Location: '.Helper::url('admin/statistics')); exit;
 }
 $rows=$db->query("SELECT * FROM statistics ORDER BY sort_order,id")->fetchAll();
+foreach($rows as &$rr){ $lv=Helper::liveStat((string)($rr['name']??'')); $rr['_live']=$lv; } unset($rr);
 require ROOT.'/templates/admin/header.php'; ?>
 <div class="flex flex-wrap items-center gap-2 mb-4">
 <h1 class="text-xl font-extrabold"><i class="fa fa-chart-simple text-emerald-600 mr-1"></i>Statistik</h1>
 <span class="text-[11px] bg-slate-800 text-white px-2.5 py-0.5 rounded-full font-bold"><?= count($rows) ?> item</span>
 <span class="text-[11px] bg-emerald-100 text-emerald-700 px-2.5 py-0.5 rounded-full font-bold">tampil di section Statistik home</span>
+<span class="text-[11px] bg-sky-100 text-sky-700 px-2.5 py-0.5 rounded-full font-bold">angka di public dihitung live</span>
 <button id="btnAdd" class="ml-auto bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-4 py-2 rounded-xl shadow"><i class="fa fa-plus mr-1"></i>Tambah Statistik</button>
 </div>
 <form method="post" id="bulkForm"><?= Security::csrfField() ?><input type="hidden" name="act" value="bulk_delete"></form>
@@ -37,7 +39,7 @@ require ROOT.'/templates/admin/header.php'; ?>
 <tr class="border-t hover:bg-slate-50">
 <td class="p-3"><input type="checkbox" form="bulkForm" name="ids[]" value="<?= $r['id'] ?>" class="rowcheck"></td><td class="p-3 text-slate-500"><?= $no++ ?></td>
 <td class="p-3 font-semibold"><span class="flex items-center gap-2"><span class="w-8 h-8 rounded-lg bg-gradient-to-br <?= Helper::e($r['gradient']) ?> text-white grid place-items-center"><i class="fa <?= Helper::e($r['icon']) ?> text-xs"></i></span><span><?= Helper::e($r['name']) ?><span class="block text-[11px] font-normal text-slate-400"><?= Helper::e($r['description']??'') ?></span></span></span><?= $r['is_active']?'':' <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-500">off</span>' ?></td>
-<td class="p-3 font-extrabold text-lg"><?= number_format((int)$r['value']) ?><?= Helper::e($r['suffix']??'') ?></td>
+<td class="p-3 font-extrabold text-lg"><?= number_format((int)($r['_live']??$r['value'])) ?><?= Helper::e($r['suffix']??'') ?><?php if($r['_live']!==null&&(int)$r['_live']!==(int)$r['value']): ?> <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sky-100 text-sky-700">live</span><?php endif; ?></td>
 <td class="p-3"><span class="flex gap-1 justify-end">
 <button class="btn-edit w-8 h-8 border rounded-lg grid place-items-center bg-white hover:text-emerald-600" title="Edit" data-row='<?= htmlspecialchars(json_encode(['id'=>$r['id'],'name'=>$r['name'],'value'=>(int)$r['value'],'suffix'=>$r['suffix']??'','icon'=>$r['icon']??'fa-chart-simple','description'=>$r['description']??'','gradient'=>$r['gradient']??'from-emerald-500 to-teal-600','sort_order'=>(int)$r['sort_order'],'is_active'=>(int)$r['is_active']]),ENT_QUOTES) ?>'><i class="fa fa-pen text-xs"></i></button>
 <form method="post" class="inline"><?= Security::csrfField() ?><input type="hidden" name="act" value="toggle"><input type="hidden" name="id" value="<?= $r['id'] ?>"><button class="w-8 h-8 border rounded-lg grid place-items-center bg-white hover:text-amber-600" title="Aktif/Nonaktif"><i class="fa fa-power-off text-xs"></i></button></form>

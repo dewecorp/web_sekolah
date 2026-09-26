@@ -9,12 +9,16 @@ elseif($act==='delete'){ $cid=(int)$_POST['id']; $cn=$db->prepare("SELECT name F
 header('Location: '.Helper::url('admin/students')); exit; }
 $sets=[]; foreach($db->query("SELECT `key`,`value` FROM settings WHERE `key` IN ('siswa_title','siswa_desc','siswa_show','siswa_cols')") as $r) $sets[$r['key']]=$r['value'];
 $classes=$db->query("SELECT * FROM student_classes ORDER BY sort_order,id")->fetchAll();
+$totReal=(int)$db->query("SELECT COUNT(*) FROM students")->fetchColumn();
+$totL=(int)array_sum(array_column($classes,'n_l')); $totP=(int)array_sum(array_column($classes,'n_p'));
 $rows=$db->query("SELECT s.*,c.name cname FROM students s LEFT JOIN student_classes c ON c.id=s.class_id ORDER BY c.sort_order,c.id,s.sort_order,s.id")->fetchAll();
 require ROOT.'/templates/admin/header.php'; ?>
 <div class="flex flex-wrap items-center gap-2 mb-4">
 <h1 class="text-xl font-extrabold"><i class="fa fa-user-graduate text-emerald-600 mr-1"></i>Data Siswa</h1>
-<span class="text-[11px] bg-slate-800 text-white px-2.5 py-0.5 rounded-full font-bold"><?= array_sum(array_column($classes,'n_l'))+array_sum(array_column($classes,'n_p')) ?> siswa</span>
-<span class="text-[11px] bg-slate-800 text-white px-2.5 py-0.5 rounded-full font-bold"><?= count($classes) ?> kelas</span>
+<span class="text-[11px] bg-slate-800 text-white px-2.5 py-0.5 rounded-full font-bold"><?= $totReal ?> siswa</span>
+<span class="text-[11px] bg-sky-600 text-white px-2.5 py-0.5 rounded-full font-bold"><?= $totL ?> putra</span>
+<span class="text-[11px] bg-pink-600 text-white px-2.5 py-0.5 rounded-full font-bold"><?= $totP ?> putri</span>
+<span class="text-[11px] bg-emerald-600 text-white px-2.5 py-0.5 rounded-full font-bold"><?= count($classes) ?> kelas</span>
 <a href="<?= Helper::url('siswa') ?>" target="_blank" rel="noopener noreferrer" class="text-sm px-3 py-1.5 border rounded-lg bg-white"><i class="fa fa-eye mr-1"></i>Lihat Public</a>
 <button id="btnClass" class="ml-auto bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-4 py-2 rounded-xl shadow"><i class="fa fa-plus mr-1"></i>Tambah Kelas</button>
 </div>

@@ -114,8 +114,8 @@ function simad_sync_guru(PDO $db, array $rows): array {
     $desc=simad_pick($r,['description','deskripsi','bio','profil']);
     if($desc===''&&simad_pick($r,['wali_kelas','kelas_wali'])!=='') $desc='Wali kelas '.simad_pick($r,['wali_kelas','kelas_wali']);
     $id=null;
-    if($nip!==''){ $findNip->execute([$nip]); $id=$findNip->fetchColumn()?:null; }
-    if(!$id){ $findName->execute([$nm]); $id=$findName->fetchColumn()?:null; }
+    if($nip!==''&&$nip!=='-'){ $findNip->execute([$nip]); $id=$findNip->fetchColumn()?:null; }
+    if(!$id&&($nip===''||$nip==='-')&&$nm!==''){ $findName->execute([$nm]); $id=$findName->fetchColumn()?:null; }
     if($id){ $upd->execute([$nm,$pos,$type,$edu,$subj,$desc,(int)$id]); $updated++; }
     else{ try{ $ins->execute([$nm,$nip!==''?$nip:null,$pos,$type,$edu,$subj,$desc]); $added++; }catch(Throwable){ $skipped++; } }
   }
@@ -128,8 +128,8 @@ function simad_sync_siswa(PDO $db, array $rows): array {
   $hasLevel=in_array('class_level',$cols,true); $hasMajor=in_array('major',$cols,true);
   $findClass=$db->prepare("SELECT id FROM student_classes WHERE name=? LIMIT 1");
   $mkClass=$db->prepare("INSERT INTO student_classes(name,n_l,n_p,sort_order) VALUES(?,0,0,0)");
-  $findNis=$db->prepare("SELECT id FROM students WHERE nis=? LIMIT 1");
-  $findNisn=$db->prepare("SELECT id FROM students WHERE nisn=? LIMIT 1");
+  $findNis=$db->prepare("SELECT id FROM students WHERE nis IS NOT NULL AND nis<>'' AND nis=? LIMIT 1");
+  $findNisn=$db->prepare("SELECT id FROM students WHERE nisn IS NOT NULL AND nisn<>'' AND nisn=? LIMIT 1");
   $findName=$db->prepare("SELECT id FROM students WHERE name=? LIMIT 1");
   foreach($rows as $r){
     if(!is_array($r)){ $skipped++; continue; }
@@ -145,9 +145,9 @@ function simad_sync_siswa(PDO $db, array $rows): array {
     if($cls!==''){ $findClass->execute([$cls]); $cid=$findClass->fetchColumn()?:null;
       if(!$cid){ try{ $mkClass->execute([$cls]); $cid=(int)$db->lastInsertId(); }catch(Throwable){ $cid=null; } } }
     $id=null;
-    if($nis!==''){ $findNis->execute([$nis]); $id=$findNis->fetchColumn()?:null; }
-    if(!$id&&$nisn!==''){ $findNisn->execute([$nisn]); $id=$findNisn->fetchColumn()?:null; }
-    if(!$id){ $findName->execute([$nm]); $id=$findName->fetchColumn()?:null; }
+    if($nisn!==''){ $findNisn->execute([$nisn]); $id=$findNisn->fetchColumn()?:null; }
+    if(!$id&&$nis!==''){ $findNis->execute([$nis]); $id=$findNis->fetchColumn()?:null; }
+    if(!$id&&$nis===''&&$nisn===''&&$nm!==''){ $findName->execute([$nm]); $id=$findName->fetchColumn()?:null; }
     try{
       if($id){
         $s=$db->prepare("UPDATE students SET name=?,nis=?,nisn=?,class_id=?,gender=? WHERE id=?");

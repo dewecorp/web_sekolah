@@ -44,12 +44,15 @@ if(!empty($_POST['id'])) $db->prepare("UPDATE teachers SET name=?,nip=?,position
 else $db->prepare("INSERT INTO teachers(name,nip,position,type,photo,education,subject,description,is_active,sort_order) VALUES(?,?,?,?,?,?,?,?,?,?)")->execute([$nm,$_POST['nip']??'',$_POST['position']??'Guru',$_POST['type']??'guru',$ph,$_POST['education']??'',$_POST['subject']??'',$_POST['description']??'',(int)($_POST['is_active']??1),(int)($_POST['sort_order']??0)]);
 Auth::log($db,'save','teachers',"Simpan $nm"); Session::flash('ok','Data disimpan.'); }
 header('Location: '.Helper::url('admin/teachers')); exit; }
-$rows=$db->query("SELECT * FROM teachers ORDER BY sort_order,id DESC")->fetchAll();
+$rows=$db->query("SELECT * FROM teachers ORDER BY name ASC,id ASC")->fetchAll();
+$nGuru=count(array_filter($rows,fn($x)=>($x['type']??'')==='guru')); $nTendik=count(array_filter($rows,fn($x)=>($x['type']??'')==='tendik'));
 $sets=[]; foreach($db->query("SELECT `key`,`value` FROM settings WHERE `key` IN ('guru_title','guru_desc','guru_show','guru_cols')") as $r) $sets[$r['key']]=$r['value'];
 require ROOT.'/templates/admin/header.php'; ?>
 <div class="flex flex-wrap items-center gap-2 mb-4">
 <h1 class="text-xl font-extrabold"><i class="fa fa-chalkboard-user text-emerald-600 mr-1"></i>Guru & Staff</h1>
 <span class="text-[11px] bg-slate-800 text-white px-2.5 py-0.5 rounded-full font-bold"><?= count($rows) ?> orang</span>
+<span class="text-[11px] bg-emerald-600 text-white px-2.5 py-0.5 rounded-full font-bold"><?= $nGuru ?> guru</span>
+<span class="text-[11px] bg-sky-600 text-white px-2.5 py-0.5 rounded-full font-bold"><?= $nTendik ?> tendik</span>
 <a href="<?= Helper::url('guru') ?>" target="_blank" rel="noopener noreferrer" class="text-sm px-3 py-1.5 border rounded-lg bg-white"><i class="fa fa-eye mr-1"></i>Lihat Public</a>
 <button id="btnAdd" class="ml-auto bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-4 py-2 rounded-xl shadow"><i class="fa fa-plus mr-1"></i>Tambah Guru/Staff</button>
 <button id="btnImport" class="bg-slate-800 hover:bg-slate-700 text-white text-sm font-bold px-4 py-2 rounded-xl shadow"><i class="fa fa-file-excel mr-1"></i>Impor Excel</button>

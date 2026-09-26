@@ -5,7 +5,7 @@ $agendas = $db->query("SELECT * FROM agenda WHERE status='published' AND event_d
 $ann = $db->query("SELECT * FROM announcements WHERE status='published' ORDER BY published_at DESC LIMIT 6")->fetchAll();
 $galImgs = [];
 try { foreach($db->query("SELECT gi.*, g.title gtitle FROM gallery_images gi JOIN galleries g ON g.id=gi.gallery_id WHERE g.status='published' ORDER BY gi.id DESC LIMIT 12") as $r) $galImgs[]=$r; } catch (Throwable) {}
-$teachers = $db->query("SELECT * FROM teachers WHERE is_active=1 ORDER BY sort_order LIMIT 8")->fetchAll();
+$teachers = $db->query("SELECT * FROM teachers WHERE is_active=1 ORDER BY name ASC,id ASC LIMIT 8")->fetchAll();
 $prestasi = $db->query("SELECT * FROM achievements WHERE is_active=1 ORDER BY id DESC LIMIT 6")->fetchAll();
 $ekskul = $db->query("SELECT * FROM extracurriculars WHERE is_active=1 ORDER BY sort_order LIMIT 6")->fetchAll();
 $secs = [];
@@ -141,7 +141,7 @@ $fx=$s['effect']??'fade-up'; $fxCls=$fx==='none'?'fx-none':'fx fx-'.$fx;
 <div class="welcome-copy <?= $wCopy ?> <?= $wCopyAl ?>"><p class="font-bold text-sm uppercase text-emerald-600">Sambutan</p><h3 class="text-2xl font-bold"><?= Helper::e($profile['principal_name']??'-') ?></h3><p class="text-sm opacity-70"><?= Helper::e($profile['principal_title']??'Kepala Sekolah') ?></p><div class="welcome-message mt-2 opacity-90 <?= $wMsgAl ?> text-sm leading-relaxed"><?= $profile['principal_greeting']??'Selamat datang.' ?></div></div>
 <?php endif; ?>
 </div>
-<?php elseif($type==='statistik'): try{ $stats=$db->query("SELECT * FROM statistics WHERE is_active=1 ORDER BY sort_order,id")->fetchAll(); }catch(Throwable){ $stats=[]; } ?>
+<?php elseif($type==='statistik'): try{ $stats=$db->query("SELECT * FROM statistics WHERE is_active=1 ORDER BY sort_order,id")->fetchAll(); foreach($stats as &$stt){ $lv=Helper::liveStat((string)($stt['name']??'')); if($lv!==null) $stt['value']=$lv; } unset($stt); }catch(Throwable){ $stats=[]; } ?>
 <?php if(!$stats): ?><p class="opacity-70 text-sm">Belum ada statistik. Tambah via Sekolah &gt; Statistik.</p><?php else: ?>
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
 <?php foreach($stats as $stt): ?>
